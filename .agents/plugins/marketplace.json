@@ -1,0 +1,17 @@
+{
+  "name": "oh-my-dynamic-plugins",
+  "interface": {
+    "displayName": "oh-my-Dynamic Multi-Agent Orchestration"
+  },
+  "plugins": [
+    {
+      "name": "oh-my-dynamic",
+      "source": "./codex-plugin",
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "NONE"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

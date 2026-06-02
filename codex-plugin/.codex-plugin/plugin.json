@@ -1,0 +1,15 @@
+{
+  "name": "oh-my-dynamic",
+  "version": "1.0.0",
+  "description": "Multi-agent orchestration engine with DAG execution, stop conditions, TEA protocol, and hierarchical synthesis. Replicates Claude Dynamic Workflows for any LLM.",
+  "skills": "./skills/",
+  "author": "PIGU-PPPgu",
+  "repository": "https://github.com/PIGU-PPPgu/oh-my-Dynamic",
+  "license": "MIT",
+  "tags": ["multi-agent", "orchestration", "DAG", "parallel", "workflow", "dynamic"],
+  "compatibility": {
+    "codex": ">=1.0.0",
+    "claude-code": true,
+    "gemini-cli": true
+  }
+}
