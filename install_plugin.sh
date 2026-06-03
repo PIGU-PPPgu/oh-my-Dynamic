@@ -86,8 +86,8 @@ echo ""
 echo "🎉 安装完成!"
 echo ""
 echo "使用方式:"
-echo '  Codex CLI: $oh-my-dynamic <query>'
-echo '  Codex CLI: $multi-agent-run <query>'
+echo '  Codex App: $oh-my-dynamic <query>'
+echo '  Codex App: $multi-agent-run <query>'
 echo "  或让 Codex 自动匹配复杂任务"
 echo ""
-echo "重启 Codex 使插件生效。"
+echo "重启 Codex App 或新开 thread 使插件生效。默认使用 App 内部 LLM，无需 API Key。"

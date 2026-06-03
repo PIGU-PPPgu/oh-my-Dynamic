@@ -57,7 +57,25 @@
 
 ## 快速开始
 
-### 1. 安装依赖
+### 1. Codex App 零配置使用
+
+安装插件后，重启 Codex App 或新开一个 thread，直接输入：
+
+```text
+$oh-my-dynamic 用多 agent 分析：学校是否应该引入 AI 作业助手？
+```
+
+或：
+
+```text
+$multi-agent-run review a Python change for security, correctness, and missing tests
+```
+
+默认模式会使用 **Codex App 当前会话的内部 LLM** 执行拆解、worker 分析、review、replan 和 synthesis，不需要配置 `.env`，也不需要 `OPENAI_API_KEY`、`DEEPSEEK_API_KEY` 或其他外部模型 key。
+
+只有当你明确要运行本地 Python engine、接外部模型、生成 dashboard 文件时，才需要下面的可选配置。
+
+### 2. 可选：安装本地 Python engine 依赖
 
 ```bash
 # 推荐：可编辑安装
@@ -70,7 +88,7 @@ pip install -e ".[google]"     # Gemini
 pip install -e ".[all]"        # 全部可选 SDK
 ```
 
-### 2. 配置 API Key
+### 3. 可选：配置外部 LLM API Key
 
 复制示例配置文件：
 
@@ -113,7 +131,7 @@ export SILICONFLOW_API_KEY=your_siliconflow_key
 export LLM_API_KEY=your_fallback_key
 ```
 
-### 3. 选择默认模型
+### 4. 可选：选择默认外部模型
 
 ```bash
 # 方式一：环境变量
@@ -123,7 +141,7 @@ export LLM_DEFAULT_MODEL=gpt-5.2
 engine = Orchestrator(model="claude-sonnet-4-6")
 ```
 
-### 4. 运行测试
+### 5. 运行测试
 
 ```bash
 # 全部测试（不需要 API Key）
@@ -136,7 +154,7 @@ python validator.py api
 python validator.py e2e easy glm-5.1 --auto
 ```
 
-### 5. 在代码中使用
+### 6. 可选：在代码中使用本地 Python engine
 
 ```python
 from orchestrator import Orchestrator
@@ -156,7 +174,7 @@ print(result["final_output"])
 print(f"完成率: {result['completed']}/{result['total']}")
 ```
 
-### 6. 运行 demo（无需 API Key）
+### 7. 运行 demo（无需 API Key）
 
 ```bash
 python examples/research_analysis.py

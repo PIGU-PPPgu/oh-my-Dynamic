@@ -7,6 +7,25 @@ description: "Run a multi-agent workflow on any complex task. One command to dec
 
 This skill decomposes any complex task into parallel subtasks, executes them with multiple agents, and synthesizes a coherent answer.
 
+## Codex App Default: Zero-Config Mode
+
+When triggered inside Codex App, this skill must work immediately after installation:
+
+- Use the current Codex App assistant/model as the execution engine.
+- Do **not** require provider API keys or `.env` configuration.
+- Do **not** tell the user to use Codex CLI.
+- Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
+
+For normal App usage, perform the multi-agent workflow directly in the response:
+
+1. Decompose the request into 3-7 tasks.
+2. Assign roles such as planner, researcher, builder, reviewer, synthesizer.
+3. Mark dependencies and identify which tasks can run in parallel.
+4. Produce worker results for each task.
+5. Review the combined result for gaps.
+6. Replan once if needed.
+7. Synthesize a final answer.
+
 ## When to Trigger
 
 - User asks to analyze something complex with multiple angles
@@ -16,25 +35,31 @@ This skill decomposes any complex task into parallel subtasks, executes them wit
 
 ## Workflow
 
-### Step 1: Check Prerequisites
+### Step 1: Codex App Execution
 
-```bash
-# Verify oh-my-Dynamic is available
-test -f ~/Desktop/oh-my-Dynamic/pipeline.py && echo "OK" || echo "NOT_FOUND"
+For ordinary Codex App usage, skip local prerequisite checks and run the workflow in-chat.
+
+Example trigger:
+
+```text
+$multi-agent-run 用多角度分析：学校是否应该引入 AI 作业助手？
 ```
-
-If not found, tell user: "oh-my-Dynamic needs to be installed at ~/Desktop/oh-my-Dynamic/"
 
 ### Step 2: Understand the Task
 
-Clarify with the user:
-1. What is the main goal/query?
-2. How many subtasks? (default: auto-detect, max 5)
-3. Any specific angles or perspectives needed?
-4. Time budget? (default: 5 minutes)
-5. Token budget? (default: 500K)
+Infer reasonable defaults:
 
-### Step 3: Run the Pipeline
+1. Main goal/query from the user request.
+2. Subtasks: auto-detect, usually 3-7.
+3. Perspectives: choose based on domain.
+4. Time budget: one concise App response unless user asks for deeper work.
+5. Token budget: stay concise but complete.
+
+Only ask for clarification when the request is ambiguous enough that execution would be misleading.
+
+### Step 3: Optional Local Python Engine
+
+Use this only if the user explicitly asks for local engine execution, real provider calls, JSON output, or dashboard generation.
 
 ```python
 import sys
@@ -63,7 +88,7 @@ Show the user:
 1. **Summary stats**: tasks completed, duration, tokens used
 2. **Final answer**: the synthesized result
 3. **DAG structure**: which tasks ran in parallel vs sequential
-4. **Offer**: "Want to see the visual dashboard?" → run visualize.py
+4. **Optional**: Offer a visual dashboard only if local Python engine mode was used.
 
 ```python
 from visualize import generate_dashboard, open_dashboard
@@ -99,7 +124,9 @@ Always present results in this structure:
 
 ## Pitfalls
 
-- GLM-5.1 is slow (~40s/call). Warn user if query generates 5+ subtasks.
+- Codex App mode is zero-config and should not ask the user for API keys.
+- Codex App mode is an in-chat workflow implementation, not a separate CLI command.
+- GLM-5.1 is slow (~40s/call). Warn user if local provider mode generates 5+ subtasks.
 - JSON parsing can fail — pipeline has fallback but results may be less structured.
 - Token budget is estimated. Keep budget generous for complex queries.
 - Don't run more than 3 parallel workers — GLM rate limits.
