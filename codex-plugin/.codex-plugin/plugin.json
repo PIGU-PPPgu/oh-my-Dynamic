@@ -1,6 +1,6 @@
 {
   "name": "oh-my-dynamic",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Multi-agent orchestration engine with DAG execution, stop conditions, TEA protocol, and hierarchical synthesis. Replicates Claude Dynamic Workflows for any LLM.",
   "skills": "./skills/",
   "author": {

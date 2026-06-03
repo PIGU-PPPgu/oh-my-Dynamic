@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oh-my-dynamic"
-version = "1.0.2"
+version = "1.0.3"
 description = "Multi-agent orchestration engine with DAG execution, dynamic replan, TEA protocol, and model-provider routing."
 readme = "README.md"
 requires-python = ">=3.9"
