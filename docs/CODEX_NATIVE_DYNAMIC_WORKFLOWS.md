@@ -127,7 +127,8 @@ From a plugin/skill user's perspective, this path should be API-key free.
 | token accounting | `token_tracker.py` |
 | sandbox experiments | `worktree.py`, `tea_protocol.py` |
 | A2A/message broker | `agent_broker.py` |
-| ecosystem bridge | `protocol_adapters.py`, `agent_broker.py`, `broker_gateway.py` |
+| Codex App subagent bridge | `codex_app_bridge.py` |
+| ecosystem bridge | `protocol_adapters.py`, `agent_broker.py`, `broker_gateway.py`, `codex_app_bridge.py` |
 | installable App UX | `codex-plugin/skills/*` |
 
 oh-my-Dynamic separates three layers:
@@ -153,6 +154,11 @@ auditable. Local isolated workers can write the same broker events during
 `native_runtime.py` execution. Direct peer-to-peer subagent messaging is a
 runtime concern; the project contract prefers controlled A2A-style collaboration
 over hidden side channels.
+
+`codex_app_bridge.py` makes the App-native path executable by the parent Codex
+agent without pretending Python can call the internal LLM. It creates a dispatch
+plan, generates per-subagent prompts, requires each real Codex App subagent to
+return a JSON envelope, and ingests that envelope into `AgentBroker`.
 
 `BrokerPolicy` makes that control concrete: events must come from registered
 agents unless they are system agents, direct receivers must be registered,
@@ -232,6 +238,8 @@ Available now:
 - Local `broker_gateway.py` HTTP/SSE gateway for Agent Card discovery, task
   snapshots, event streams, agent registration/inbox, messages, artifacts,
   handoffs, review requests/responses, and completion.
+- Local `codex_app_bridge.py` for App-native subagent dispatch specs, prompts,
+  structured JSON envelopes, and broker ingestion.
 - `native_runtime.py` can write worker outputs, final answers, and completion
   events into `AgentBroker`.
 - Mock demos that run without API keys.

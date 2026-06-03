@@ -569,6 +569,106 @@ def test_broker_gateway_http_lifecycle():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("CodexAppBridge: dispatch envelope ingestion")
+def test_codex_app_bridge_ingestion():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+    from codex_app_bridge import (
+        CodexSubagentSpec,
+        build_subagent_prompt,
+        create_dispatch_plan,
+        ingest_subagent_envelope,
+        parse_subagent_envelope,
+        register_dispatch_plan,
+    )
+
+    d = tempfile.mkdtemp()
+    try:
+        broker = AgentBroker(d)
+        plan = create_dispatch_plan(
+            "Review a project with real Codex App subagents",
+            [
+                CodexSubagentSpec(
+                    id="planner",
+                    role="planner",
+                    goal="Plan the workflow",
+                    capabilities=["plan"],
+                ),
+                CodexSubagentSpec(
+                    id="builder",
+                    role="builder",
+                    goal="Build the patch",
+                    dependencies=["planner"],
+                    capabilities=["build"],
+                ),
+                CodexSubagentSpec(
+                    id="reviewer",
+                    role="reviewer",
+                    goal="Review the patch",
+                    dependencies=["builder"],
+                    capabilities=["review"],
+                ),
+            ],
+            run_id="codex-thread-1",
+        )
+        register_dispatch_plan(broker, plan)
+        prompt = build_subagent_prompt(plan, plan.agents[0])
+        assert "current Codex App model/runtime" in prompt
+        assert "Return exactly one JSON object" in prompt
+
+        raw = """
+```json
+{
+  "agent_id": "planner",
+  "status": "completed",
+  "summary": "Plan ready.",
+  "artifacts": [
+    {"name": "plan", "kind": "plan", "content": "1. build\\n2. review"}
+  ],
+  "messages": [
+    {"to_agent": "orchestrator", "subject": "Plan complete", "body": "Ready.", "artifact_names": ["plan"]}
+  ],
+  "handoffs": [
+    {"to_agent": "builder", "task_id": "build-1", "subject": "Build this", "body": "Use plan.", "artifact_names": ["plan"]}
+  ],
+  "review_requests": [
+    {"reviewer": "reviewer", "task_id": "build-1", "subject": "Review plan", "body": "Check scope.", "artifact_names": ["plan"]}
+  ],
+  "review_responses": [],
+  "metadata": {"confidence": 0.9},
+  "error": ""
+}
+```
+"""
+        envelope = parse_subagent_envelope(raw)
+        result = ingest_subagent_envelope(
+            broker,
+            plan.run_id,
+            envelope,
+            role="planner",
+            capabilities=["plan"],
+        )
+        assert result["agent_id"] == "planner"
+        assert "plan" in result["artifact_ids"]
+        events = broker.list_events(thread_id=plan.run_id)
+        kinds = [event.kind for event in events]
+        assert "handoff" in kinds
+        assert "review_request" in kinds
+        assert any(event.subject == "codex_subagent_completed" for event in events)
+        snapshot = broker.to_a2a_task(plan.run_id)
+        assert snapshot["artifacts"][0]["name"] == "plan"
+
+        bad = parse_subagent_envelope('{"agent_id":"planner","status":"completed","summary":"bad","messages":[{"to_agent":"orchestrator","subject":"bad","body":"bad","artifact_names":["missing"]}]}')
+        try:
+            ingest_subagent_envelope(broker, plan.run_id, bad, role="planner")
+        except ValueError as exc:
+            assert "unknown envelope artifact names" in str(exc)
+        else:
+            raise AssertionError("unknown artifact_names should be rejected")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("Native Runtime: sandboxed fan-out")
 def test_native_runtime_fanout():
     from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
@@ -943,6 +1043,7 @@ if __name__ == "__main__":
         test_protocol_adapters,
         test_agent_broker_collaboration,
         test_broker_gateway_http_lifecycle,
+        test_codex_app_bridge_ingestion,
         test_native_runtime_fanout,
         test_native_runtime_broker_trace,
         test_synthesis_single,

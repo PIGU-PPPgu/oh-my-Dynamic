@@ -54,6 +54,7 @@
 | `message_bus.py` | Agent 间消息总线（文件系统队列，线程安全） |
 | `agent_broker.py` | A2A-style 协作 broker：policy、messages、artifacts、handoff、review request/response、audit trace |
 | `broker_gateway.py` | 本地 HTTP/SSE gateway：Agent Card、agents/inbox、task snapshot、events、messages、artifacts、handoffs、review requests/responses |
+| `codex_app_bridge.py` | Codex App subagent bridge：dispatch plan、subagent prompt、JSON envelope、broker ingestion |
 | `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
 | `pipeline.py` | 端到端 Pipeline（组合所有组件） |
 | `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
@@ -268,7 +269,7 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 | 几十到上百个 isolated subagents | App backend 可用时由 Codex runtime 管理 | `SandboxedFanoutRuntime` 可跑 100+ isolated workers 原型 | 每个 subagent 独立上下文窗口 |
 | 每个 agent 独立工具权限和沙箱 | App-native 权限/沙箱由 Codex runtime 提供 | `AgentSandbox` + `ToolGrant` + worktree / subprocess 原型 | per-agent sandbox + least privilege tools |
 | 原生 DAG 调度与汇总 | App-native scheduler/trace 由 Codex runtime 提供 | `dag.py` + `native_runtime.py` + `synthesis.py` | runtime 级 DAG execution graph |
-| Agent 间受控沟通 | App subagents 通过父 orchestrator 协调；直接 P2P 取决于 runtime | `agent_broker.py` 提供 message / artifact / handoff / review request / A2A snapshot | runtime 原生 A2A broker + audit policy |
+| Agent 间受控沟通 | App subagents 通过父 orchestrator 协调；直接 P2P 取决于 runtime | `codex_app_bridge.py` + `agent_broker.py` 提供 envelope ingestion、message、artifact、handoff、review、A2A snapshot | runtime 原生 A2A broker + audit policy |
 | 进度、预算、审计日志 | 部分依赖会话文本 | `token_tracker.py` + `agent_broker.py` trace + dashboard | App 原生可视化 trace |
 
 详细提案见 [Codex Native Dynamic Workflows Proposal](docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md)。
@@ -281,6 +282,7 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 - A2A-style：`a2a_agent_card()` 返回 Agent Card；`A2ATaskStore` 提供轻量 Task submit/get 结构，可用于后续 HTTP、SSE 或网关封装。
 - AgentBroker：`AgentBroker` 可注册 agents，发送 direct/broadcast message，发布 artifacts，创建 task handoff，发起 review request/response，并导出 A2A-style task snapshot。
 - BrokerPolicy：默认要求 agent 注册，校验 sender/receiver、artifact 引用、消息/工件大小和 content type，避免无约束上下文串流。
+- Codex App bridge：`codex_app_bridge.py` 生成 App-native subagent dispatch plan 和 prompt，要求真实 Codex subagents 返回 JSON envelope，再把 envelope ingest 到 `AgentBroker`。
 - Native runtime 集成：`SandboxedFanoutRuntime(..., broker=AgentBroker(...))` 会把 worker started/completed、worker artifacts、final answer 和 workflow completion 写入 broker trace。
 - Gateway：`python broker_gateway.py --host 127.0.0.1 --port 8765` 会提供 `/.well-known/agent.json`、`GET/POST /agents`、`GET /agents/{id}/inbox`、`POST /tasks`、`GET /tasks/{id}`、`GET /tasks/{id}/events`、`POST /tasks/{id}/messages`、`/artifacts`、`/handoffs`、`/review-requests`、`/review-responses` 和 `/complete`。
 

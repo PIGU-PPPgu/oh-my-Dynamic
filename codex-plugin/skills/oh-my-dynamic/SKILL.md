@@ -22,6 +22,8 @@ policy-governed messages, artifacts, task handoffs, review requests/responses,
 inboxes, and audit traces.
 `broker_gateway.py` exposes that contract as a local HTTP/SSE gateway when a
 transport surface is needed.
+`codex_app_bridge.py` defines the App-native bridge: dispatch specs, subagent
+prompts, structured JSON envelopes, and AgentBroker ingestion.
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -35,8 +37,9 @@ When this skill is triggered inside Codex App, the default App-mode priority is:
 1. If Codex subagent runtime/tools are available and the user asks for dynamic workflows, real subagents, parallel agents, or equivalent multi-agent execution, spawn real Codex internal subagents.
 2. Do **not** set a model override for spawned subagents. Let them inherit the current Codex App internal LLM/runtime.
 3. Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key for App-native subagent execution.
-4. Coordinate subagents through the parent orchestrator and the AgentBroker contract: registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and traceable synthesis. Do not rely on hidden peer-to-peer side channels.
-5. If native Codex subagent runtime/tools are unavailable, use zero-config in-chat workflow execution as the fallback.
+4. Use the Codex App bridge contract: create a dispatch plan, prompt each subagent to return the structured JSON envelope, then ingest envelopes into AgentBroker.
+5. Coordinate subagents through the parent orchestrator and the AgentBroker contract: registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and traceable synthesis. Do not rely on hidden peer-to-peer side channels.
+6. If native Codex subagent runtime/tools are unavailable, use zero-config in-chat workflow execution as the fallback.
 
 In App fallback/zero-config mode:
 
@@ -95,6 +98,7 @@ Pipeline: Query → Decompose → DAG Build → Execute → Stop Check → Repla
 | `worktree.py` | Git worktree isolation per agent |
 | `agent_broker.py` | A2A-style policy, messages, artifacts, task handoff, review requests/responses, inboxes, audit trace |
 | `broker_gateway.py` | Local HTTP/SSE gateway for AgentBroker task snapshots and events |
+| `codex_app_bridge.py` | Codex App dispatch plans, subagent prompts, JSON envelopes, broker ingestion |
 | `visualize.py` | Generate interactive HTML dashboard |
 | `test_suite.py` | Unit, integration, security, provider-routing, and stress tests |
 

@@ -112,7 +112,7 @@ def a2a_agent_card(base_url: str = "http://localhost:8765") -> Dict[str, Any]:
         "name": "oh-my-Dynamic",
         "description": "Multi-agent dynamic workflow orchestrator with DAG execution, dynamic replan, and synthesis.",
         "url": base_url.rstrip("/"),
-        "version": "1.4.0",
+        "version": "1.5.0",
         "capabilities": {
             "streaming": False,
             "pushNotifications": False,
