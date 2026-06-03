@@ -46,6 +46,15 @@ link_skill "$PLUGIN_DIR/skills/multi-agent-run" "$SKILLS_DIR/multi-agent-run" "m
 # 3. 安装 marketplace（个人级）
 MARKETPLACE_DIR="$HOME/.agents/plugins"
 mkdir -p "$MARKETPLACE_DIR"
+MARKETPLACE_PLUGIN_DIR="$MARKETPLACE_DIR/plugins/oh-my-dynamic"
+mkdir -p "$MARKETPLACE_DIR/plugins"
+
+if [ -e "$MARKETPLACE_PLUGIN_DIR" ] && [ ! -L "$MARKETPLACE_PLUGIN_DIR" ]; then
+    echo "📋 marketplace plugin 目录已存在，跳过链接: $MARKETPLACE_PLUGIN_DIR"
+else
+    ln -sfn "$PLUGIN_DIR" "$MARKETPLACE_PLUGIN_DIR"
+    echo "  ✅ marketplace plugin link"
+fi
 
 # 更新 marketplace.json
 if [ -f "$MARKETPLACE_DIR/marketplace.json" ]; then

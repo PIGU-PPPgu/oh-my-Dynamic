@@ -6,10 +6,13 @@
   "plugins": [
     {
       "name": "oh-my-dynamic",
-      "source": "./codex-plugin",
+      "source": {
+        "source": "local",
+        "path": "./plugins/oh-my-dynamic"
+      },
       "policy": {
         "installation": "AVAILABLE",
-        "authentication": "NONE"
+        "authentication": "ON_INSTALL"
       },
       "category": "Developer Tools"
     }
