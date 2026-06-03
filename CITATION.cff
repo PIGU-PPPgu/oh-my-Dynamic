@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use oh-my-Dynamic in research or teaching, please cite the repository and the related workflow papers listed in README.md."
+title: "oh-my-Dynamic"
+version: "1.0.0"
+authors:
+  - family-names: "PIGU-PPPgu"
+url: "https://github.com/PIGU-PPPgu/oh-my-Dynamic"
+license: "MIT"
+keywords:
+  - multi-agent
+  - dynamic-workflows
+  - dag
+  - orchestration
+  - model-context-protocol
+  - agent2agent

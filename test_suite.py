@@ -270,6 +270,72 @@ def test_tea_search():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("TEA Protocol: 沙箱阻止内省逃逸")
+def test_tea_sandbox_blocks_escape():
+    import shutil, tempfile
+    from tea_protocol import ToolRegistry
+
+    d = tempfile.mkdtemp()
+    try:
+        reg = ToolRegistry(storage_dir=d)
+        malicious = r'''
+def probe(x):
+    return ().__class__.__mro__[1].__subclasses__()
+'''
+        tool = reg.register("probe", "尝试逃逸沙箱", malicious, "audit")
+        result = reg.test_tool(tool.tool_id, "x")
+        assert not result["success"]
+        assert "不安全" in result["error"] or "unsafe" in result["error"].lower()
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("LLM Client: Provider 路由")
+def test_llm_provider_routing():
+    from llm_client import _detect_provider
+
+    cases = {
+        "openrouter/anthropic/claude-sonnet-4": "openrouter",
+        "deepseek-chat": "deepseek",
+        "deepseek/deepseek-reasoner": "deepseek",
+        "qwen-plus": "qwen",
+        "dashscope/qwen-max": "qwen",
+        "moonshot-v1-8k": "moonshot",
+        "kimi-k2": "moonshot",
+        "glm-5.1": "zhipu",
+        "claude-sonnet-4-20250514": "anthropic",
+    }
+    for model, provider in cases.items():
+        assert _detect_provider(model) == provider, f"{model} 应路由到 {provider}"
+
+
+@test("Protocol Adapters: MCP + A2A payloads")
+def test_protocol_adapters():
+    from protocol_adapters import A2ATaskStore, a2a_agent_card, mcp_tools, run_mcp_tool
+
+    def mock_llm(sys, user):
+        if "拆解" in user or "subtasks" in user.lower():
+            return '{"subtasks":[{"id":"a","question":"A","agent_type":"builder","priority":5,"dependencies":[]}]}'
+        return "protocol adapter answer"
+
+    tools = mcp_tools()
+    assert tools[0]["name"] == "oh_my_dynamic.run_workflow"
+    assert "inputSchema" in tools[0]
+
+    response = run_mcp_tool("oh_my_dynamic.run_workflow", {"query": "demo", "max_iterations": 1}, mock_llm)
+    assert response["content"][0]["type"] == "text"
+    assert "structuredContent" in response
+
+    card = a2a_agent_card("http://localhost:9999")
+    assert card["name"] == "oh-my-Dynamic"
+    assert card["skills"][0]["id"] == "dynamic-workflow"
+
+    store = A2ATaskStore(mock_llm)
+    task = store.submit("demo")
+    assert task["status"]["state"] == "completed"
+    assert task["artifacts"]
+
+
 @test("Synthesis: 单次汇总")
 def test_synthesis_single():
     from synthesis import Synthesizer
@@ -306,6 +372,27 @@ def test_worktree_basic():
         
         mgr.abandon("test-agent")
         assert not wt.is_active()
+    finally:
+        import shutil
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("Worktree: 拒绝不安全 agent 名称")
+def test_worktree_rejects_unsafe_name():
+    import tempfile, subprocess
+    from worktree import WorktreeManager
+
+    d = tempfile.mkdtemp()
+    subprocess.run(["git", "init", d], capture_output=True)
+    subprocess.run(["git", "commit", "--allow-empty", "-m", "init"], cwd=d, capture_output=True)
+
+    try:
+        mgr = WorktreeManager(d)
+        try:
+            mgr.create("../escape")
+        except ValueError:
+            return
+        raise AssertionError("应拒绝包含路径穿越的 agent_name")
     finally:
         import shutil
         shutil.rmtree(d, ignore_errors=True)
@@ -516,8 +603,12 @@ if __name__ == "__main__":
         test_prompt_kit,
         test_tea_basic,
         test_tea_search,
+        test_tea_sandbox_blocks_escape,
+        test_llm_provider_routing,
+        test_protocol_adapters,
         test_synthesis_single,
         test_worktree_basic,
+        test_worktree_rejects_unsafe_name,
     ])
     
     # 集成测试

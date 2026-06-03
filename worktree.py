@@ -21,6 +21,7 @@ Git Worktree 隔离 —— 每个 Agent 独立工作目录。
 
 from __future__ import annotations
 import os
+import re
 import subprocess
 import shutil
 import json
@@ -29,6 +30,18 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+
+_AGENT_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+
+
+def _validate_agent_name(agent_name: str) -> str:
+    """Return a safe agent slug for branch and worktree paths."""
+    if not _AGENT_NAME_RE.fullmatch(agent_name or ""):
+        raise ValueError("agent_name 只能包含字母、数字、点、下划线、连字符，且长度不超过 64")
+    if ".." in agent_name or agent_name.startswith("."):
+        raise ValueError("agent_name 不能包含 '..' 或以点开头")
+    return agent_name
 
 
 @dataclass
@@ -134,6 +147,8 @@ class WorktreeManager:
         Returns:
             Worktree 实例
         """
+        agent_name = _validate_agent_name(agent_name)
+
         if agent_name in self._worktrees and self._worktrees[agent_name].is_active():
             raise ValueError(f"Worktree '{agent_name}' 已存在")
         
@@ -180,6 +195,7 @@ class WorktreeManager:
     
     def get(self, agent_name: str) -> Optional[Worktree]:
         """获取 worktree"""
+        agent_name = _validate_agent_name(agent_name)
         return self._worktrees.get(agent_name)
     
     def list_active(self) -> list[Worktree]:
@@ -203,6 +219,7 @@ class WorktreeManager:
         Returns:
             合并结果消息
         """
+        agent_name = _validate_agent_name(agent_name)
         wt = self._worktrees.get(agent_name)
         if not wt or not wt.is_active():
             raise ValueError(f"Worktree '{agent_name}' 不存在或已失效")
@@ -240,6 +257,7 @@ class WorktreeManager:
     
     def abandon(self, agent_name: str) -> str:
         """放弃一个 Agent 的工作，不合并"""
+        agent_name = _validate_agent_name(agent_name)
         wt = self._worktrees.get(agent_name)
         if not wt:
             raise ValueError(f"Worktree '{agent_name}' 不存在")
@@ -269,6 +287,7 @@ class WorktreeManager:
     
     def diff_summary(self, agent_name: str) -> str:
         """查看 Agent 工作目录的变更摘要"""
+        agent_name = _validate_agent_name(agent_name)
         wt = self._worktrees.get(agent_name)
         if not wt or not wt.is_active():
             return f"Worktree '{agent_name}' 不可用"

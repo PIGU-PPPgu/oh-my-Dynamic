@@ -19,10 +19,12 @@ from __future__ import annotations
 import json
 import os
 import re
-import signal
+import ast
+import subprocess
+import sys
+import tempfile
 import threading
 import time
-import traceback
 import uuid
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
@@ -98,6 +100,154 @@ def _bump_minor(version: str) -> str:
         return "1.0.0"
     major, minor, _ = int(parts[0]), int(parts[1]), int(parts[2])
     return f"{major}.{minor + 1}.0"
+
+
+_SAFE_TOOL_BUILTINS = {
+    "abs", "all", "any", "bool", "dict", "enumerate", "filter", "float",
+    "int", "isinstance", "len", "list", "map", "max", "min", "pow", "range",
+    "reversed", "round", "set", "sorted", "str", "sum", "tuple", "zip",
+}
+
+_BLOCKED_CALLS = {
+    "__import__", "breakpoint", "classmethod", "compile", "delattr", "dir",
+    "eval", "exec", "exit", "getattr", "globals", "hasattr", "help", "input",
+    "locals", "memoryview", "object", "open", "property", "quit", "setattr",
+    "staticmethod", "super", "type", "vars",
+}
+
+_BLOCKED_AST_NODES = (
+    ast.AsyncFunctionDef,
+    ast.ClassDef,
+    ast.Delete,
+    ast.Global,
+    ast.Import,
+    ast.ImportFrom,
+    ast.Nonlocal,
+    ast.Try,
+    ast.With,
+)
+
+_TOOL_WORKER = r"""
+import builtins
+import json
+import os
+import sys
+import traceback
+
+payload = json.loads(sys.stdin.read())
+safe_names = set(payload["safe_builtins"])
+safe_builtins = {name: getattr(builtins, name) for name in safe_names}
+namespace = {"__builtins__": safe_builtins}
+
+try:
+    code = compile(payload["code"], "<tea_tool>", "exec")
+    exec(code, namespace)
+    fn = namespace.get(payload["name"])
+    if fn is None or not callable(fn):
+        raise NameError(f"工具代码中未定义函数 {payload['name']!r}")
+    result = fn(payload["test_input"])
+    try:
+        json.dumps(result)
+        output = result
+        repr_output = False
+    except TypeError:
+        output = repr(result)
+        repr_output = True
+    print(json.dumps({
+        "success": True,
+        "output": output,
+        "repr_output": repr_output,
+    }, ensure_ascii=False))
+except BaseException as exc:
+    print(json.dumps({
+        "success": False,
+        "error": f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}",
+    }, ensure_ascii=False))
+"""
+
+
+def _validate_tool_code(code: str, function_name: str) -> None:
+    """Reject Python constructs that can escape the lightweight tool sandbox."""
+    try:
+        tree = ast.parse(code)
+    except SyntaxError as exc:
+        raise ValueError(f"工具代码语法错误: {exc}") from exc
+
+    functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)]
+    if len(functions) != 1 or functions[0].name != function_name:
+        raise ValueError(f"工具代码必须且只能定义一个名为 '{function_name}' 的函数")
+
+    for node in ast.walk(tree):
+        if isinstance(node, _BLOCKED_AST_NODES):
+            raise ValueError(f"工具代码包含不允许的语法: {type(node).__name__}")
+        if isinstance(node, ast.Name):
+            if node.id.startswith("__") or node.id in _BLOCKED_CALLS:
+                raise ValueError(f"工具代码引用了不安全名称: {node.id}")
+        if isinstance(node, ast.Attribute):
+            if node.attr.startswith("__") or node.attr in _BLOCKED_CALLS:
+                raise ValueError(f"工具代码访问了不安全属性: {node.attr}")
+        if isinstance(node, ast.Call):
+            target = node.func
+            if isinstance(target, ast.Name) and target.id in _BLOCKED_CALLS:
+                raise ValueError(f"工具代码调用了不安全函数: {target.id}")
+            if isinstance(target, ast.Attribute) and target.attr in _BLOCKED_CALLS:
+                raise ValueError(f"工具代码调用了不安全方法: {target.attr}")
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            if "__" in node.value:
+                raise ValueError("工具代码包含不安全的双下划线字符串")
+
+
+def _resource_limiter() -> None:
+    """Best-effort POSIX resource limits for the tool worker process."""
+    try:
+        import resource
+
+        resource.setrlimit(resource.RLIMIT_CPU, (2, 2))
+        resource.setrlimit(resource.RLIMIT_NOFILE, (16, 16))
+        if hasattr(resource, "RLIMIT_AS"):
+            limit = 128 * 1024 * 1024
+            resource.setrlimit(resource.RLIMIT_AS, (limit, limit))
+    except Exception:
+        pass
+
+
+def _run_tool_in_subprocess(code: str, function_name: str, test_input: str) -> Dict:
+    """Run validated tool code in an isolated Python subprocess."""
+    payload = {
+        "code": code,
+        "name": function_name,
+        "test_input": test_input,
+        "safe_builtins": sorted(_SAFE_TOOL_BUILTINS),
+    }
+    with tempfile.TemporaryDirectory(prefix="tea-tool-") as tmp:
+        proc = subprocess.run(
+            [sys.executable, "-I", "-S", "-c", _TOOL_WORKER],
+            input=json.dumps(payload, ensure_ascii=False),
+            capture_output=True,
+            text=True,
+            cwd=tmp,
+            env={"PYTHONIOENCODING": "utf-8"},
+            timeout=5,
+            preexec_fn=_resource_limiter if os.name == "posix" else None,
+        )
+
+    if proc.returncode != 0:
+        return {
+            "success": False,
+            "output": None,
+            "error": proc.stderr.strip() or f"工具子进程退出码 {proc.returncode}",
+        }
+    try:
+        result = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return {
+            "success": False,
+            "output": None,
+            "error": f"工具子进程返回非 JSON 输出: {proc.stdout[:500]}",
+        }
+    result.setdefault("output", None)
+    result.setdefault("error", None)
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -332,45 +482,17 @@ class ToolRegistry:
         if tv is None:
             return {"success": False, "output": None, "error": f"工具 {tool_id} 无活跃版本", "execution_time": 0.0}
 
-        # --- sandboxed exec namespace ---
-        _BLOCKED_BUILTINS = {
-            "exec", "eval", "compile", "__import__", "open",
-            "input", "breakpoint", "exit", "quit",
-        }
-        _safe_builtins = {
-            k: v for k, v in __builtins__.items()
-            if k not in _BLOCKED_BUILTINS
-        } if isinstance(__builtins__, dict) else {
-            k: getattr(__builtins__, k)
-            for k in dir(__builtins__)
-            if not k.startswith("_") and k not in _BLOCKED_BUILTINS
-        }
-        namespace: Dict = {"__builtins__": _safe_builtins}
-
-        # --- 超时保护 ---
-        class _TimeoutError(Exception):
-            pass
-
-        def _timeout_handler(signum, frame):
-            raise _TimeoutError("工具执行超时（5秒）")
-
         start = time.time()
         try:
-            old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
-            signal.alarm(5)  # 5秒超时
-            try:
-                exec(tv.code, namespace)  # noqa: S102
-            finally:
-                signal.alarm(0)
-                signal.signal(signal.SIGALRM, old_handler)
-            fn = namespace.get(tv.name)
-            if fn is None:
-                raise NameError(f"工具代码中未定义函数 '{tv.name}'")
-            result = fn(test_input)
+            _validate_tool_code(tv.code, tv.name)
+            result = _run_tool_in_subprocess(tv.code, tv.name, test_input)
             elapsed = time.time() - start
+            if not result.get("success"):
+                raise RuntimeError(result.get("error") or "工具执行失败")
 
             # Record success
-            record = {"input": test_input, "output": repr(result), "success": True}
+            output = result.get("output")
+            record = {"input": test_input, "output": repr(output), "success": True}
             with self._lock:
                 versions = self._load(tool_id)
                 for v in versions:
@@ -379,7 +501,7 @@ class ToolRegistry:
                         break
                 self._save(tool_id, versions)
 
-            return {"success": True, "output": result, "error": None, "execution_time": elapsed}
+            return {"success": True, "output": output, "error": None, "execution_time": elapsed}
         except Exception as exc:
             elapsed = time.time() - start
             record = {"input": test_input, "output": None, "success": False, "error": str(exc)}
@@ -390,7 +512,7 @@ class ToolRegistry:
                         v.test_results.append(record)
                         break
                 self._save(tool_id, versions)
-            return {"success": False, "output": None, "error": f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}", "execution_time": elapsed}
+            return {"success": False, "output": None, "error": f"{type(exc).__name__}: {exc}", "execution_time": elapsed}
 
 
 # ---------------------------------------------------------------------------

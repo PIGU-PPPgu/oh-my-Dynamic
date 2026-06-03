@@ -34,7 +34,7 @@ Pipeline: Query → Decompose → DAG Build → Execute → Stop Check → Repla
 | `tea_protocol.py` | Tool Evolution & Adaptation (runtime tool creation + versioning) |
 | `worktree.py` | Git worktree isolation per agent |
 | `visualize.py` | Generate interactive HTML dashboard |
-| `test_suite.py` | 21 tests (unit + integration + stress) |
+| `test_suite.py` | Unit, integration, security, provider-routing, and stress tests |
 
 ## Step-by-Step Usage
 
@@ -104,7 +104,7 @@ open_dashboard(html_path)
 ### 5. Run Tests
 
 ```bash
-python test_suite.py              # Unit + integration (21 tests)
+python test_suite.py              # Unit + integration
 python test_suite.py --stress     # Include stress tests
 python test_suite.py --e2e        # Include real API tests
 ```

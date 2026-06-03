@@ -1,0 +1,22 @@
+"""End-to-end demo: multi-agent code review workflow."""
+
+from __future__ import annotations
+
+import _bootstrap  # noqa: F401
+from pipeline import DynamicPipeline
+from examples.mock_llm import mock_llm
+
+
+def main() -> None:
+    pipeline = DynamicPipeline(mock_llm, max_iterations=1, max_parallel=3, verbose=True)
+    result = pipeline.run(
+        "Review a Python pull request that adds subprocess execution and HTML dashboard rendering. "
+        "Check security risks, correctness, tests, and release notes."
+    )
+    print("\n=== Code Review Demo ===")
+    print(result["final_answer"])
+    print(f"Tasks: {result['dag_stats']['completed']}/{result['dag_stats']['total']}")
+
+
+if __name__ == "__main__":
+    main()
