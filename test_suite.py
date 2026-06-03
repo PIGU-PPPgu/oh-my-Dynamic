@@ -296,6 +296,7 @@ def test_llm_provider_routing():
 
     cases = {
         "openrouter/anthropic/claude-sonnet-4": "openrouter",
+        "openrouter/openai/gpt-5.2": "openrouter",
         "deepseek-chat": "deepseek",
         "deepseek/deepseek-reasoner": "deepseek",
         "qwen-plus": "qwen",
@@ -303,7 +304,9 @@ def test_llm_provider_routing():
         "moonshot-v1-8k": "moonshot",
         "kimi-k2": "moonshot",
         "glm-5.1": "zhipu",
-        "claude-sonnet-4-20250514": "anthropic",
+        "gpt-5.2": "openai",
+        "claude-sonnet-4-6": "anthropic",
+        "gemini-3.5-flash": "google",
     }
     for model, provider in cases.items():
         assert _detect_provider(model) == provider, f"{model} 应路由到 {provider}"

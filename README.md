@@ -117,10 +117,10 @@ export LLM_API_KEY=your_fallback_key
 
 ```bash
 # 方式一：环境变量
-export LLM_DEFAULT_MODEL=gpt-4o
+export LLM_DEFAULT_MODEL=gpt-5.2
 
 # 方式二：代码中指定
-engine = Orchestrator(model="claude-sonnet-4-20250514")
+engine = Orchestrator(model="claude-sonnet-4-6")
 ```
 
 ### 4. 运行测试
@@ -149,7 +149,7 @@ result = engine.run(
 )
 
 # 指定模型
-engine = Orchestrator(model="gpt-4o")
+engine = Orchestrator(model="gpt-5.2")
 result = engine.run(goal="...", context="...")
 
 print(result["final_output"])
@@ -179,10 +179,10 @@ Demo 使用 deterministic mock LLM，适合快速验证端到端编排链路：
 | Provider | 模型示例 | 环境变量 |
 |----------|---------|----------|
 | 智谱 GLM | `glm-5.1`, `glm-4-flash`, `glm-4-plus` | `ZHIPUAI_API_KEY` |
-| OpenAI | `gpt-4o`, `gpt-4o-mini`, `o3-mini` | `OPENAI_API_KEY` |
-| Anthropic | `claude-sonnet-4-20250514`, `claude-haiku-4-20250414` | `ANTHROPIC_API_KEY` |
-| Google | `gemini-2.5-pro`, `gemini-2.5-flash` | `GOOGLE_API_KEY` |
-| OpenRouter | `openrouter/anthropic/claude-sonnet-4` | `OPENROUTER_API_KEY` |
+| OpenAI | `gpt-5.2`, `gpt-5.2-pro`, `gpt-5-mini`, `gpt-5-nano` | `OPENAI_API_KEY` |
+| Anthropic | `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5` | `ANTHROPIC_API_KEY` |
+| Google | `gemini-3.5-flash`, `gemini-3.1-pro-preview`, `gemini-flash-latest` | `GOOGLE_API_KEY` |
+| OpenRouter | `openrouter/openai/gpt-5.2`, `openrouter/anthropic/claude-sonnet-4.6`, `openrouter/google/gemini-3.5-flash` | `OPENROUTER_API_KEY` |
 | DeepSeek | `deepseek-chat`, `deepseek-reasoner` | `DEEPSEEK_API_KEY` |
 | 通义千问 / Qwen | `qwen-plus`, `qwen-max`, `dashscope/qwen-turbo` | `DASHSCOPE_API_KEY` |
 | Moonshot / Kimi | `moonshot-v1-8k`, `kimi-k2` | `MOONSHOT_API_KEY` |
