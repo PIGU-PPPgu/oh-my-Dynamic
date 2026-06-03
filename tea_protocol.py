@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import signal
 import threading
 import time
 import traceback
@@ -345,9 +346,23 @@ class ToolRegistry:
             if not k.startswith("_") and k not in _BLOCKED_BUILTINS
         }
         namespace: Dict = {"__builtins__": _safe_builtins}
+
+        # --- 超时保护 ---
+        class _TimeoutError(Exception):
+            pass
+
+        def _timeout_handler(signum, frame):
+            raise _TimeoutError("工具执行超时（5秒）")
+
         start = time.time()
         try:
-            exec(tv.code, namespace)  # noqa: S102
+            old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
+            signal.alarm(5)  # 5秒超时
+            try:
+                exec(tv.code, namespace)  # noqa: S102
+            finally:
+                signal.alarm(0)
+                signal.signal(signal.SIGALRM, old_handler)
             fn = namespace.get(tv.name)
             if fn is None:
                 raise NameError(f"工具代码中未定义函数 '{tv.name}'")

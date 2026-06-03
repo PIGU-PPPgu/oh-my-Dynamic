@@ -36,7 +36,7 @@ Result = Dict[str, object]
 
 _CHAR_THRESHOLD = 15_000  # characters
 _RESULT_THRESHOLD = 10  # number of result dicts
-_DEFAULT_MODEL = "gpt-4o"
+_DEFAULT_MODEL = "glm-5.1"
 _TARGET_CONDENSE_CHARS = 500  # approximate target length per group summary
 
 

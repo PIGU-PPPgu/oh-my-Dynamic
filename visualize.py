@@ -74,6 +74,7 @@ def generate_dashboard(result: dict, output_path: str = "dashboard.html") -> str
     """
     data = _build_dag_data(result)
     data_json = json.dumps(data, ensure_ascii=False, indent=2)
+    data_json = data_json.replace("</script", "<\\/script")
     
     html = _TEMPLATE.replace("{{DAG_DATA_PLACEHOLDER}}", data_json)
     
@@ -263,6 +264,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif
 <script>
 const DATA = {{DAG_DATA_PLACEHOLDER}};
 
+// HTML 转义函数，防止 XSS 注入
+function esc(s) { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+
 // Stats
 const stats = DATA.dag_stats;
 const tokens = DATA.token_summary;
@@ -288,7 +292,7 @@ document.getElementById('stats').innerHTML = `
   <div class="stat-card">
     <div class="label">完备度</div>
     <div class="value" style="color:var(--accent)">${((stats.avg_score||stats.completeness||0)*100).toFixed(0)}%</div>
-    <div class="sub">停机: ${DATA.stop_reason||'-'}</div>
+    <div class="sub">停机: ${esc(DATA.stop_reason||'-')}</div>
   </div>
 `;
 
@@ -343,9 +347,9 @@ for(let i=0; i<=maxDepth; i++) {
     const statusCls = n.status || 'pending';
     const typeColor = {builder:'#3b82f6',explorer:'#8b5cf6',reviewer:'#f59e0b'}[n.agent_type]||'#6b7280';
     dagHTML += `<div class="dag-node ${statusCls}" onclick="showDetail('${n.id}')">
-      <div class="q">${n.question||n.id}</div>
+      <div class="q">${esc(n.question||n.id)}</div>
       <div class="meta">
-        <span class="type" style="background:${typeColor}20;color:${typeColor}">${n.agent_type||'task'}</span>
+        <span class="type" style="background:${typeColor}20;color:${typeColor}">${esc(n.agent_type||'task')}</span>
         <span>${n.duration_s?n.duration_s.toFixed(0)+'s':''}</span>
       </div>
     </div>`;
@@ -362,7 +366,7 @@ nodes.filter(n=>n.duration_s).forEach(n => {
   const w = ((n.duration_s||0)/maxDur*70+10).toFixed(0);
   const c = typeColors[n.agent_type]||'#6b7280';
   timelineHTML += `<div class="timeline-item">
-    <span class="timeline-label">${(n.question||n.id).substring(0,15)}</span>
+    <span class="timeline-label">${esc((n.question||n.id).substring(0,15))}</span>
     <div class="timeline-bar" style="width:${w}%;background:${c}"><span class="dur">${(n.duration_s||0).toFixed(0)}s</span></div>
   </div>`;
 });
@@ -372,8 +376,8 @@ document.getElementById('timeline').innerHTML = timelineHTML || '<p style="color
 let resultsHTML = '';
 nodes.filter(n=>n.status==='completed'&&n.result).forEach(n => {
   resultsHTML += `<div class="result-item" onclick="showResult('${n.id}')">
-    <div class="rq">${(n.question||'').substring(0,50)}</div>
-    <div class="rr">${(n.result||'').substring(0,100)}</div>
+    <div class="rq">${esc((n.question||'').substring(0,50))}</div>
+    <div class="rr">${esc((n.result||'').substring(0,100))}</div>
   </div>`;
 });
 document.getElementById('results').innerHTML = resultsHTML || '<p style="color:var(--text2)">无结果</p>';
