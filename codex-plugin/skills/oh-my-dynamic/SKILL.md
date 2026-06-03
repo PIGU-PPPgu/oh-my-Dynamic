@@ -17,7 +17,8 @@ subagent tools are not available, fall back to the zero-config in-chat workflow
 below. The project also includes `native_runtime.py`, a local executable
 prototype that can fan out many isolated workers with separate sandbox
 directories, per-worker context, tool grants, trace capture, and reducer
-synthesis.
+synthesis. `agent_broker.py` provides the shared collaboration contract:
+messages, artifacts, task handoffs, review requests, and audit traces.
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -31,7 +32,8 @@ When this skill is triggered inside Codex App, the default App-mode priority is:
 1. If Codex subagent runtime/tools are available and the user asks for dynamic workflows, real subagents, parallel agents, or equivalent multi-agent execution, spawn real Codex internal subagents.
 2. Do **not** set a model override for spawned subagents. Let them inherit the current Codex App internal LLM/runtime.
 3. Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key for App-native subagent execution.
-4. If native Codex subagent runtime/tools are unavailable, use zero-config in-chat workflow execution as the fallback.
+4. Coordinate subagents through the parent orchestrator and the AgentBroker contract: explicit messages, artifacts, handoffs, review requests, and traceable synthesis. Do not rely on hidden peer-to-peer side channels.
+5. If native Codex subagent runtime/tools are unavailable, use zero-config in-chat workflow execution as the fallback.
 
 In App fallback/zero-config mode:
 
@@ -88,6 +90,7 @@ Pipeline: Query → Decompose → DAG Build → Execute → Stop Check → Repla
 | `dynamic_replan.py` | Result-preserving replan (keeps completed work) |
 | `tea_protocol.py` | Tool Evolution & Adaptation (runtime tool creation + versioning) |
 | `worktree.py` | Git worktree isolation per agent |
+| `agent_broker.py` | A2A-style messages, artifacts, task handoff, review requests, audit trace |
 | `visualize.py` | Generate interactive HTML dashboard |
 | `test_suite.py` | Unit, integration, security, provider-routing, and stress tests |
 
@@ -218,6 +221,7 @@ python test_suite.py --e2e        # Include real API tests
 
 - In Codex App zero-config mode, do not ask for API keys.
 - In Codex App native-subagent mode, do not ask for API keys and do not set a model override; spawned subagents inherit the current App internal LLM/runtime.
+- In Codex App native-subagent mode, keep inter-agent collaboration explicit: route useful cross-agent context through orchestrator-mediated messages, artifacts, handoffs, review requests, and final synthesis.
 - In Codex App zero-config mode, do not tell the user to use Codex CLI.
 - The local Python `native_runtime.py` cannot directly call Codex App's internal LLM API unless an explicit App/runtime bridge is exposed; it uses the provided `llm_fn` or external providers.
 - External provider mode needs provider API keys and may be slower; local Python runtime itself uses the `llm_fn` supplied by the caller.

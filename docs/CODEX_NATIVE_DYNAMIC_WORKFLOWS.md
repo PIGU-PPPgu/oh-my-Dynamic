@@ -22,6 +22,7 @@ simulation. The runtime-level capabilities that matter are:
 - assign per-agent tool permissions,
 - run each subagent inside an isolated sandbox,
 - schedule a DAG natively,
+- let subagents collaborate through a controlled message/artifact broker,
 - stream progress, artifacts, budgets, and audit traces back to the App,
 - synthesize the result through a runtime-level reducer.
 
@@ -103,6 +104,15 @@ From a plugin/skill user's perspective, this path should be API-key free.
 - final answer with source/task attribution
 - exportable workflow trace
 
+### Phase 5: Controlled A2A Broker
+
+- direct and broadcast messages with explicit sender/receiver metadata
+- artifact publication and durable artifact references
+- task handoff events between agents
+- review request / review response events
+- append-only audit trace exportable as an A2A-style task snapshot
+- parent orchestrator policy over what can be shared, reviewed, or forwarded
+
 ## How oh-my-Dynamic Maps to This
 
 | Runtime target | Current prototype module |
@@ -114,7 +124,8 @@ From a plugin/skill user's perspective, this path should be API-key free.
 | result synthesis | `synthesis.py` |
 | token accounting | `token_tracker.py` |
 | sandbox experiments | `worktree.py`, `tea_protocol.py` |
-| ecosystem bridge | `protocol_adapters.py` |
+| A2A/message broker | `agent_broker.py` |
+| ecosystem bridge | `protocol_adapters.py`, `agent_broker.py` |
 | installable App UX | `codex-plugin/skills/*` |
 
 oh-my-Dynamic separates three layers:
@@ -133,6 +144,14 @@ oh-my-Dynamic separates three layers:
    LLM; it uses the `llm_fn` passed by the caller, usually mock demos or
    configured external providers.
 
+`agent_broker.py` is the bridge between these layers. Codex App subagents should
+normally collaborate through the parent orchestrator and this broker contract:
+messages, artifacts, handoffs, review requests, and traces are explicit and
+auditable. Local isolated workers can write the same broker events during
+`native_runtime.py` execution. Direct peer-to-peer subagent messaging is a
+runtime concern; the project contract prefers controlled A2A-style collaboration
+over hidden side channels.
+
 The project is therefore both an App plugin UX and a working specification
 surface for capabilities that should remain owned by the Codex runtime.
 
@@ -150,6 +169,8 @@ A Codex native dynamic workflow implementation should be judged by:
 8. **User experience**: can the user trigger it from Codex App with one instruction?
 9. **Portability**: can workflows expose MCP/A2A compatible surfaces?
 10. **Reproducibility**: can a workflow trace be replayed or exported?
+11. **Inter-agent communication**: can agents hand off work, reference artifacts,
+    request review, and leave an audit trail without uncontrolled context bleed?
 
 ## Why This Belongs in Codex
 
@@ -193,6 +214,10 @@ Available now:
 - Local `native_runtime.py` prototype for sandboxed fan-out with 10/50/100+
   isolated workers, per-worker context, sandbox directories, tool grants, trace,
   and reducer synthesis.
+- Local `agent_broker.py` for A2A-style messages, artifacts, task handoffs,
+  review requests, and audit trace snapshots.
+- `native_runtime.py` can write worker outputs, final answers, and completion
+  events into `AgentBroker`.
 - Mock demos that run without API keys.
 - MCP-style and A2A-style adapter payloads.
 
@@ -204,6 +229,8 @@ Not available yet:
   visualization, and trace unless Codex runtime exposes those facilities in the
   current App environment.
 - A standalone replacement for the official Codex subagent spawn API.
+- App-native peer-to-peer subagent messaging independent of parent orchestrator
+  policy, unless Codex runtime exposes and governs that capability.
 
 That gap is the reason this project exists.
 
@@ -212,9 +239,11 @@ That gap is the reason this project exists.
 The local prototype is intentionally close to the desired native runtime shape:
 
 ```python
+from agent_broker import AgentBroker
 from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
 
-runtime = SandboxedFanoutRuntime(llm_fn, max_workers=100)
+broker = AgentBroker(".orchestry/demo-broker")
+runtime = SandboxedFanoutRuntime(llm_fn, max_workers=100, broker=broker)
 trace = runtime.run(
     "Review a large codebase from many independent angles.",
     [
@@ -228,6 +257,8 @@ trace = runtime.run(
         for i in range(100)
     ],
 )
+
+a2a_snapshot = broker.to_a2a_task(trace.run_id)
 ```
 
 This gives the project executable behavior for:
@@ -239,6 +270,8 @@ This gives the project executable behavior for:
 - concurrent scheduling,
 - reducer synthesis,
 - trace export.
+- artifact publication,
+- task snapshots that can be served through an A2A-style gateway.
 
 The local Python prototype still does not make a standalone Python process spawn
 Codex App internal isolated subagents or call the App internal LLM. That requires

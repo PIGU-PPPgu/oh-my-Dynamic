@@ -16,6 +16,7 @@ When triggered inside Codex App, this skill must work immediately after installa
 - Do **not** require provider API keys or `.env` configuration for App-native subagent execution.
 - Do **not** tell the user to use Codex CLI.
 - Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
+- Coordinate subagent collaboration through explicit messages, artifacts, handoffs, review requests, and auditable synthesis. Prefer parent-orchestrated A2A-style exchange over hidden peer-to-peer communication.
 - If native Codex subagent runtime/tools are unavailable, fall back to zero-config in-chat workflow execution using the current Codex App assistant/model.
 
 Boundary: local Python runtime, including `native_runtime.py`, cannot directly
@@ -29,10 +30,11 @@ present the multi-agent workflow directly in the response:
 1. Decompose the request into 3-7 tasks.
 2. Assign roles such as planner, researcher, builder, reviewer, synthesizer.
 3. Mark dependencies and identify which tasks can run in parallel.
-4. Produce worker results for each task.
-5. Review the combined result for gaps.
-6. Replan once if needed.
-7. Synthesize a final answer.
+4. Track worker messages, artifacts, handoffs, and review requests explicitly.
+5. Produce worker results for each task.
+6. Review the combined result for gaps.
+7. Replan once if needed.
+8. Synthesize a final answer.
 
 ## When to Trigger
 
@@ -137,6 +139,7 @@ Always present results in this structure:
 
 - Codex App native-subagent mode should not ask the user for API keys.
 - Codex App native-subagent mode should not set a model override; spawned subagents inherit the current App internal LLM/runtime.
+- Codex App native-subagent mode should not imply uncontrolled P2P messaging; keep collaboration explicit and auditable through the orchestrator/broker contract.
 - Codex App fallback mode is zero-config and should not ask the user for API keys.
 - Codex App fallback mode is an in-chat workflow implementation, not a separate CLI command.
 - Local Python `native_runtime.py` cannot directly call Codex App's internal LLM API unless an explicit App/runtime bridge is exposed; it uses the supplied `llm_fn` or external providers.

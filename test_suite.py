@@ -339,6 +339,64 @@ def test_protocol_adapters():
     assert task["artifacts"]
 
 
+@test("AgentBroker: messages + artifacts + A2A snapshot")
+def test_agent_broker_collaboration():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+
+    d = tempfile.mkdtemp()
+    try:
+        broker = AgentBroker(d)
+        broker.register_agent("planner", "planner", ["decompose"])
+        broker.register_agent("builder", "builder", ["write"])
+        broker.register_agent("reviewer", "reviewer", ["review"])
+
+        artifact = broker.publish_artifact(
+            "planner",
+            "plan",
+            "Build the broker layer first.",
+            kind="plan",
+        )
+        broker.create_handoff(
+            "planner",
+            "builder",
+            "task-1",
+            "Implement broker",
+            "Use the attached plan.",
+            artifact_ids=[artifact.id],
+            thread_id="thread-1",
+        )
+        broker.request_review(
+            "builder",
+            "reviewer",
+            "task-1",
+            "Review broker",
+            "Please review the broker artifact contract.",
+            artifact_ids=[artifact.id],
+            thread_id="thread-1",
+        )
+        broker.send_message(
+            "planner",
+            None,
+            "Shared constraint",
+            "Do not require external API keys.",
+            thread_id="thread-1",
+        )
+
+        builder_inbox = broker.read_inbox("builder", mark_delivered=False)
+        reviewer_inbox = broker.read_inbox("reviewer", mark_delivered=False)
+        assert {event.kind for event in builder_inbox} == {"handoff", "message"}
+        assert {event.kind for event in reviewer_inbox} == {"review_request", "message"}
+
+        snapshot = broker.to_a2a_task("thread-1")
+        assert snapshot["id"] == "thread-1"
+        assert snapshot["history"]
+        assert snapshot["artifacts"][0]["artifactId"] == artifact.id
+        assert broker.get_artifact(artifact.id).content.startswith("Build the broker")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("Native Runtime: sandboxed fan-out")
 def test_native_runtime_fanout():
     from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
@@ -366,6 +424,52 @@ def test_native_runtime_fanout():
     assert len({r.sandbox.root for r in trace.results}) == 32
     assert all(r.tool_grants[0].name == "read" for r in trace.results)
     assert "reduced" in trace.final_answer
+
+
+@test("Native Runtime: broker trace + artifacts")
+def test_native_runtime_broker_trace():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+    from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
+
+    d = tempfile.mkdtemp()
+    try:
+        broker = AgentBroker(str(Path(d) / "broker"))
+
+        def mock_llm(sys, user):
+            if "Worker results:" in user:
+                return "broker reducer complete"
+            return "worker artifact"
+
+        agents = [
+            AgentSpec(
+                id=f"agent_{i:02d}",
+                role="worker",
+                goal=f"Shard {i}",
+                tool_grants=[ToolGrant("read", "sandbox")],
+            )
+            for i in range(4)
+        ]
+        runtime = SandboxedFanoutRuntime(
+            mock_llm,
+            workspace_root=str(Path(d) / "runtime"),
+            max_workers=4,
+            keep_sandboxes=False,
+            broker=broker,
+        )
+        trace = runtime.run("broker fanout", agents)
+
+        assert trace.summary()["completed"] == 4
+        assert trace.broker_thread_id == trace.run_id
+        assert trace.broker_event_count >= 10
+        assert all(result.artifact_ids for result in trace.results)
+
+        task_snapshot = broker.to_a2a_task(trace.run_id)
+        assert task_snapshot["status"]["state"] == "completed"
+        assert len(task_snapshot["artifacts"]) >= 5  # 4 workers + final answer
+        assert any(event.subject == "workflow_completed" for event in broker.list_events(thread_id=trace.run_id))
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
 
 
 @test("Synthesis: 单次汇总")
@@ -665,7 +769,9 @@ if __name__ == "__main__":
         test_tea_sandbox_blocks_escape,
         test_llm_provider_routing,
         test_protocol_adapters,
+        test_agent_broker_collaboration,
         test_native_runtime_fanout,
+        test_native_runtime_broker_trace,
         test_synthesis_single,
         test_worktree_basic,
         test_worktree_rejects_unsafe_name,

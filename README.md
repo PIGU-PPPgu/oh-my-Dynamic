@@ -12,6 +12,7 @@
 
 - 🎯 **明确目标**：不是只做 prompt 技巧，而是为 Codex Native Dynamic Workflows 提供可验证原型和接口提案
 - 🧠 **Codex App internal subagent backend**：在 Codex App 暴露 subagent tools/runtime 时，默认使用真实 Codex subagents，并继承当前 App 内部 LLM；无需 API key
+- 📨 **A2A / Agent Broker**：受控 message、artifact、handoff、review request 和 audit trace，让 subagents 不只是并行跑，还能有证据链地协作
 - 🤖 **多模型支持**：GLM、OpenAI GPT、Claude、Gemini、DeepSeek、通义千问/Qwen、Moonshot/Kimi、硅基流动…… 自动识别模型名选择对应 provider
 - 🔗 **串行编排**（Orchestrator）：Planner → Builder → Reviewer 流水线，含自动重试和 review 打回
 - 👥 **并行团队**（TeamEngine）：多 agent 并行抢任务，消息总线通信
@@ -51,6 +52,7 @@
 | `dynamic_replan.py` | 动态重规划（运行中调整策略） |
 | `tea_protocol.py` | TEA 工具进化协议（LLM 驱动的工具改进） |
 | `message_bus.py` | Agent 间消息总线（文件系统队列，线程安全） |
+| `agent_broker.py` | A2A-style 协作 broker：messages、artifacts、handoff、review request、audit trace |
 | `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
 | `pipeline.py` | 端到端 Pipeline（组合所有组件） |
 | `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
@@ -265,18 +267,21 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 | 几十到上百个 isolated subagents | App backend 可用时由 Codex runtime 管理 | `SandboxedFanoutRuntime` 可跑 100+ isolated workers 原型 | 每个 subagent 独立上下文窗口 |
 | 每个 agent 独立工具权限和沙箱 | App-native 权限/沙箱由 Codex runtime 提供 | `AgentSandbox` + `ToolGrant` + worktree / subprocess 原型 | per-agent sandbox + least privilege tools |
 | 原生 DAG 调度与汇总 | App-native scheduler/trace 由 Codex runtime 提供 | `dag.py` + `native_runtime.py` + `synthesis.py` | runtime 级 DAG execution graph |
-| 进度、预算、审计日志 | 部分依赖会话文本 | `token_tracker.py` + dashboard | App 原生可视化 trace |
+| Agent 间受控沟通 | App subagents 通过父 orchestrator 协调；直接 P2P 取决于 runtime | `agent_broker.py` 提供 message / artifact / handoff / review request / A2A snapshot | runtime 原生 A2A broker + audit policy |
+| 进度、预算、审计日志 | 部分依赖会话文本 | `token_tracker.py` + `agent_broker.py` trace + dashboard | App 原生可视化 trace |
 
 详细提案见 [Codex Native Dynamic Workflows Proposal](docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md)。
 
 ### MCP / A2A 协议适配
 
-`protocol_adapters.py` 提供 transport-agnostic 的生态适配层：
+`protocol_adapters.py` 提供 transport-agnostic 的生态适配层，`agent_broker.py` 提供可运行的本地协作 broker：
 
 - MCP-style：`mcp_tools()` 暴露 `oh_my_dynamic.run_workflow` 工具描述；`run_mcp_tool()` 可执行 workflow 并返回 text + structured content。
 - A2A-style：`a2a_agent_card()` 返回 Agent Card；`A2ATaskStore` 提供轻量 Task submit/get 结构，可用于后续 HTTP、SSE 或网关封装。
+- AgentBroker：`AgentBroker` 可注册 agents，发送 direct/broadcast message，发布 artifacts，创建 task handoff，发起 review request，并导出 A2A-style task snapshot。
+- Native runtime 集成：`SandboxedFanoutRuntime(..., broker=AgentBroker(...))` 会把 worker started/completed、worker artifacts、final answer 和 workflow completion 写入 broker trace。
 
-当前实现是协议对象和调用契约，不内置常驻 HTTP/MCP server。这样可以先稳定核心 payload，再按部署目标接入 stdio、HTTP 或托管网关。
+当前实现是协议对象、调用契约和本地 broker，不内置常驻 HTTP/MCP server。这样可以先稳定核心协作语义，再按部署目标接入 stdio、HTTP、SSE 或托管网关。
 
 ## 验证体系
 

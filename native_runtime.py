@@ -21,6 +21,8 @@ import threading
 import time
 import uuid
 
+from agent_broker import AgentBroker
+
 
 LLMFn = Callable[[str, str], str]
 
@@ -82,6 +84,8 @@ class AgentResult:
     duration_s: float
     error: str = ""
     thread_name: str = ""
+    artifact_ids: List[str] = field(default_factory=list)
+    broker_event_ids: List[str] = field(default_factory=list)
 
 
 @dataclass
@@ -97,6 +101,8 @@ class WorkflowTrace:
     results: List[AgentResult]
     final_answer: str
     sandbox_root: str
+    broker_thread_id: str = ""
+    broker_event_count: int = 0
 
     def summary(self) -> Dict:
         completed = sum(1 for r in self.results if r.status == "completed")
@@ -109,6 +115,8 @@ class WorkflowTrace:
             "failed": failed,
             "duration_s": self.duration_s,
             "sandbox_root": self.sandbox_root,
+            "broker_thread_id": self.broker_thread_id,
+            "broker_event_count": self.broker_event_count,
         }
 
     def to_dict(self) -> Dict:
@@ -122,6 +130,8 @@ class WorkflowTrace:
             "results": [asdict(r) for r in self.results],
             "final_answer": self.final_answer,
             "sandbox_root": self.sandbox_root,
+            "broker_thread_id": self.broker_thread_id,
+            "broker_event_count": self.broker_event_count,
         }
 
 
@@ -134,11 +144,13 @@ class SandboxedFanoutRuntime:
         workspace_root: str = ".orchestry/native_runtime",
         max_workers: int = 32,
         keep_sandboxes: bool = True,
+        broker: Optional[AgentBroker] = None,
     ) -> None:
         self.llm_fn = llm_fn
         self.workspace_root = Path(workspace_root)
         self.max_workers = max_workers
         self.keep_sandboxes = keep_sandboxes
+        self.broker = broker
 
     def run(
         self,
@@ -157,6 +169,26 @@ class SandboxedFanoutRuntime:
         sandbox_root = self.workspace_root / run_id
         sandbox_root.mkdir(parents=True, exist_ok=True)
 
+        if self.broker:
+            self.broker.register_agent("orchestrator", "orchestrator", ["plan", "reduce"])
+            self.broker.trace(
+                "orchestrator",
+                "workflow_started",
+                goal,
+                thread_id=run_id,
+                metadata={"max_agents": len(agents), "max_workers": self.max_workers},
+            )
+            for spec in agents:
+                self.broker.register_agent(
+                    spec.id,
+                    spec.role,
+                    [grant.name for grant in spec.tool_grants],
+                    metadata={
+                        "goal": spec.goal,
+                        "dependencies": spec.dependencies,
+                    },
+                )
+
         results: List[AgentResult] = []
         result_lock = threading.Lock()
 
@@ -172,7 +204,29 @@ class SandboxedFanoutRuntime:
 
         results.sort(key=lambda r: r.agent_id)
         final_answer = self._reduce(goal, results, reducer_prompt)
+        final_artifact_ids: List[str] = []
+        if self.broker:
+            artifact = self.broker.publish_artifact(
+                "orchestrator",
+                "final_answer",
+                final_answer,
+                kind="final_answer",
+                metadata={"run_id": run_id},
+            )
+            final_artifact_ids.append(artifact.id)
+            self.broker.trace(
+                "orchestrator",
+                "workflow_completed",
+                f"Workflow completed with {len(results)} worker results.",
+                thread_id=run_id,
+                artifact_ids=final_artifact_ids,
+                metadata={
+                    "completed": sum(1 for r in results if r.status == "completed"),
+                    "failed": sum(1 for r in results if r.status == "failed"),
+                },
+            )
         completed_at = _now()
+        broker_event_count = len(self.broker.list_events(thread_id=run_id)) if self.broker else 0
         trace = WorkflowTrace(
             run_id=run_id,
             goal=goal,
@@ -183,6 +237,8 @@ class SandboxedFanoutRuntime:
             results=results,
             final_answer=final_answer,
             sandbox_root=str(sandbox_root.resolve()),
+            broker_thread_id=run_id if self.broker else "",
+            broker_event_count=broker_event_count,
         )
 
         if not self.keep_sandboxes:
@@ -196,6 +252,18 @@ class SandboxedFanoutRuntime:
         start = time.time()
         sandbox = AgentSandbox(root=str(sandbox_path.resolve()))
         thread_name = threading.current_thread().name
+        broker_event_ids: List[str] = []
+        artifact_ids: List[str] = []
+
+        if self.broker:
+            event = self.broker.trace(
+                spec.id,
+                "agent_started",
+                spec.goal,
+                thread_id=self._current_thread_id(sandbox_path),
+                metadata={"role": spec.role, "sandbox": sandbox.root},
+            )
+            broker_event_ids.append(event.id)
 
         grants = "\n".join(
             f"- {grant.name} ({grant.scope}): {grant.reason or 'no reason provided'}"
@@ -221,10 +289,38 @@ class SandboxedFanoutRuntime:
             output = self.llm_fn(system_prompt, user_prompt)
             status = "completed"
             error = ""
+            if self.broker:
+                artifact = self.broker.publish_artifact(
+                    spec.id,
+                    f"{spec.id}_result",
+                    output,
+                    kind="worker_result",
+                    metadata={"role": spec.role, "sandbox": sandbox.root},
+                )
+                artifact_ids.append(artifact.id)
+                event = self.broker.send_message(
+                    spec.id,
+                    "orchestrator",
+                    f"Worker completed: {spec.id}",
+                    output[:2000],
+                    thread_id=self._current_thread_id(sandbox_path),
+                    artifact_ids=[artifact.id],
+                    metadata={"status": status, "role": spec.role},
+                )
+                broker_event_ids.append(event.id)
         except Exception as exc:
             output = ""
             status = "failed"
             error = f"{type(exc).__name__}: {exc}"
+            if self.broker:
+                event = self.broker.trace(
+                    spec.id,
+                    "agent_failed",
+                    error,
+                    thread_id=self._current_thread_id(sandbox_path),
+                    metadata={"role": spec.role, "sandbox": sandbox.root},
+                )
+                broker_event_ids.append(event.id)
 
         return AgentResult(
             agent_id=spec.id,
@@ -238,7 +334,12 @@ class SandboxedFanoutRuntime:
             duration_s=time.time() - start,
             error=error,
             thread_name=thread_name,
+            artifact_ids=artifact_ids,
+            broker_event_ids=broker_event_ids,
         )
+
+    def _current_thread_id(self, sandbox_path: Path) -> str:
+        return sandbox_path.parent.name
 
     def _reduce(
         self,
