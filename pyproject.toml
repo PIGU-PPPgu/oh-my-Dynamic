@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oh-my-dynamic"
-version = "1.0.4"
+version = "1.1.0"
 description = "Multi-agent orchestration engine with DAG execution, dynamic replan, TEA protocol, and model-provider routing."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -34,6 +34,7 @@ py-modules = [
   "dynamic_replan",
   "llm_client",
   "message_bus",
+  "native_runtime",
   "orchestrator",
   "pipeline",
   "protocol_adapters",

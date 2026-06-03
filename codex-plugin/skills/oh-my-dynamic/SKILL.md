@@ -11,6 +11,9 @@ Important positioning: Codex App currently does not expose a native runtime API
 for spawning tens or hundreds of isolated internal subagents. This skill gives a
 zero-config dynamic-workflow-style experience in App, and the project documents
 the target native runtime capability in `docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md`.
+The project also includes `native_runtime.py`, a local executable prototype that
+can fan out many isolated workers with separate sandbox directories, per-worker
+context, tool grants, trace capture, and reducer synthesis.
 
 ## Codex App Default: Zero-Config Mode
 
@@ -22,7 +25,8 @@ When this skill is triggered inside Codex App, the default mode is **zero-config
 - Treat the modules in `~/Desktop/oh-my-Dynamic` as the reference implementation and mirror their workflow in-chat.
 - Be explicit if the user asks about native parallel sandboxed subagents: Codex
   App does not currently expose that capability to skills; it is the project's
-  roadmap target, not the current App-mode behavior.
+  roadmap target, not the current App-mode behavior. The local prototype can be
+  demonstrated with `python examples/sandboxed_fanout.py`.
 
 In zero-config mode, execute this workflow directly in the conversation:
 

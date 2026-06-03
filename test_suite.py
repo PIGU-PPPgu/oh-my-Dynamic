@@ -339,6 +339,35 @@ def test_protocol_adapters():
     assert task["artifacts"]
 
 
+@test("Native Runtime: sandboxed fan-out")
+def test_native_runtime_fanout():
+    from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
+
+    def mock_llm(sys, user):
+        if "Worker results:" in user:
+            return f"reduced {user.count(', completed)')} workers"
+        return "worker complete"
+
+    agents = [
+        AgentSpec(
+            id=f"agent_{i:02d}",
+            role="worker",
+            goal=f"Shard {i}",
+            context=f"private context {i}",
+            tool_grants=[ToolGrant("read", "sandbox")],
+        )
+        for i in range(32)
+    ]
+    runtime = SandboxedFanoutRuntime(mock_llm, max_workers=32, keep_sandboxes=False)
+    trace = runtime.run("fanout test", agents)
+    summary = trace.summary()
+    assert summary["agents"] == 32
+    assert summary["completed"] == 32
+    assert len({r.sandbox.root for r in trace.results}) == 32
+    assert all(r.tool_grants[0].name == "read" for r in trace.results)
+    assert "reduced" in trace.final_answer
+
+
 @test("Synthesis: 单次汇总")
 def test_synthesis_single():
     from synthesis import Synthesizer
@@ -538,6 +567,33 @@ def test_stress_large_dag():
     assert elapsed < 10, f"100个mock节点应在10s内完成，实际{elapsed:.1f}s"
 
 
+@test("压力: 100 isolated agents fan-out")
+def test_stress_native_runtime_100_agents():
+    from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
+
+    def mock_llm(sys, user):
+        if "Worker results:" in user:
+            return "100-agent reducer complete"
+        return "ok"
+
+    agents = [
+        AgentSpec(
+            id=f"agent_{i:03d}",
+            role="worker",
+            goal=f"Shard {i}",
+            tool_grants=[ToolGrant("read", "sandbox")],
+        )
+        for i in range(100)
+    ]
+    runtime = SandboxedFanoutRuntime(mock_llm, max_workers=100, keep_sandboxes=False)
+    start = time.time()
+    trace = runtime.run("100-agent fanout", agents)
+    elapsed = time.time() - start
+    assert trace.summary()["completed"] == 100
+    assert len({r.sandbox.root for r in trace.results}) == 100
+    assert elapsed < 10, f"100 isolated agents should finish quickly with mock LLM, got {elapsed:.1f}s"
+
+
 @test("压力: 并发 TokenTracker")
 def test_stress_token_tracker():
     import threading
@@ -609,6 +665,7 @@ if __name__ == "__main__":
         test_tea_sandbox_blocks_escape,
         test_llm_provider_routing,
         test_protocol_adapters,
+        test_native_runtime_fanout,
         test_synthesis_single,
         test_worktree_basic,
         test_worktree_rejects_unsafe_name,
@@ -626,6 +683,7 @@ if __name__ == "__main__":
     if "--stress" in sys.argv:
         run_section("💪 压力测试", [
             test_stress_large_dag,
+            test_stress_native_runtime_100_agents,
             test_stress_token_tracker,
         ])
     

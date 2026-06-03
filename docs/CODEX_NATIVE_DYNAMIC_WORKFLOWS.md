@@ -150,6 +150,9 @@ Available now:
 
 - Codex App zero-config skill mode, using the current App model in-chat.
 - Optional local Python engine with external provider APIs.
+- Local `native_runtime.py` prototype for sandboxed fan-out with 10/50/100+
+  isolated workers, per-worker context, sandbox directories, tool grants, trace,
+  and reducer synthesis.
 - Mock demos that run without API keys.
 - MCP-style and A2A-style adapter payloads.
 
@@ -161,3 +164,40 @@ Not available yet:
 - Official subagent spawn API.
 
 That gap is the reason this project exists.
+
+## Local Runtime Prototype
+
+The local prototype is intentionally close to the desired native runtime shape:
+
+```python
+from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
+
+runtime = SandboxedFanoutRuntime(llm_fn, max_workers=100)
+trace = runtime.run(
+    "Review a large codebase from many independent angles.",
+    [
+        AgentSpec(
+            id=f"agent_{i:03d}",
+            role="reviewer",
+            goal=f"Review shard {i}",
+            context=f"Private shard context {i}",
+            tool_grants=[ToolGrant("read", "sandbox")],
+        )
+        for i in range(100)
+    ],
+)
+```
+
+This gives the project executable behavior for:
+
+- worker fan-out,
+- isolated worker context,
+- per-worker sandbox directories,
+- explicit tool grant recording,
+- concurrent scheduling,
+- reducer synthesis,
+- trace export.
+
+It still does not make Codex App itself spawn internal isolated subagents. That
+requires runtime support from Codex. The prototype exists so the desired runtime
+contract can be tested before such an API exists.

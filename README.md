@@ -3,7 +3,8 @@
 **多 Agent 编排引擎 / Codex Native Dynamic Workflows 提案原型** —— 对齐 Anthropic Dynamic Workflows + VMAO 论文架构（arXiv 2603.11445），支持所有主流大模型。
 
 > 当前：Codex App 零配置 workflow-style 编排 + 可选本地 Python engine。  
-> 目标：推动 Codex runtime 原生支持 sandboxed fan-out、几十到上百个 isolated subagents、独立上下文/工具权限/沙箱、原生调度与汇总。
+> 本地 runtime：已支持 sandboxed fan-out、几十到上百个 isolated workers、独立上下文、工具权限记录、并发调度与汇总。  
+> 目标：推动 Codex App runtime 原生支持这些能力，而不是只靠插件提示词模拟。
 
 ## ✨ 特性
 
@@ -11,6 +12,7 @@
 - 🤖 **多模型支持**：GLM、OpenAI GPT、Claude、Gemini、DeepSeek、通义千问/Qwen、Moonshot/Kimi、硅基流动…… 自动识别模型名选择对应 provider
 - 🔗 **串行编排**（Orchestrator）：Planner → Builder → Reviewer 流水线，含自动重试和 review 打回
 - 👥 **并行团队**（TeamEngine）：多 agent 并行抢任务，消息总线通信
+- 🧪 **Sandboxed Fan-out Runtime**：本地原型可并发启动 10/50/100+ isolated workers，每个 worker 有独立 sandbox、context 和 tool grants
 - 🕸️ **DAG 任务图**：依赖感知的并行执行，自动拓扑排序
 - 🔄 **动态重规划**（Dynamic Replan）：运行中根据中间结果调整计划
 - 🧬 **TEA 工具进化**：LLM 驱动的工具自动分析、改进和回滚
@@ -46,6 +48,7 @@
 | `dynamic_replan.py` | 动态重规划（运行中调整策略） |
 | `tea_protocol.py` | TEA 工具进化协议（LLM 驱动的工具改进） |
 | `message_bus.py` | Agent 间消息总线（文件系统队列，线程安全） |
+| `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
 | `pipeline.py` | 端到端 Pipeline（组合所有组件） |
 | `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
 | `synthesis.py` | 结果汇总 |
@@ -184,6 +187,7 @@ python examples/research_analysis.py
 python examples/code_review.py
 python examples/data_processing.py
 python examples/protocol_preview.py
+python examples/sandboxed_fanout.py
 ```
 
 Demo 使用 deterministic mock LLM，适合快速验证端到端编排链路：
@@ -192,6 +196,7 @@ Demo 使用 deterministic mock LLM，适合快速验证端到端编排链路：
 - `code_review.py`：代码审查场景
 - `data_processing.py`：数据处理场景
 - `protocol_preview.py`：MCP-style tool 和 A2A-style Agent Card / Task 预览
+- `sandboxed_fanout.py`：64 个 isolated workers 的 fan-out/reduce demo
 
 ## 支持的模型
 
@@ -234,10 +239,10 @@ oh-my-Dynamic 当前可以在 Codex App 里提供零配置 dynamic-workflow-styl
 
 | 目标能力 | 当前 Codex App 状态 | oh-my-Dynamic 当前做法 | 期望官方 runtime |
 |----------|---------------------|------------------------|------------------|
-| App 原生 fan-out | 暂无公开插件 API | in-chat 拆解 + 本地 engine 可选 | `spawn_subagents()` 原生调度 |
-| 几十到上百个 isolated subagents | 暂无公开能力 | Python `DAGExecutor` / `TeamEngine` | 每个 subagent 独立上下文窗口 |
-| 每个 agent 独立工具权限和沙箱 | 暂无公开能力 | worktree / subprocess / TEA sandbox 原型 | per-agent sandbox + least privilege tools |
-| 原生 DAG 调度与汇总 | 暂无公开能力 | `dag.py` + `synthesis.py` | runtime 级 DAG execution graph |
+| App 原生 fan-out | 暂无公开插件 API | `native_runtime.py` 本地 fan-out 原型 | `spawn_subagents()` 原生调度 |
+| 几十到上百个 isolated subagents | 暂无公开能力 | `SandboxedFanoutRuntime` 可跑 100+ isolated workers | 每个 subagent 独立上下文窗口 |
+| 每个 agent 独立工具权限和沙箱 | 暂无公开能力 | `AgentSandbox` + `ToolGrant` + worktree / subprocess 原型 | per-agent sandbox + least privilege tools |
+| 原生 DAG 调度与汇总 | 暂无公开能力 | `dag.py` + `native_runtime.py` + `synthesis.py` | runtime 级 DAG execution graph |
 | 进度、预算、审计日志 | 部分依赖会话文本 | `token_tracker.py` + dashboard | App 原生可视化 trace |
 
 详细提案见 [Codex Native Dynamic Workflows Proposal](docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md)。
