@@ -4,10 +4,18 @@ This document describes the capability gap oh-my-Dynamic is trying to close:
 Codex should be able to run native dynamic workflows with sandboxed parallel
 subagents, similar in spirit to Claude Code Dynamic Workflows.
 
+Important default for Codex App: when Codex App exposes subagent tools/runtime
+to a plugin or skill, oh-my-Dynamic should use that **Codex App internal
+subagent backend** by default. Those subagents should inherit the current Codex
+App internal LLM, so normal App usage does not require `OPENAI_API_KEY` or any
+other external provider key.
+
 ## Problem
 
 Codex App skills can guide the current assistant to decompose and reason in a
-multi-agent style, but they cannot currently request the App runtime to:
+multi-agent style. When App-native subagent tools/runtime are available, the
+right behavior is to use real Codex subagents instead of prompt-only worker
+simulation. The runtime-level capabilities that matter are:
 
 - fan out into tens or hundreds of internal subagents,
 - give each subagent an isolated context window,
@@ -19,7 +27,10 @@ multi-agent style, but they cannot currently request the App runtime to:
 
 That difference matters. Prompt-level orchestration can improve reasoning
 structure, but it cannot unlock the same throughput, isolation, observability,
-or reliability as runtime-level subagents.
+or reliability as runtime-level subagents. A local Python process also should
+not be described as directly calling the Codex App internal LLM; App-native LLM
+inheritance, isolated sandboxes, tool permissions, scheduling, and trace capture
+belong to the Codex runtime.
 
 ## Desired Runtime Capability
 
@@ -58,8 +69,9 @@ review = workflow.reduce(
 ```
 
 The exact API does not need to look like this. The important pieces are native
-fan-out, isolated subagents, explicit tool grants, DAG scheduling, review, and
-observable synthesis.
+fan-out, isolated subagents, internal LLM inheritance from the current Codex App
+session, explicit tool grants, DAG scheduling, review, and observable synthesis.
+From a plugin/skill user's perspective, this path should be API-key free.
 
 ## Proposed Minimum Viable Runtime
 
@@ -105,9 +117,24 @@ observable synthesis.
 | ecosystem bridge | `protocol_adapters.py` |
 | installable App UX | `codex-plugin/skills/*` |
 
-oh-my-Dynamic is not claiming Codex App can already do all of this natively.
-It is a working prototype and specification surface for the runtime capability
-Codex should grow.
+oh-my-Dynamic separates three layers:
+
+1. **Codex App internal subagent backend**: when Codex App provides subagent
+   tools/runtime, the plugin/skill should default to real App-native subagents.
+   These subagents inherit the current Codex App internal LLM and do not need
+   external API keys.
+2. **Plugin-level orchestration**: when that backend is not available, the skill
+   can still structure the current Codex App conversation into planner, worker,
+   reviewer, replan, and synthesis passes. This is useful, but it is not
+   runtime-level isolated subagents.
+3. **Local Python runtime prototype**: `native_runtime.py` gives executable
+   fan-out, sandbox directory, tool grant, trace, and reducer behavior for
+   testing the proposed contract. It does not directly call Codex App's internal
+   LLM; it uses the `llm_fn` passed by the caller, usually mock demos or
+   configured external providers.
+
+The project is therefore both an App plugin UX and a working specification
+surface for capabilities that should remain owned by the Codex runtime.
 
 ## Evaluation Criteria
 
@@ -140,15 +167,28 @@ Codex use those strengths at scale:
 ## Non-Goals
 
 - Do not fake native parallel subagents through prompt formatting alone.
+- Do not route around an available Codex App internal subagent backend; if the
+  App provides subagent tools/runtime, use real Codex subagents by default.
 - Do not grant all tools to every worker by default.
 - Do not hide worker failures behind a polished final summary.
 - Do not require external model API keys for normal Codex App usage.
+- Do not claim that a local Python process can directly call the Codex App
+  internal LLM.
+- Do not claim the local runtime prototype provides App-native isolated
+  sandboxes, tool permissions, or scheduler semantics; those are Codex runtime
+  responsibilities.
 
 ## Current Status
 
 Available now:
 
-- Codex App zero-config skill mode, using the current App model in-chat.
+- Codex App zero-config skill mode.
+- Codex App internal subagent backend selection, when the App environment
+  exposes subagent tools/runtime to the plugin or skill. In that mode, real
+  Codex subagents inherit the current Codex App internal LLM and do not require
+  external API keys.
+- Plugin-level fallback orchestration using the current App model in-chat when
+  the App-native backend is unavailable.
 - Optional local Python engine with external provider APIs.
 - Local `native_runtime.py` prototype for sandboxed fan-out with 10/50/100+
   isolated workers, per-worker context, sandbox directories, tool grants, trace,
@@ -158,10 +198,12 @@ Available now:
 
 Not available yet:
 
-- Codex App native runtime fan-out.
-- App-managed isolated subagent sandboxes.
-- Runtime-level DAG visualization and trace.
-- Official subagent spawn API.
+- A project-owned way for local Python code to call the Codex App internal LLM
+  directly.
+- App-native isolated subagent sandboxes, per-agent tool permissions, scheduler,
+  visualization, and trace unless Codex runtime exposes those facilities in the
+  current App environment.
+- A standalone replacement for the official Codex subagent spawn API.
 
 That gap is the reason this project exists.
 
@@ -198,6 +240,9 @@ This gives the project executable behavior for:
 - reducer synthesis,
 - trace export.
 
-It still does not make Codex App itself spawn internal isolated subagents. That
-requires runtime support from Codex. The prototype exists so the desired runtime
-contract can be tested before such an API exists.
+The local Python prototype still does not make a standalone Python process spawn
+Codex App internal isolated subagents or call the App internal LLM. That requires
+runtime support from Codex. The prototype exists so the desired runtime contract
+can be tested before or alongside such an App-native API. When that API is
+available inside Codex App, it should be preferred over the local prototype for
+normal plugin/skill execution.

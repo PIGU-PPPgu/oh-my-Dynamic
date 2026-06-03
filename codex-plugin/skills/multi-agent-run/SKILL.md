@@ -7,16 +7,24 @@ description: "Run a multi-agent workflow on any complex task. One command to dec
 
 This skill decomposes any complex task into parallel subtasks, executes them with multiple agents, and synthesizes a coherent answer.
 
-## Codex App Default: Zero-Config Mode
+## Codex App Default: Native Subagents First
 
 When triggered inside Codex App, this skill must work immediately after installation:
 
-- Use the current Codex App assistant/model as the execution engine.
-- Do **not** require provider API keys or `.env` configuration.
+- If Codex subagent runtime/tools are available and the user asks for dynamic workflows, real subagents, parallel agents, or equivalent multi-agent execution, spawn real Codex internal subagents by default.
+- Do **not** set a model override for spawned subagents. Let them inherit the current Codex App internal LLM/runtime.
+- Do **not** require provider API keys or `.env` configuration for App-native subagent execution.
 - Do **not** tell the user to use Codex CLI.
 - Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
+- If native Codex subagent runtime/tools are unavailable, fall back to zero-config in-chat workflow execution using the current Codex App assistant/model.
 
-For normal App usage, perform the multi-agent workflow directly in the response:
+Boundary: local Python runtime, including `native_runtime.py`, cannot directly
+call the Codex App internal LLM API unless Codex App/runtime exposes an explicit
+bridge. Python runtime mode still uses the supplied `llm_fn` or external
+provider APIs when configured.
+
+For fallback App usage, or for synthesizing after native subagents return,
+present the multi-agent workflow directly in the response:
 
 1. Decompose the request into 3-7 tasks.
 2. Assign roles such as planner, researcher, builder, reviewer, synthesizer.
@@ -37,7 +45,10 @@ For normal App usage, perform the multi-agent workflow directly in the response:
 
 ### Step 1: Codex App Execution
 
-For ordinary Codex App usage, skip local prerequisite checks and run the workflow in-chat.
+For ordinary Codex App usage, skip local prerequisite checks. If App-native
+Codex subagent tools are available and the request calls for real/parallel
+agents, use those tools to spawn real internal subagents without any model
+override. Otherwise, run the workflow in-chat.
 
 Example trigger:
 
@@ -124,8 +135,11 @@ Always present results in this structure:
 
 ## Pitfalls
 
-- Codex App mode is zero-config and should not ask the user for API keys.
-- Codex App mode is an in-chat workflow implementation, not a separate CLI command.
+- Codex App native-subagent mode should not ask the user for API keys.
+- Codex App native-subagent mode should not set a model override; spawned subagents inherit the current App internal LLM/runtime.
+- Codex App fallback mode is zero-config and should not ask the user for API keys.
+- Codex App fallback mode is an in-chat workflow implementation, not a separate CLI command.
+- Local Python `native_runtime.py` cannot directly call Codex App's internal LLM API unless an explicit App/runtime bridge is exposed; it uses the supplied `llm_fn` or external providers.
 - GLM-5.1 is slow (~40s/call). Warn user if local provider mode generates 5+ subtasks.
 - JSON parsing can fail — pipeline has fallback but results may be less structured.
 - Token budget is estimated. Keep budget generous for complex queries.

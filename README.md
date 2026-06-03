@@ -2,13 +2,16 @@
 
 **多 Agent 编排引擎 / Codex Native Dynamic Workflows 提案原型** —— 对齐 Anthropic Dynamic Workflows + VMAO 论文架构（arXiv 2603.11445），支持所有主流大模型。
 
-> 当前：Codex App 零配置 workflow-style 编排 + 可选本地 Python engine。  
-> 本地 runtime：已支持 sandboxed fan-out、几十到上百个 isolated workers、独立上下文、工具权限记录、并发调度与汇总。  
-> 目标：推动 Codex App runtime 原生支持这些能力，而不是只靠插件提示词模拟。
+> Codex App 默认：当 App 内部 subagent tools/runtime 可用时，插件/skill 应默认走 **Codex App internal subagent backend**，使用真实 Codex subagents。
+> LLM 继承：这些 App-native subagents 默认继承当前 Codex App 内部 LLM，不需要 `OPENAI_API_KEY` 或其他外部模型 key。
+> 当前项目边界：提供插件级编排与本地 Python runtime 原型；真正 App-native isolated sandboxes、tool permissions、DAG scheduler 和 trace 仍由 Codex runtime 提供。
+>
+> **oh-my-Dynamic bridges plugin-level orchestration, local runtime prototypes, and Codex App-native subagents.**
 
 ## ✨ 特性
 
 - 🎯 **明确目标**：不是只做 prompt 技巧，而是为 Codex Native Dynamic Workflows 提供可验证原型和接口提案
+- 🧠 **Codex App internal subagent backend**：在 Codex App 暴露 subagent tools/runtime 时，默认使用真实 Codex subagents，并继承当前 App 内部 LLM；无需 API key
 - 🤖 **多模型支持**：GLM、OpenAI GPT、Claude、Gemini、DeepSeek、通义千问/Qwen、Moonshot/Kimi、硅基流动…… 自动识别模型名选择对应 provider
 - 🔗 **串行编排**（Orchestrator）：Planner → Builder → Reviewer 流水线，含自动重试和 review 打回
 - 👥 **并行团队**（TeamEngine）：多 agent 并行抢任务，消息总线通信
@@ -77,9 +80,22 @@ $oh-my-dynamic 用多 agent 分析：学校是否应该引入 AI 作业助手？
 $multi-agent-run review a Python change for security, correctness, and missing tests
 ```
 
-默认模式会使用 **Codex App 当前会话的内部 LLM** 执行拆解、worker 分析、review、replan 和 synthesis，不需要配置 `.env`，也不需要 `OPENAI_API_KEY`、`DEEPSEEK_API_KEY` 或其他外部模型 key。
+默认模式会优先使用 **Codex App internal subagent backend**：只要 Codex App 当前环境提供 subagent tools/runtime，插件/skill 就应启动真实 Codex subagents 来执行拆解、worker 分析、review、replan 和 synthesis。这些 subagents 默认继承当前 Codex App 内部 LLM，不需要配置 `.env`，也不需要 `OPENAI_API_KEY`、`DEEPSEEK_API_KEY` 或其他外部模型 key。
+
+如果当前 Codex App 环境没有暴露 subagent tools/runtime，则退回到插件级 dynamic-workflow-style 编排：仍使用当前 Codex App 会话的内部 LLM 进行结构化拆解、分 lane 分析和汇总，但这不是 runtime 级 isolated subagents。
 
 只有当你明确要运行本地 Python engine、接外部模型、生成 dashboard 文件时，才需要下面的可选配置。
+
+#### LLM 执行模式说明
+
+| 模式 | 默认 LLM | 是否需要外部 API Key | 是否是真 isolated workers |
+|------|----------|----------------------|---------------------------|
+| Codex App internal subagent backend | Codex App 当前内部 LLM，由 App-native subagents 继承 | 否 | 是，前提是 Codex runtime 提供 subagent tools/runtime、isolated sandboxes、tool permissions 和 scheduler |
+| Codex App 插件级编排 fallback | Codex App 当前会话的内部 LLM | 否 | 否；是在当前会话中执行 dynamic-workflow-style 编排 |
+| 本地 `native_runtime.py` fan-out | 调用传入的 `llm_fn`，demo 默认 mock | 否（mock）/ 是（真实外部模型） | 是本地 isolated worker runtime：独立 sandbox 目录、独立 context、tool grants、trace |
+| 本地 Python engine + 外部模型 | `llm_client.py` 路由到配置的 provider | 是 | 可并发 worker，但不是 Codex App 内部 subagents |
+
+也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 但这不表示本地 Python 进程可以直接调用 Codex App 内部 LLM。本地 `native_runtime.py` 只能调用传入的 `llm_fn`：demo 默认 mock，真实模型需要你配置外部 provider。App-native isolated sandboxes、tool permissions、scheduler 和 trace 由 Codex runtime 提供，不由本地 Python 原型伪造。
 
 ### 2. 可选：安装本地 Python engine 依赖
 
@@ -233,16 +249,22 @@ engine = Orchestrator(model="siliconflow/deepseek-ai/DeepSeek-V3")
 
 ### 与 Claude Code Dynamic Workflows 的差距和目标
 
-oh-my-Dynamic 当前可以在 Codex App 里提供零配置 dynamic-workflow-style 编排，也可以用本地 Python engine 运行 DAG、多 worker、replan 和 synthesis。但 Codex App 目前还没有公开的 native runtime 能力来真正复刻 Claude Code Dynamic Workflows 的核心特性。
+oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/runtime 可用，就走 **Codex App internal subagent backend**，用真实 Codex subagents 执行 dynamic workflows；这些 subagents 继承当前 Codex App 内部 LLM，不要求外部 API key。若该 backend 不可用，插件仍可提供零配置 dynamic-workflow-style 编排，本地 Python engine 也可运行 DAG、多 worker、replan 和 synthesis 原型。
+
+需要精确区分三层能力：
+
+1. **Codex App internal subagent backend**：真实 App-native subagents、内部 LLM 继承、API key free，由 Codex runtime 管理。
+2. **插件级编排**：skill/plugin 在当前会话中组织拆解、worker lane、review 和 synthesis，不等同于 isolated runtime subagents。
+3. **本地 Python runtime 原型**：可测试 sandboxed fan-out、tool grants 和 reducer 形状，但本地 Python 进程不能直接调用 Codex App 内部 LLM；真实 App-native isolated sandboxes、tool permissions、scheduler 仍属于 Codex runtime。
 
 我们希望推动 Codex 官方支持这些能力：
 
 | 目标能力 | 当前 Codex App 状态 | oh-my-Dynamic 当前做法 | 期望官方 runtime |
 |----------|---------------------|------------------------|------------------|
-| App 原生 fan-out | 暂无公开插件 API | `native_runtime.py` 本地 fan-out 原型 | `spawn_subagents()` 原生调度 |
-| 几十到上百个 isolated subagents | 暂无公开能力 | `SandboxedFanoutRuntime` 可跑 100+ isolated workers | 每个 subagent 独立上下文窗口 |
-| 每个 agent 独立工具权限和沙箱 | 暂无公开能力 | `AgentSandbox` + `ToolGrant` + worktree / subprocess 原型 | per-agent sandbox + least privilege tools |
-| 原生 DAG 调度与汇总 | 暂无公开能力 | `dag.py` + `native_runtime.py` + `synthesis.py` | runtime 级 DAG execution graph |
+| App 原生 fan-out | subagent tools/runtime 可用时应默认使用；能力由 Codex runtime 提供 | 插件选择 App backend；否则用 `native_runtime.py` 本地 fan-out 原型 | `spawn_subagents()` 原生调度 |
+| 几十到上百个 isolated subagents | App backend 可用时由 Codex runtime 管理 | `SandboxedFanoutRuntime` 可跑 100+ isolated workers 原型 | 每个 subagent 独立上下文窗口 |
+| 每个 agent 独立工具权限和沙箱 | App-native 权限/沙箱由 Codex runtime 提供 | `AgentSandbox` + `ToolGrant` + worktree / subprocess 原型 | per-agent sandbox + least privilege tools |
+| 原生 DAG 调度与汇总 | App-native scheduler/trace 由 Codex runtime 提供 | `dag.py` + `native_runtime.py` + `synthesis.py` | runtime 级 DAG execution graph |
 | 进度、预算、审计日志 | 部分依赖会话文本 | `token_tracker.py` + dashboard | App 原生可视化 trace |
 
 详细提案见 [Codex Native Dynamic Workflows Proposal](docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md)。

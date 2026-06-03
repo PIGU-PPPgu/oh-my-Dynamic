@@ -7,26 +7,49 @@ description: "Multi-agent orchestration engine for complex tasks. Use when you n
 
 A self-contained multi-agent orchestration system that replicates Claude Dynamic Workflows. It decomposes complex queries into DAG-structured subtasks, executes them in parallel, and synthesizes results with stop-condition-aware iteration.
 
-Important positioning: Codex App currently does not expose a native runtime API
-for spawning tens or hundreds of isolated internal subagents. This skill gives a
-zero-config dynamic-workflow-style experience in App, and the project documents
-the target native runtime capability in `docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md`.
-The project also includes `native_runtime.py`, a local executable prototype that
-can fan out many isolated workers with separate sandbox directories, per-worker
-context, tool grants, trace capture, and reducer synthesis.
+Important positioning: when Codex App exposes native subagent runtime/tools in
+the current session, this skill should use them as the preferred App execution
+path for user requests that explicitly ask for dynamic workflows, real
+subagents, parallel agents, or equivalent multi-agent execution. The App-native
+path should spawn real Codex internal subagents, let them inherit the current
+Codex App LLM/runtime, and avoid any external provider setup. If those native
+subagent tools are not available, fall back to the zero-config in-chat workflow
+below. The project also includes `native_runtime.py`, a local executable
+prototype that can fan out many isolated workers with separate sandbox
+directories, per-worker context, tool grants, trace capture, and reducer
+synthesis.
 
-## Codex App Default: Zero-Config Mode
+Boundary: the local Python `native_runtime.py` cannot directly call the Codex
+App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
+runtime mode still uses the `llm_fn` passed into it, or external provider APIs
+when configured.
 
-When this skill is triggered inside Codex App, the default mode is **zero-config**:
+## Codex App Default: Native Subagents First
+
+When this skill is triggered inside Codex App, the default App-mode priority is:
+
+1. If Codex subagent runtime/tools are available and the user asks for dynamic workflows, real subagents, parallel agents, or equivalent multi-agent execution, spawn real Codex internal subagents.
+2. Do **not** set a model override for spawned subagents. Let them inherit the current Codex App internal LLM/runtime.
+3. Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key for App-native subagent execution.
+4. If native Codex subagent runtime/tools are unavailable, use zero-config in-chat workflow execution as the fallback.
+
+In App fallback/zero-config mode:
 
 - Use the current Codex App assistant/model as the reasoning engine.
 - Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key.
 - Do **not** run `llm_client.py` or the Python `DynamicPipeline` unless the user explicitly asks to use the local Python engine, a real provider, or a dashboard artifact.
 - Treat the modules in `~/Desktop/oh-my-Dynamic` as the reference implementation and mirror their workflow in-chat.
-- Be explicit if the user asks about native parallel sandboxed subagents: Codex
-  App does not currently expose that capability to skills; it is the project's
-  roadmap target, not the current App-mode behavior. The local prototype can be
-  demonstrated with `python examples/sandboxed_fanout.py`.
+- Be explicit if the user asks about native parallel sandboxed subagents and no
+  Codex subagent runtime/tools are available in the current session: App-native
+  spawning cannot be used from this skill until the App/runtime exposes those
+  tools. The local prototype can still be demonstrated with
+  `python examples/sandboxed_fanout.py`.
+- If the user asks whether isolated workers use Codex's internal LLM by default,
+  answer precisely: App-native subagents inherit the current Codex App internal
+  LLM/runtime when the App exposes subagent tools and no model override is set.
+  The local Python isolated worker runtime cannot call Codex App's internal LLM
+  API directly unless an explicit App/runtime bridge exists; it uses the provided
+  `llm_fn` (mock by default in demos, or external provider APIs when configured).
 
 In zero-config mode, execute this workflow directly in the conversation:
 
@@ -98,7 +121,10 @@ Tasks: 5/5 completed
 ...
 ```
 
-This mode is fully handled by Codex App. No `.env` file or model API key is needed.
+This mode is fully handled by Codex App. No `.env` file or model API key is
+needed. If App-native subagent runtime/tools are available and the request calls
+for real/parallel agents, use those tools and spawn real Codex subagents without
+setting a model override. If not, produce the same workflow directly in-chat.
 
 ### 1. Optional: Local Python Engine
 
@@ -191,8 +217,10 @@ python test_suite.py --e2e        # Include real API tests
 ## Pitfalls
 
 - In Codex App zero-config mode, do not ask for API keys.
+- In Codex App native-subagent mode, do not ask for API keys and do not set a model override; spawned subagents inherit the current App internal LLM/runtime.
 - In Codex App zero-config mode, do not tell the user to use Codex CLI.
-- External Python engine mode needs provider API keys and may be slower.
+- The local Python `native_runtime.py` cannot directly call Codex App's internal LLM API unless an explicit App/runtime bridge is exposed; it uses the provided `llm_fn` or external providers.
+- External provider mode needs provider API keys and may be slower; local Python runtime itself uses the `llm_fn` supplied by the caller.
 - GLM-5.1 is slow (~40s/call). Keep `max_iterations` low (1-2) for quick real-provider runs.
 - JSON parsing from GLM can fail. All parsers have 3-level fallback (direct → code block → brace matching).
 - Token budget is estimated (chars/2). Not exact but sufficient for cost control.
