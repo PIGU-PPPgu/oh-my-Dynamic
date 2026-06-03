@@ -7,6 +7,11 @@ description: "Multi-agent orchestration engine for complex tasks. Use when you n
 
 A self-contained multi-agent orchestration system that replicates Claude Dynamic Workflows. It decomposes complex queries into DAG-structured subtasks, executes them in parallel, and synthesizes results with stop-condition-aware iteration.
 
+Important positioning: Codex App currently does not expose a native runtime API
+for spawning tens or hundreds of isolated internal subagents. This skill gives a
+zero-config dynamic-workflow-style experience in App, and the project documents
+the target native runtime capability in `docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md`.
+
 ## Codex App Default: Zero-Config Mode
 
 When this skill is triggered inside Codex App, the default mode is **zero-config**:
@@ -15,6 +20,9 @@ When this skill is triggered inside Codex App, the default mode is **zero-config
 - Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key.
 - Do **not** run `llm_client.py` or the Python `DynamicPipeline` unless the user explicitly asks to use the local Python engine, a real provider, or a dashboard artifact.
 - Treat the modules in `~/Desktop/oh-my-Dynamic` as the reference implementation and mirror their workflow in-chat.
+- Be explicit if the user asks about native parallel sandboxed subagents: Codex
+  App does not currently expose that capability to skills; it is the project's
+  roadmap target, not the current App-mode behavior.
 
 In zero-config mode, execute this workflow directly in the conversation:
 

@@ -1,11 +1,13 @@
 # oh-my-Dynamic 🔄
 
-**多 Agent 编排引擎** —— 复刻 Anthropic Dynamic Workflows + VMAO 论文架构（arXiv 2603.11445），支持所有主流大模型。
+**多 Agent 编排引擎 / Codex Native Dynamic Workflows 提案原型** —— 对齐 Anthropic Dynamic Workflows + VMAO 论文架构（arXiv 2603.11445），支持所有主流大模型。
 
-> 串行编排 + 并行团队 + DAG 任务图 + 动态重规划 + TEA 工具进化 + 消息总线 = 一个完整的多 Agent 协作框架
+> 当前：Codex App 零配置 workflow-style 编排 + 可选本地 Python engine。  
+> 目标：推动 Codex runtime 原生支持 sandboxed fan-out、几十到上百个 isolated subagents、独立上下文/工具权限/沙箱、原生调度与汇总。
 
 ## ✨ 特性
 
+- 🎯 **明确目标**：不是只做 prompt 技巧，而是为 Codex Native Dynamic Workflows 提供可验证原型和接口提案
 - 🤖 **多模型支持**：GLM、OpenAI GPT、Claude、Gemini、DeepSeek、通义千问/Qwen、Moonshot/Kimi、硅基流动…… 自动识别模型名选择对应 provider
 - 🔗 **串行编排**（Orchestrator）：Planner → Builder → Reviewer 流水线，含自动重试和 review 打回
 - 👥 **并行团队**（TeamEngine）：多 agent 并行抢任务，消息总线通信
@@ -54,6 +56,7 @@
 | `worktree.py` | Git worktree 管理 |
 | `protocol_adapters.py` | MCP/A2A 风格协议适配层（tool descriptor、Agent Card、Task payload） |
 | `examples/` | 无需 API Key 的端到端 demo |
+| `docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md` | Codex 原生 dynamic workflows 能力提案 |
 
 ## 快速开始
 
@@ -223,18 +226,21 @@ engine = Orchestrator(model="moonshot/moonshot-v1-32k")
 engine = Orchestrator(model="siliconflow/deepseek-ai/DeepSeek-V3")
 ```
 
-### 与 Claude Code Dynamic Workflows 的对应关系
+### 与 Claude Code Dynamic Workflows 的差距和目标
 
-oh-my-Dynamic 对齐的是 Claude Code Dynamic Workflows 的核心形态：把复杂目标拆成可并行的子任务，用编排器调度多 agent 执行，并在验证/停机条件后进行动态重规划和汇总。
+oh-my-Dynamic 当前可以在 Codex App 里提供零配置 dynamic-workflow-style 编排，也可以用本地 Python engine 运行 DAG、多 worker、replan 和 synthesis。但 Codex App 目前还没有公开的 native runtime 能力来真正复刻 Claude Code Dynamic Workflows 的核心特性。
 
-| Claude Code Dynamic Workflows 能力 | oh-my-Dynamic 对应模块 |
-|-----------------------------------|-------------------------|
-| 动态生成/运行编排流程 | `pipeline.py` + `dynamic_replan.py` |
-| fan-out 到多个 subagent | `dag.py` + `team_engine.py` |
-| 子任务依赖和并行执行 | `DAGExecutor` |
-| 验证后继续/停止 | `stop_conditions.py` + reviewer |
-| 汇总多 agent 结果 | `synthesis.py` |
-| 可复用 workflow/plugin 入口 | `codex-plugin/skills/*` |
+我们希望推动 Codex 官方支持这些能力：
+
+| 目标能力 | 当前 Codex App 状态 | oh-my-Dynamic 当前做法 | 期望官方 runtime |
+|----------|---------------------|------------------------|------------------|
+| App 原生 fan-out | 暂无公开插件 API | in-chat 拆解 + 本地 engine 可选 | `spawn_subagents()` 原生调度 |
+| 几十到上百个 isolated subagents | 暂无公开能力 | Python `DAGExecutor` / `TeamEngine` | 每个 subagent 独立上下文窗口 |
+| 每个 agent 独立工具权限和沙箱 | 暂无公开能力 | worktree / subprocess / TEA sandbox 原型 | per-agent sandbox + least privilege tools |
+| 原生 DAG 调度与汇总 | 暂无公开能力 | `dag.py` + `synthesis.py` | runtime 级 DAG execution graph |
+| 进度、预算、审计日志 | 部分依赖会话文本 | `token_tracker.py` + dashboard | App 原生可视化 trace |
+
+详细提案见 [Codex Native Dynamic Workflows Proposal](docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md)。
 
 ### MCP / A2A 协议适配
 

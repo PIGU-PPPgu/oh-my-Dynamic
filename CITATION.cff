@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use oh-my-Dynamic in research or teaching, please cite the repository and the related workflow papers listed in README.md."
 title: "oh-my-Dynamic"
-version: "1.0.3"
+version: "1.0.4"
 authors:
   - family-names: "PIGU-PPPgu"
 url: "https://github.com/PIGU-PPPgu/oh-my-Dynamic"
