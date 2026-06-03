@@ -370,9 +370,9 @@ class AgentBroker:
                         else {"kind": "data", "data": artifact.content}
                     ],
                     "metadata": {
+                        **artifact.metadata,
                         "producer": artifact.producer,
                         "kind": artifact.kind,
-                        **artifact.metadata,
                     },
                 }
                 for artifact in artifacts.values()
@@ -440,6 +440,7 @@ class AgentBroker:
                 }
             ],
             "metadata": {
+                **event.metadata,
                 "eventId": event.id,
                 "kind": event.kind,
                 "from": event.from_agent,
@@ -447,6 +448,5 @@ class AgentBroker:
                 "subject": event.subject,
                 "taskId": event.task_id,
                 "artifactIds": event.artifact_ids,
-                **event.metadata,
             },
         }

@@ -53,6 +53,7 @@
 | `tea_protocol.py` | TEA 工具进化协议（LLM 驱动的工具改进） |
 | `message_bus.py` | Agent 间消息总线（文件系统队列，线程安全） |
 | `agent_broker.py` | A2A-style 协作 broker：messages、artifacts、handoff、review request、audit trace |
+| `broker_gateway.py` | 本地 HTTP/SSE gateway：Agent Card、task snapshot、events、messages、artifacts、handoffs、review requests |
 | `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
 | `pipeline.py` | 端到端 Pipeline（组合所有组件） |
 | `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
@@ -274,14 +275,15 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 
 ### MCP / A2A 协议适配
 
-`protocol_adapters.py` 提供 transport-agnostic 的生态适配层，`agent_broker.py` 提供可运行的本地协作 broker：
+`protocol_adapters.py` 提供 transport-agnostic 的生态适配层，`agent_broker.py` 提供可运行的本地协作 broker，`broker_gateway.py` 把 broker 暴露成 HTTP/SSE 入口：
 
 - MCP-style：`mcp_tools()` 暴露 `oh_my_dynamic.run_workflow` 工具描述；`run_mcp_tool()` 可执行 workflow 并返回 text + structured content。
 - A2A-style：`a2a_agent_card()` 返回 Agent Card；`A2ATaskStore` 提供轻量 Task submit/get 结构，可用于后续 HTTP、SSE 或网关封装。
 - AgentBroker：`AgentBroker` 可注册 agents，发送 direct/broadcast message，发布 artifacts，创建 task handoff，发起 review request，并导出 A2A-style task snapshot。
 - Native runtime 集成：`SandboxedFanoutRuntime(..., broker=AgentBroker(...))` 会把 worker started/completed、worker artifacts、final answer 和 workflow completion 写入 broker trace。
+- Gateway：`python broker_gateway.py --host 127.0.0.1 --port 8765` 会提供 `/.well-known/agent.json`、`POST /tasks`、`GET /tasks/{id}`、`GET /tasks/{id}/events`、`POST /tasks/{id}/messages`、`/artifacts`、`/handoffs`、`/review-requests` 和 `/complete`。
 
-当前实现是协议对象、调用契约和本地 broker，不内置常驻 HTTP/MCP server。这样可以先稳定核心协作语义，再按部署目标接入 stdio、HTTP、SSE 或托管网关。
+当前实现已包含本地 HTTP/SSE gateway，但还不是托管服务或官方 App-native runtime。这样可以先稳定核心协作语义，再按部署目标接入 MCP stdio、远程 HTTP、SSE 或托管网关。
 
 ## 验证体系
 

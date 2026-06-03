@@ -19,6 +19,8 @@ prototype that can fan out many isolated workers with separate sandbox
 directories, per-worker context, tool grants, trace capture, and reducer
 synthesis. `agent_broker.py` provides the shared collaboration contract:
 messages, artifacts, task handoffs, review requests, and audit traces.
+`broker_gateway.py` exposes that contract as a local HTTP/SSE gateway when a
+transport surface is needed.
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -91,6 +93,7 @@ Pipeline: Query → Decompose → DAG Build → Execute → Stop Check → Repla
 | `tea_protocol.py` | Tool Evolution & Adaptation (runtime tool creation + versioning) |
 | `worktree.py` | Git worktree isolation per agent |
 | `agent_broker.py` | A2A-style messages, artifacts, task handoff, review requests, audit trace |
+| `broker_gateway.py` | Local HTTP/SSE gateway for AgentBroker task snapshots and events |
 | `visualize.py` | Generate interactive HTML dashboard |
 | `test_suite.py` | Unit, integration, security, provider-routing, and stress tests |
 

@@ -397,6 +397,110 @@ def test_agent_broker_collaboration():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("BrokerGateway: HTTP task lifecycle + SSE")
+def test_broker_gateway_http_lifecycle():
+    import shutil, tempfile, threading, urllib.request
+    from agent_broker import AgentBroker
+    from broker_gateway import create_server
+
+    d = tempfile.mkdtemp()
+    server = None
+    thread = None
+    try:
+        broker = AgentBroker(str(Path(d) / "broker"))
+        server = create_server(broker, host="127.0.0.1", port=0)
+        port = server.server_address[1]
+        base = f"http://127.0.0.1:{port}"
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+
+        def request(method, path, payload=None, headers=None):
+            data = None
+            if payload is not None:
+                data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                base + path,
+                data=data,
+                method=method,
+                headers={"Content-Type": "application/json", **(headers or {})},
+            )
+            with urllib.request.urlopen(req, timeout=5) as response:
+                body = response.read().decode("utf-8")
+                content_type = response.headers.get("Content-Type", "")
+                if content_type.startswith("text/event-stream"):
+                    return body
+                return json.loads(body)
+
+        card = request("GET", "/.well-known/agent.json")
+        assert card["capabilities"]["agentBroker"]
+        assert any(skill["id"] == "agent-broker" for skill in card["skills"])
+
+        task = request("POST", "/tasks", {"message": "Coordinate a broker workflow"})
+        task_id = task["id"]
+        assert task["status"]["state"] == "working"
+
+        artifact = request("POST", f"/tasks/{task_id}/artifacts", {
+            "producer": "planner",
+            "name": "plan",
+            "content": "Broker gateway plan",
+            "kind": "plan",
+        })
+        assert artifact["id"].startswith("artifact_")
+
+        handoff = request("POST", f"/tasks/{task_id}/handoffs", {
+            "from": "planner",
+            "to": "builder",
+            "task_id": "build-broker",
+            "subject": "Implement gateway",
+            "body": "Use the plan artifact.",
+            "artifact_ids": [artifact["id"]],
+        })
+        assert handoff["kind"] == "handoff"
+
+        review = request("POST", f"/tasks/{task_id}/review-requests", {
+            "from": "builder",
+            "reviewer": "reviewer",
+            "task_id": "build-broker",
+            "subject": "Review gateway",
+            "body": "Check lifecycle endpoints.",
+            "artifact_ids": [artifact["id"]],
+        })
+        assert review["kind"] == "review_request"
+
+        message = request("POST", f"/tasks/{task_id}/messages", {
+            "from": "reviewer",
+            "to": "orchestrator",
+            "subject": "Review complete",
+            "body": "Looks coherent.",
+        })
+        assert message["kind"] == "message"
+
+        completed = request("POST", f"/tasks/{task_id}/complete", {
+            "final_answer": "Gateway lifecycle complete.",
+        })
+        assert completed["status"]["state"] == "completed"
+        assert any(item["name"] == "final_answer" for item in completed["artifacts"])
+
+        events = request("GET", f"/tasks/{task_id}/events")
+        assert len(events["events"]) >= 7
+
+        sse = request("GET", f"/tasks/{task_id}/events", headers={"Accept": "text/event-stream"})
+        assert "event: handoff" in sse
+        assert "event: review_request" in sse
+        assert "workflow_completed" in sse
+        refreshed = request("GET", f"/tasks/{task_id}")
+        history_kinds = [item["metadata"]["kind"] for item in refreshed["history"]]
+        assert "trace" in history_kinds
+        assert "handoff" in history_kinds
+    finally:
+        if server is not None:
+            server.shutdown()
+            server.server_close()
+        if thread is not None:
+            thread.join(timeout=5)
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("Native Runtime: sandboxed fan-out")
 def test_native_runtime_fanout():
     from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
@@ -770,6 +874,7 @@ if __name__ == "__main__":
         test_llm_provider_routing,
         test_protocol_adapters,
         test_agent_broker_collaboration,
+        test_broker_gateway_http_lifecycle,
         test_native_runtime_fanout,
         test_native_runtime_broker_trace,
         test_synthesis_single,

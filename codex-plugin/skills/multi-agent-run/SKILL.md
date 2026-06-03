@@ -17,6 +17,7 @@ When triggered inside Codex App, this skill must work immediately after installa
 - Do **not** tell the user to use Codex CLI.
 - Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
 - Coordinate subagent collaboration through explicit messages, artifacts, handoffs, review requests, and auditable synthesis. Prefer parent-orchestrated A2A-style exchange over hidden peer-to-peer communication.
+- Use `broker_gateway.py` only when the user asks for a local HTTP/SSE transport surface or external tool integration; ordinary Codex App usage should stay inside the App-native subagent path.
 - If native Codex subagent runtime/tools are unavailable, fall back to zero-config in-chat workflow execution using the current Codex App assistant/model.
 
 Boundary: local Python runtime, including `native_runtime.py`, cannot directly
