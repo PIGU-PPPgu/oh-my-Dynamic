@@ -29,6 +29,43 @@ from llm_client import call_glm
 
 
 # ============================================================
+# Review 判定
+# ============================================================
+
+def _parse_review_verdict(review_text: str) -> str:
+    """从 review 结果中提取判定。返回 'approve' / 'reject'。
+    
+    规则：只看文本开头或首个独立行的关键词，
+    避免正文中出现的 "APPROVE"/"通过" 被误判。
+    """
+    # 取前 200 字符 + 首行，避免被正文干扰
+    head = review_text.strip()[:200].lower()
+    first_line = review_text.strip().split("\n")[0].strip().lower()
+    
+    approve_kw = ["approve", "通过", "✅", "accept", "approved", "合格", "确认"]
+    reject_kw  = ["reject", "拒绝", "不通过", "❌", "deny", "denied", "需修改", "需补充"]
+    
+    # 先检查首行（最权威的信号）
+    for kw in reject_kw:
+        if kw in first_line:
+            return "reject"
+    for kw in approve_kw:
+        if kw in first_line:
+            return "approve"
+    
+    # 再检查头部区域
+    for kw in reject_kw:
+        if kw in head:
+            return "reject"
+    for kw in approve_kw:
+        if kw in head:
+            return "approve"
+    
+    # 默认 reject（宁可多改一次，也不要放过低质量输出）
+    return "reject"
+
+
+# ============================================================
 # Planner 输出解析器
 # ============================================================
 
@@ -291,7 +328,7 @@ class Orchestrator:
                         task.status = TaskStatus.REVIEWING
                         review_result = self._call_agent(REVIEWER, task, context_for_task)
                         
-                        if 'APPROVE' in review_result.upper() or '通过' in review_result:
+                        if _parse_review_verdict(review_result) == "approve":
                             task.status = TaskStatus.DONE
                             self._log(f"  ✅ Review 通过")
                         else:

@@ -22,6 +22,17 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Callable, Optional, Any
 
+# 统一状态模型：复用 task.py 的 TaskStatus 枚举
+from task import TaskStatus
+
+# 向后兼容映射：dag.py 历史用词 → TaskStatus
+_LEGACY_STATUS_MAP = {
+    "pending": TaskStatus.TODO,
+    "running": TaskStatus.IN_PROGRESS,
+    "completed": TaskStatus.DONE,
+    "failed": TaskStatus.FAILED,
+}
+
 
 @dataclass
 class DAGNode:
@@ -46,7 +57,7 @@ class DAGNode:
     verification_criteria: str = ""        # 验证标准
     
     # 运行时状态
-    status: str = "pending"                # pending / running / completed / failed
+    status: str = "pending"                # pending / running / completed / failed（兼容旧代码）
     result: str = ""                       # 执行结果
     completeness_score: float = 0.0        # 0.0-1.0
     owner: str = ""                        # 执行者 agent 名

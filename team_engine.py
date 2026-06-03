@@ -248,7 +248,7 @@ class TeamEngine:
     
     # ========== 并行执行核心 ==========
     
-    def _run_single_agent(self, agent_name: str) -> dict:
+    def _run_single_agent(self, agent_name: str, max_idle_rounds: int = 30) -> dict:
         """
         单个 agent 的工作循环。
         
@@ -258,12 +258,17 @@ class TeamEngine:
           3. 执行任务
           4. 把结果写回任务文件
           5. 通过消息通知 lead
+        
+        Args:
+            agent_name: agent 名称
+            max_idle_rounds: 连续抢不到任务的最大空转轮数，超过后退出（默认 30 轮）
         """
         role = self.agents[agent_name]
         completed_tasks = []
         failed_tasks = []
+        idle_rounds = 0
         
-        self._log(f"  🚀 {agent_name} 开始工作")
+        self._log(f"  🚀 {agent_name} 开始工作 (max_idle={max_idle_rounds})")
         
         while True:
             # 1. 读消息
@@ -285,15 +290,24 @@ class TeamEngine:
                     break
                 else:
                     # 还有任务但依赖没满足，等一下
+                    idle_rounds += 1
+                    if idle_rounds >= max_idle_rounds:
+                        self._log(f"  ⏰ {agent_name}: 连续 {max_idle_rounds} 轮无任务可领，退出")
+                        break
                     time.sleep(2)
                     continue
             
             # 尝试 claim
             if not self._claim_task(task, agent_name):
+                idle_rounds += 1
+                if idle_rounds >= max_idle_rounds:
+                    self._log(f"  ⏰ {agent_name}: 连续 {max_idle_rounds} 轮 claim 失败，退出")
+                    break
                 time.sleep(1)
                 continue
             
             self._log(f"  🔨 {agent_name} claim 了: {task.subject[:40]}")
+            idle_rounds = 0  # 成功 claim，重置 idle 计数
             
             # 3. 收集依赖任务的输出作为上下文
             all_tasks = self._load_tasks()
@@ -333,7 +347,8 @@ class TeamEngine:
                         model=self.config.model,
                     )
                     
-                    if "REJECT" in review_result.upper():
+                    from orchestrator import _parse_review_verdict
+                    if _parse_review_verdict(review_result) == "reject":
                         # 通知 lead
                         self.bus.send(Message.create(
                             channel="lead",

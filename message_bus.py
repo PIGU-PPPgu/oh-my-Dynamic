@@ -16,6 +16,7 @@ import os
 import time
 from datetime import datetime
 from pathlib import Path
+import threading
 from typing import Optional
 from dataclasses import dataclass, field, asdict
 
@@ -87,12 +88,13 @@ class MessageBus:
     def __init__(self, base_dir: str = ".orchestry/messages"):
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(parents=True, exist_ok=True)
+        self._lock = threading.Lock()
     
     def _inbox_path(self, agent_name: str) -> Path:
         return self.base_dir / f"{agent_name}.jsonl"
     
     def send(self, message: Message):
-        """发送消息——追加到目标 agent 的 inbox 文件"""
+        """发送消息——追加到目标 agent 的 inbox 文件（线程安全）"""
         targets = []
         
         if message.channel == "direct":
@@ -106,53 +108,55 @@ class MessageBus:
         elif message.channel == "lead":
             targets.append("lead")
         
-        for target in targets:
-            inbox = self._inbox_path(target)
-            # 确保目标 agent 的 inbox 存在
-            if not inbox.exists():
-                inbox.touch()
-            
-            with open(inbox, "a", encoding="utf-8") as f:
-                f.write(json.dumps(asdict(message), ensure_ascii=False) + "\n")
+        with self._lock:
+            for target in targets:
+                inbox = self._inbox_path(target)
+                # 确保目标 agent 的 inbox 存在
+                if not inbox.exists():
+                    inbox.touch()
+                
+                with open(inbox, "a", encoding="utf-8") as f:
+                    f.write(json.dumps(asdict(message), ensure_ascii=False) + "\n")
     
     def read_inbox(self, agent_name: str, mark_delivered: bool = True) -> list[Message]:
-        """读取 agent 的未读消息"""
+        """读取 agent 的未读消息（线程安全）"""
         inbox = self._inbox_path(agent_name)
         if not inbox.exists():
             return []
         
-        messages = []
-        all_lines = []
-        
-        with open(inbox, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    data = json.loads(line)
-                    msg = Message(**data)
-                    
-                    # 检查是否过期
-                    created_ts = datetime.fromisoformat(msg.created_at).timestamp()
-                    if time.time() - created_ts > msg.ttl_seconds:
-                        msg.status = "expired"
-                        continue  # 丢弃过期消息
-                    
-                    if msg.status == "pending":
-                        messages.append(msg)
-                        if mark_delivered:
-                            msg.status = "delivered"
-                    
-                    all_lines.append(json.dumps(asdict(msg), ensure_ascii=False))
-                except (json.JSONDecodeError, TypeError, ValueError):
-                    continue
-        
-        # 回写（更新 status）
-        if mark_delivered and messages:
-            with open(inbox, "w", encoding="utf-8") as f:
-                for line in all_lines:
-                    f.write(line + "\n")
+        with self._lock:
+            messages = []
+            all_lines = []
+            
+            with open(inbox, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                        msg = Message(**data)
+                        
+                        # 检查是否过期
+                        created_ts = datetime.fromisoformat(msg.created_at).timestamp()
+                        if time.time() - created_ts > msg.ttl_seconds:
+                            msg.status = "expired"
+                            continue  # 丢弃过期消息
+                        
+                        if msg.status == "pending":
+                            messages.append(msg)
+                            if mark_delivered:
+                                msg.status = "delivered"
+                        
+                        all_lines.append(json.dumps(asdict(msg), ensure_ascii=False))
+                    except (json.JSONDecodeError, TypeError, ValueError):
+                        continue
+            
+            # 回写（更新 status）
+            if mark_delivered and messages:
+                with open(inbox, "w", encoding="utf-8") as f:
+                    for line in all_lines:
+                        f.write(line + "\n")
         
         return messages
     

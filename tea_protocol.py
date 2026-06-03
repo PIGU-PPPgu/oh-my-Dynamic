@@ -331,7 +331,20 @@ class ToolRegistry:
         if tv is None:
             return {"success": False, "output": None, "error": f"工具 {tool_id} 无活跃版本", "execution_time": 0.0}
 
-        namespace: Dict = {}
+        # --- sandboxed exec namespace ---
+        _BLOCKED_BUILTINS = {
+            "exec", "eval", "compile", "__import__", "open",
+            "input", "breakpoint", "exit", "quit",
+        }
+        _safe_builtins = {
+            k: v for k, v in __builtins__.items()
+            if k not in _BLOCKED_BUILTINS
+        } if isinstance(__builtins__, dict) else {
+            k: getattr(__builtins__, k)
+            for k in dir(__builtins__)
+            if not k.startswith("_") and k not in _BLOCKED_BUILTINS
+        }
+        namespace: Dict = {"__builtins__": _safe_builtins}
         start = time.time()
         try:
             exec(tv.code, namespace)  # noqa: S102

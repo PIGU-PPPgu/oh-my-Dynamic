@@ -1,111 +1,312 @@
 """
-GLM-5.1 API 客户端 —— 统一的模型调用层。
+通用 LLM 客户端 —— 统一的模型调用层。
 
-支持：
-  - zhipuai SDK（推荐）
-  - OpenAI 兼容接口（备选）
+支持多种大模型后端：
+  - GLM（智谱 AI）：zhipuai SDK 或 OpenAI 兼容接口
+  - OpenAI（GPT-4o 等）：openai SDK
+  - Anthropic（Claude）：anthropic SDK
+  - Google（Gemini）：google-genai SDK
+  - 任意 OpenAI 兼容接口（DeepSeek、通义千问、Moonshot 等）
 
-GLM-5.1 的坑：
-  - tool_call 不稳定 → 这里只做纯文本调用
-  - 偶尔超时 → 内置重试
-  - 偶尔不听 system prompt → 在 user prompt 里重复关键指令
+配置方式（优先级从高到低）：
+  1. 代码中传 model="provider/model-name"
+  2. 环境变量 LLM_DEFAULT_MODEL
+  3. 默认 glm-5.1（向后兼容）
+
+支持的模型名格式：
+  - "glm-5.1" / "glm-4-flash"           → 智谱 GLM
+  - "gpt-4o" / "gpt-4o-mini"             → OpenAI
+  - "claude-sonnet-4-20250514"            → Anthropic Claude
+  - "gemini-2.5-pro" / "gemini-2.5-flash" → Google Gemini
+  - "deepseek-chat" / "qwen-plus" 等     → OpenAI 兼容接口
+  - "openrouter/xxx"                      → OpenRouter
 """
 
 from __future__ import annotations
 import os
-import json
 import time
 from typing import Optional
 
 
-# 默认配置（可被环境变量覆盖）
-DEFAULT_API_KEY = "f92944362576476ab66c424899617160.bUm4pMI38ZwPCDjW"
-DEFAULT_BASE_URL = "https://open.bigmodel.cn/api/coding/paas/v4"
+# --------------------------------------------------------------------------- #
+# Provider 自动检测
+# --------------------------------------------------------------------------- #
+
+def _detect_provider(model: str) -> str:
+    """根据模型名自动推断 provider"""
+    m = model.lower()
+    if m.startswith("glm-") or "chatglm" in m:
+        return "zhipu"
+    if m.startswith("gpt-") or m.startswith("o1-") or m.startswith("o3-") or m.startswith("o4-"):
+        return "openai"
+    if "claude" in m:
+        return "anthropic"
+    if m.startswith("gemini-"):
+        return "google"
+    if m.startswith("openrouter/"):
+        return "openrouter"
+    # 其他走 OpenAI 兼容接口
+    return "openai_compatible"
 
 
-def _get_api_key() -> str:
-    """从环境变量或默认配置获取 API Key"""
-    key = os.environ.get("ZHIPUAI_API_KEY") or os.environ.get("OPENAI_API_KEY") or DEFAULT_API_KEY
+def _get_env_key(provider: str) -> tuple[str, str]:
+    """返回 (环境变量名, 提示语)"""
+    mapping = {
+        "zhipu":     ("ZHIPUAI_API_KEY",       "export ZHIPUAI_API_KEY=your_key"),
+        "openai":    ("OPENAI_API_KEY",         "export OPENAI_API_KEY=your_key"),
+        "anthropic": ("ANTHROPIC_API_KEY",      "export ANTHROPIC_API_KEY=your_key"),
+        "google":    ("GOOGLE_API_KEY",         "export GOOGLE_API_KEY=your_key"),
+        "openrouter":("OPENROUTER_API_KEY",     "export OPENROUTER_API_KEY=your_key"),
+        "openai_compatible": ("OPENAI_API_KEY", "export OPENAI_API_KEY=your_key"),
+    }
+    return mapping.get(provider, ("OPENAI_API_KEY", "export OPENAI_API_KEY=your_key"))
+
+
+def _get_api_key(provider: str) -> str:
+    """根据 provider 获取对应 API Key"""
+    env_name, hint = _get_env_key(provider)
+    key = os.environ.get(env_name)
+    if not key:
+        # 回退尝试通用 key
+        key = os.environ.get("LLM_API_KEY")
     if not key:
         raise ValueError(
-            "请设置环境变量 ZHIPUAI_API_KEY 或 OPENAI_API_KEY\n"
-            "export ZHIPUAI_API_KEY=your_key_here"
+            f"模型 provider '{provider}' 需要 API Key。\n"
+            f"请设置环境变量: {hint}\n"
+            f"或设置通用 key: export LLM_API_KEY=your_key"
         )
     return key
+
+
+# --------------------------------------------------------------------------- #
+# 各 Provider 调用实现
+# --------------------------------------------------------------------------- #
+
+def _call_zhipu(api_key: str, model: str, system_prompt: str, user_prompt: str,
+                temperature: float, max_retries: int, retry_delay: float) -> str:
+    """智谱 GLM：优先 zhipuai SDK，回退 OpenAI 兼容"""
+    # 尝试 zhipuai SDK
+    try:
+        from zhipuai import ZhipuAI
+        client = ZhipuAI(api_key=api_key)
+        return _retry_call(
+            lambda: client.chat.completions.create(
+                model=model, temperature=temperature,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+            ),
+            max_retries=max_retries, retry_delay=retry_delay,
+        )
+    except ImportError:
+        pass
+
+    # 回退 OpenAI 兼容接口
+    base_url = os.environ.get("GLM_BASE_URL", "https://open.bigmodel.cn/api/coding/paas/v4")
+    return _call_openai_compatible(api_key, base_url, model, system_prompt,
+                                   user_prompt, temperature, max_retries, retry_delay)
+
+
+def _call_openai(api_key: str, model: str, system_prompt: str, user_prompt: str,
+                 temperature: float, max_retries: int, retry_delay: float) -> str:
+    """OpenAI GPT 系列"""
+    from openai import OpenAI
+    client = OpenAI(api_key=api_key)
+    return _retry_call(
+        lambda: client.chat.completions.create(
+            model=model, temperature=temperature,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        ),
+        max_retries=max_retries, retry_delay=retry_delay,
+    )
+
+
+def _call_anthropic(api_key: str, model: str, system_prompt: str, user_prompt: str,
+                    temperature: float, max_retries: int, retry_delay: float) -> str:
+    """Anthropic Claude 系列"""
+    from anthropic import Anthropic
+    client = Anthropic(api_key=api_key)
+    def _do():
+        resp = client.messages.create(
+            model=model,
+            max_tokens=4096,
+            temperature=temperature,
+            system=system_prompt,
+            messages=[{"role": "user", "content": user_prompt}],
+        )
+        # Anthropic 返回 content blocks
+        text = "".join(block.text for block in resp.content if block.type == "text")
+        if not text.strip():
+            raise ValueError("模型返回空响应")
+        return text.strip()
+    return _retry_fn(_do, max_retries=max_retries, retry_delay=retry_delay)
+
+
+def _call_google(api_key: str, model: str, system_prompt: str, user_prompt: str,
+                 temperature: float, max_retries: int, retry_delay: float) -> str:
+    """Google Gemini 系列"""
+    import google.generativeai as genai
+    genai.configure(api_key=api_key)
+    gemini_model = genai.GenerativeModel(
+        model_name=model,
+        system_instruction=system_prompt,
+    )
+    def _do():
+        resp = gemini_model.generate_content(
+            user_prompt,
+            generation_config=genai.types.GenerationConfig(temperature=temperature),
+        )
+        text = resp.text
+        if not text or not text.strip():
+            raise ValueError("模型返回空响应")
+        return text.strip()
+    return _retry_fn(_do, max_retries=max_retries, retry_delay=retry_delay)
+
+
+def _call_openrouter(api_key: str, model: str, system_prompt: str, user_prompt: str,
+                     temperature: float, max_retries: int, retry_delay: float) -> str:
+    """OpenRouter（去掉 openrouter/ 前缀后的模型名）"""
+    actual_model = model.removeprefix("openrouter/")
+    base_url = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+    return _call_openai_compatible(api_key, base_url, actual_model, system_prompt,
+                                   user_prompt, temperature, max_retries, retry_delay)
+
+
+def _call_openai_compatible(api_key: str, base_url: str, model: str,
+                            system_prompt: str, user_prompt: str,
+                            temperature: float, max_retries: int, retry_delay: float) -> str:
+    """OpenAI 兼容接口（DeepSeek、通义千问、Moonshot 等）"""
+    from openai import OpenAI
+    client = OpenAI(api_key=api_key, base_url=base_url)
+    return _retry_call(
+        lambda: client.chat.completions.create(
+            model=model, temperature=temperature,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+        ),
+        max_retries=max_retries, retry_delay=retry_delay,
+    )
+
+
+# --------------------------------------------------------------------------- #
+# 重试逻辑
+# --------------------------------------------------------------------------- #
+
+def _extract_content(response) -> str:
+    """从 OpenAI 格式 response 提取文本"""
+    content = response.choices[0].message.content
+    if content and content.strip():
+        return content.strip()
+    raise ValueError("模型返回空响应")
+
+
+def _retry_call(fn, max_retries: int = 3, retry_delay: float = 5.0) -> str:
+    """重试 OpenAI 格式的 chat.completions.create 调用"""
+    last_exc: Exception = RuntimeError("所有重试失败")
+    for attempt in range(max_retries):
+        try:
+            return _extract_content(fn())
+        except Exception as e:
+            last_exc = e
+            if attempt < max_retries - 1:
+                print(f"  [retry {attempt+1}/{max_retries}] {e}")
+                time.sleep(retry_delay * (attempt + 1))
+    raise last_exc
+
+
+def _retry_fn(fn, max_retries: int = 3, retry_delay: float = 5.0) -> str:
+    """重试任意函数调用"""
+    last_exc: Exception = RuntimeError("所有重试失败")
+    for attempt in range(max_retries):
+        try:
+            return fn()
+        except Exception as e:
+            last_exc = e
+            if attempt < max_retries - 1:
+                print(f"  [retry {attempt+1}/{max_retries}] {e}")
+                time.sleep(retry_delay * (attempt + 1))
+    raise last_exc
+
+
+# --------------------------------------------------------------------------- #
+# 主入口（向后兼容 call_glm）
+# --------------------------------------------------------------------------- #
+
+# Provider 调用分发在 call_glm() 中通过 if/elif 实现
+# （因为 _call_openai_compatible 需要 base_url 参数，不适合 dict dispatch）
 
 
 def call_glm(
     system_prompt: str,
     user_prompt: str,
-    model: str = "glm-5.1",
+    model: str = "",
     temperature: float = 0.3,
     max_retries: int = 3,
     retry_delay: float = 5.0,
 ) -> str:
     """
-    调用 GLM-5.1，返回纯文本响应。
-    
-    不依赖 tool_call，纯 prompt → response。
+    统一的 LLM 调用入口（向后兼容 call_glm）。
+
+    根据 model 名称自动选择 provider 和 API Key。
+
+    Args:
+        system_prompt: 系统提示词
+        user_prompt: 用户消息
+        model: 模型名称（默认从 LLM_DEFAULT_MODEL 或 glm-5.1）
+        temperature: 温度
+        max_retries: 最大重试次数
+        retry_delay: 重试间隔基数（实际为 delay * attempt）
+
+    Returns:
+        模型返回的文本
     """
-    # 尝试 zhipuai SDK
-    try:
-        from zhipuai import ZhipuAI
-        client = ZhipuAI(api_key=_get_api_key())
-        
-        for attempt in range(max_retries):
-            try:
-                response = client.chat.completions.create(
-                    model=model,
-                    temperature=temperature,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                )
-                content = response.choices[0].message.content
-                if content and content.strip():
-                    return content.strip()
-                raise ValueError("模型返回空响应")
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    print(f"  [retry {attempt+1}/{max_retries}] {e}")
-                    time.sleep(retry_delay * (attempt + 1))
-                else:
-                    raise
-    except ImportError:
-        pass
-    
-    # 备选：OpenAI 兼容接口
-    try:
-        from openai import OpenAI
-        base_url = os.environ.get("GLM_BASE_URL", DEFAULT_BASE_URL)
-        client = OpenAI(api_key=_get_api_key(), base_url=base_url)
-        
-        for attempt in range(max_retries):
-            try:
-                response = client.chat.completions.create(
-                    model=model,
-                    temperature=temperature,
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt},
-                    ],
-                )
-                content = response.choices[0].message.content
-                if content and content.strip():
-                    return content.strip()
-                raise ValueError("模型返回空响应")
-            except Exception as e:
-                if attempt < max_retries - 1:
-                    print(f"  [retry {attempt+1}/{max_retries}] {e}")
-                    time.sleep(retry_delay * (attempt + 1))
-                else:
-                    raise
-    except ImportError:
-        pass
-    
-    raise RuntimeError(
-        "无法调用 GLM-5.1。请安装 zhipuai 或 openai SDK：\n"
-        "  pip install zhipuai\n"
-        "  或 pip install openai"
-    )
+    # 解析实际 model
+    if not model:
+        model = os.environ.get("LLM_DEFAULT_MODEL", "glm-5.1")
+
+    provider = _detect_provider(model)
+    api_key = _get_api_key(provider)
+
+    # 分发到对应 provider
+    if provider == "zhipu":
+        return _call_zhipu(api_key, model, system_prompt, user_prompt,
+                           temperature, max_retries, retry_delay)
+    elif provider == "openai":
+        return _call_openai(api_key, model, system_prompt, user_prompt,
+                            temperature, max_retries, retry_delay)
+    elif provider == "anthropic":
+        return _call_anthropic(api_key, model, system_prompt, user_prompt,
+                               temperature, max_retries, retry_delay)
+    elif provider == "google":
+        return _call_google(api_key, model, system_prompt, user_prompt,
+                            temperature, max_retries, retry_delay)
+    elif provider == "openrouter":
+        return _call_openrouter(api_key, model, system_prompt, user_prompt,
+                                temperature, max_retries, retry_delay)
+    else:
+        # openai_compatible：需要额外的 base_url
+        base_url = os.environ.get("LLM_BASE_URL", "https://api.openai.com/v1")
+        return _call_openai_compatible(api_key, base_url, model, system_prompt,
+                                       user_prompt, temperature, max_retries, retry_delay)
+
+
+# --------------------------------------------------------------------------- #
+# 便捷：列出可用 provider
+# --------------------------------------------------------------------------- #
+
+def list_providers() -> dict:
+    """返回所有支持的 provider 及其环境变量"""
+    return {
+        "zhipu":     {"sdk": "zhipuai",     "env": "ZHIPUAI_API_KEY",    "models": ["glm-5.1", "glm-4-flash", "glm-4-plus"]},
+        "openai":    {"sdk": "openai",       "env": "OPENAI_API_KEY",     "models": ["gpt-4o", "gpt-4o-mini", "o3-mini"]},
+        "anthropic": {"sdk": "anthropic",    "env": "ANTHROPIC_API_KEY",  "models": ["claude-sonnet-4-20250514", "claude-haiku-4-20250414"]},
+        "google":    {"sdk": "google-generativeai", "env": "GOOGLE_API_KEY", "models": ["gemini-2.5-pro", "gemini-2.5-flash"]},
+        "openrouter":{"sdk": "openai",       "env": "OPENROUTER_API_KEY", "models": ["openrouter/anthropic/claude-sonnet-4", "openrouter/google/gemini-2.5-pro"]},
+        "compatible":{"sdk": "openai",       "env": "OPENAI_API_KEY",     "models": ["deepseek-chat", "qwen-plus", "moonshot-v1"]},
+    }
