@@ -16,7 +16,7 @@ When triggered inside Codex App, this skill must work immediately after installa
 - Do **not** require provider API keys or `.env` configuration for App-native subagent execution.
 - Do **not** tell the user to use Codex CLI.
 - Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
-- Coordinate subagent collaboration through explicit messages, artifacts, handoffs, review requests, and auditable synthesis. Prefer parent-orchestrated A2A-style exchange over hidden peer-to-peer communication.
+- Coordinate subagent collaboration through registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and auditable synthesis. Prefer parent-orchestrated A2A-style exchange over hidden peer-to-peer communication.
 - Use `broker_gateway.py` only when the user asks for a local HTTP/SSE transport surface or external tool integration; ordinary Codex App usage should stay inside the App-native subagent path.
 - If native Codex subagent runtime/tools are unavailable, fall back to zero-config in-chat workflow execution using the current Codex App assistant/model.
 
@@ -31,7 +31,7 @@ present the multi-agent workflow directly in the response:
 1. Decompose the request into 3-7 tasks.
 2. Assign roles such as planner, researcher, builder, reviewer, synthesizer.
 3. Mark dependencies and identify which tasks can run in parallel.
-4. Track worker messages, artifacts, handoffs, and review requests explicitly.
+4. Track registered workers, messages, artifacts, handoffs, review requests/responses, and inboxes explicitly.
 5. Produce worker results for each task.
 6. Review the combined result for gaps.
 7. Replan once if needed.

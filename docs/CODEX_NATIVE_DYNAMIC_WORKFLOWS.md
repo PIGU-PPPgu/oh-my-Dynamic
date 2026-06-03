@@ -112,6 +112,8 @@ From a plugin/skill user's perspective, this path should be API-key free.
 - review request / review response events
 - append-only audit trace exportable as an A2A-style task snapshot
 - parent orchestrator policy over what can be shared, reviewed, or forwarded
+- policy checks for registered agents, artifact references, content type, and
+  message/artifact size limits
 
 ## How oh-my-Dynamic Maps to This
 
@@ -151,6 +153,11 @@ auditable. Local isolated workers can write the same broker events during
 `native_runtime.py` execution. Direct peer-to-peer subagent messaging is a
 runtime concern; the project contract prefers controlled A2A-style collaboration
 over hidden side channels.
+
+`BrokerPolicy` makes that control concrete: events must come from registered
+agents unless they are system agents, direct receivers must be registered,
+artifact references must exist, and event/artifact payloads must stay within
+declared limits.
 
 `broker_gateway.py` exposes that same broker over a local HTTP/SSE surface:
 Agent Card discovery, task creation, task snapshots, event streams, messages,
@@ -220,11 +227,11 @@ Available now:
 - Local `native_runtime.py` prototype for sandboxed fan-out with 10/50/100+
   isolated workers, per-worker context, sandbox directories, tool grants, trace,
   and reducer synthesis.
-- Local `agent_broker.py` for A2A-style messages, artifacts, task handoffs,
-  review requests, and audit trace snapshots.
+- Local `agent_broker.py` for policy-governed A2A-style messages, artifacts,
+  task handoffs, review requests/responses, inboxes, and audit trace snapshots.
 - Local `broker_gateway.py` HTTP/SSE gateway for Agent Card discovery, task
-  snapshots, event streams, messages, artifacts, handoffs, review requests, and
-  completion.
+  snapshots, event streams, agent registration/inbox, messages, artifacts,
+  handoffs, review requests/responses, and completion.
 - `native_runtime.py` can write worker outputs, final answers, and completion
   events into `AgentBroker`.
 - Mock demos that run without API keys.

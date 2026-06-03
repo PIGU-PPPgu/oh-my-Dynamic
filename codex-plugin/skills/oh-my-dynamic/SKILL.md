@@ -18,7 +18,8 @@ below. The project also includes `native_runtime.py`, a local executable
 prototype that can fan out many isolated workers with separate sandbox
 directories, per-worker context, tool grants, trace capture, and reducer
 synthesis. `agent_broker.py` provides the shared collaboration contract:
-messages, artifacts, task handoffs, review requests, and audit traces.
+policy-governed messages, artifacts, task handoffs, review requests/responses,
+inboxes, and audit traces.
 `broker_gateway.py` exposes that contract as a local HTTP/SSE gateway when a
 transport surface is needed.
 
@@ -34,7 +35,7 @@ When this skill is triggered inside Codex App, the default App-mode priority is:
 1. If Codex subagent runtime/tools are available and the user asks for dynamic workflows, real subagents, parallel agents, or equivalent multi-agent execution, spawn real Codex internal subagents.
 2. Do **not** set a model override for spawned subagents. Let them inherit the current Codex App internal LLM/runtime.
 3. Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key for App-native subagent execution.
-4. Coordinate subagents through the parent orchestrator and the AgentBroker contract: explicit messages, artifacts, handoffs, review requests, and traceable synthesis. Do not rely on hidden peer-to-peer side channels.
+4. Coordinate subagents through the parent orchestrator and the AgentBroker contract: registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and traceable synthesis. Do not rely on hidden peer-to-peer side channels.
 5. If native Codex subagent runtime/tools are unavailable, use zero-config in-chat workflow execution as the fallback.
 
 In App fallback/zero-config mode:
@@ -92,7 +93,7 @@ Pipeline: Query → Decompose → DAG Build → Execute → Stop Check → Repla
 | `dynamic_replan.py` | Result-preserving replan (keeps completed work) |
 | `tea_protocol.py` | Tool Evolution & Adaptation (runtime tool creation + versioning) |
 | `worktree.py` | Git worktree isolation per agent |
-| `agent_broker.py` | A2A-style messages, artifacts, task handoff, review requests, audit trace |
+| `agent_broker.py` | A2A-style policy, messages, artifacts, task handoff, review requests/responses, inboxes, audit trace |
 | `broker_gateway.py` | Local HTTP/SSE gateway for AgentBroker task snapshots and events |
 | `visualize.py` | Generate interactive HTML dashboard |
 | `test_suite.py` | Unit, integration, security, provider-routing, and stress tests |

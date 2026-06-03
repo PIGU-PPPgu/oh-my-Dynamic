@@ -89,6 +89,29 @@ class BrokerEvent:
             self.created_at = _now_iso()
 
 
+@dataclass
+class BrokerPolicy:
+    """Governance policy for controlled broker collaboration."""
+
+    require_registered_agents: bool = True
+    system_agents: List[str] = field(default_factory=lambda: ["broker", "orchestrator", "user"])
+    allowed_event_kinds: List[str] = field(default_factory=lambda: [
+        "message",
+        "handoff",
+        "review_request",
+        "review_response",
+        "trace",
+    ])
+    max_subject_chars: int = 500
+    max_body_chars: int = 100_000
+    max_artifact_chars: int = 1_000_000
+    allowed_content_types: List[str] = field(default_factory=lambda: [
+        "text/plain",
+        "application/json",
+        "text/markdown",
+    ])
+
+
 class AgentBroker:
     """
     Filesystem-backed broker for controlled A2A-style agent collaboration.
@@ -98,13 +121,14 @@ class AgentBroker:
     HTTP/SSE A2A gateway without changing the workflow contract.
     """
 
-    def __init__(self, base_dir: str = ".orchestry/agent_broker") -> None:
+    def __init__(self, base_dir: str = ".orchestry/agent_broker", policy: Optional[BrokerPolicy] = None) -> None:
         self.base_dir = Path(base_dir)
         self.inbox_dir = self.base_dir / "inbox"
         self.artifact_dir = self.base_dir / "artifact_blobs"
         self.agents_path = self.base_dir / "agents.json"
         self.events_path = self.base_dir / "events.jsonl"
         self.artifacts_path = self.base_dir / "artifacts.jsonl"
+        self.policy = policy or BrokerPolicy()
         self._lock = threading.Lock()
 
         self.inbox_dir.mkdir(parents=True, exist_ok=True)
@@ -123,6 +147,8 @@ class AgentBroker:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> BrokerAgent:
         """Register an agent and create its inbox."""
+        if not agent_id:
+            raise ValueError("agent_id is required")
         agent = BrokerAgent(
             id=agent_id,
             role=role,
@@ -155,6 +181,12 @@ class AgentBroker:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> BrokerArtifact:
         """Store an artifact and return its durable reference."""
+        self._validate_agent(producer, "producer")
+        if len(content) > self.policy.max_artifact_chars:
+            raise ValueError("artifact content exceeds broker policy limit")
+        if content_type not in self.policy.allowed_content_types:
+            raise ValueError(f"content_type not allowed by broker policy: {content_type}")
+
         artifact = BrokerArtifact(
             id="",
             producer=producer,
@@ -275,6 +307,39 @@ class AgentBroker:
             )
         )
 
+    def respond_review(
+        self,
+        from_agent: str,
+        to_agent: str,
+        task_id: str,
+        subject: str,
+        body: str,
+        verdict: str,
+        artifact_ids: Optional[List[str]] = None,
+        thread_id: str = "default",
+        parent_id: str = "",
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> BrokerEvent:
+        """Respond to a review request with an explicit verdict."""
+        normalized = verdict.lower().strip()
+        if normalized not in ("approved", "changes_requested", "rejected", "commented"):
+            raise ValueError("review verdict must be approved, changes_requested, rejected, or commented")
+        return self._emit(
+            BrokerEvent(
+                id="",
+                kind="review_response",
+                from_agent=from_agent,
+                to_agent=to_agent,
+                subject=subject,
+                body=body,
+                thread_id=thread_id,
+                task_id=task_id,
+                artifact_ids=artifact_ids or [],
+                parent_id=parent_id,
+                metadata={"verdict": normalized, **(metadata or {})},
+            )
+        )
+
     def trace(
         self,
         from_agent: str,
@@ -381,12 +446,49 @@ class AgentBroker:
 
     def _emit(self, event: BrokerEvent, deliver: bool = True) -> BrokerEvent:
         with self._lock:
+            self._validate_event_unlocked(event)
             self._append_jsonl_unlocked(self.events_path, asdict(event))
             if deliver:
                 targets = self._resolve_targets_unlocked(event)
                 for target in targets:
                     self._append_jsonl_unlocked(self._inbox_path(target), asdict(event))
         return event
+
+    def _validate_event_unlocked(self, event: BrokerEvent) -> None:
+        if event.kind not in self.policy.allowed_event_kinds:
+            raise ValueError(f"event kind not allowed by broker policy: {event.kind}")
+        if len(event.subject) > self.policy.max_subject_chars:
+            raise ValueError("event subject exceeds broker policy limit")
+        if len(event.body) > self.policy.max_body_chars:
+            raise ValueError("event body exceeds broker policy limit")
+        self._validate_agent_unlocked(event.from_agent, "from_agent")
+        if event.to_agent:
+            self._validate_agent_unlocked(event.to_agent, "to_agent")
+        known_artifacts = self._artifact_ids_unlocked()
+        missing = [artifact_id for artifact_id in event.artifact_ids if artifact_id not in known_artifacts]
+        if missing:
+            raise ValueError(f"unknown artifact ids: {', '.join(missing)}")
+
+    def _validate_agent(self, agent_id: str, field_name: str) -> None:
+        with self._lock:
+            self._validate_agent_unlocked(agent_id, field_name)
+
+    def _validate_agent_unlocked(self, agent_id: str, field_name: str) -> None:
+        if not agent_id:
+            raise ValueError(f"{field_name} is required")
+        if not self.policy.require_registered_agents:
+            return
+        if agent_id in self.policy.system_agents:
+            return
+        if agent_id not in self._load_agents_unlocked():
+            raise ValueError(f"{field_name} is not registered: {agent_id}")
+
+    def _artifact_ids_unlocked(self) -> set[str]:
+        return {
+            record.get("id", "")
+            for record in self._read_jsonl_unlocked(self.artifacts_path)
+            if record.get("id")
+        }
 
     def _resolve_targets_unlocked(self, event: BrokerEvent) -> List[str]:
         if event.to_agent:

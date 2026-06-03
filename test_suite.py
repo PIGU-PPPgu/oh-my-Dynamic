@@ -393,6 +393,33 @@ def test_agent_broker_collaboration():
         assert snapshot["history"]
         assert snapshot["artifacts"][0]["artifactId"] == artifact.id
         assert broker.get_artifact(artifact.id).content.startswith("Build the broker")
+
+        review_response = broker.respond_review(
+            "reviewer",
+            "builder",
+            "task-1",
+            "Broker review",
+            "Approved with trace coverage.",
+            "approved",
+            artifact_ids=[artifact.id],
+            thread_id="thread-1",
+        )
+        assert review_response.kind == "review_response"
+        assert review_response.metadata["verdict"] == "approved"
+
+        try:
+            broker.send_message("unknown", "builder", "bad", "should fail")
+        except ValueError as exc:
+            assert "not registered" in str(exc)
+        else:
+            raise AssertionError("unregistered sender should be rejected")
+
+        try:
+            broker.create_handoff("planner", "builder", "task-2", "bad artifact", "", artifact_ids=["missing"])
+        except ValueError as exc:
+            assert "unknown artifact" in str(exc)
+        else:
+            raise AssertionError("unknown artifact references should be rejected")
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -439,6 +466,18 @@ def test_broker_gateway_http_lifecycle():
         task_id = task["id"]
         assert task["status"]["state"] == "working"
 
+        agents = [
+            request("POST", "/agents", {"id": "planner", "role": "planner", "capabilities": ["plan"]}),
+            request("POST", "/agents", {"id": "builder", "role": "builder", "capabilities": ["build"]}),
+            request("POST", "/agents", {"id": "reviewer", "role": "reviewer", "capabilities": ["review"]}),
+        ]
+        assert {agent["id"] for agent in agents} == {"planner", "builder", "reviewer"}
+
+        all_agents = request("GET", "/agents")
+        assert {"user", "orchestrator", "planner", "builder", "reviewer"}.issubset(
+            {agent["id"] for agent in all_agents["agents"]}
+        )
+
         artifact = request("POST", f"/tasks/{task_id}/artifacts", {
             "producer": "planner",
             "name": "plan",
@@ -467,6 +506,19 @@ def test_broker_gateway_http_lifecycle():
         })
         assert review["kind"] == "review_request"
 
+        response = request("POST", f"/tasks/{task_id}/review-responses", {
+            "from": "reviewer",
+            "to": "builder",
+            "task_id": "build-broker",
+            "subject": "Gateway review response",
+            "body": "Approved.",
+            "verdict": "approved",
+            "artifact_ids": [artifact["id"]],
+            "parent_id": review["id"],
+        })
+        assert response["kind"] == "review_response"
+        assert response["metadata"]["verdict"] == "approved"
+
         message = request("POST", f"/tasks/{task_id}/messages", {
             "from": "reviewer",
             "to": "orchestrator",
@@ -492,6 +544,22 @@ def test_broker_gateway_http_lifecycle():
         history_kinds = [item["metadata"]["kind"] for item in refreshed["history"]]
         assert "trace" in history_kinds
         assert "handoff" in history_kinds
+        assert "review_response" in history_kinds
+
+        inbox = request("GET", "/agents/builder/inbox?mark_delivered=0")
+        assert {"handoff", "review_response"}.issubset({event["kind"] for event in inbox["events"]})
+
+        try:
+            request("POST", f"/tasks/{task_id}/messages", {
+                "from": "unknown",
+                "to": "orchestrator",
+                "subject": "bad",
+                "body": "bad",
+            })
+        except Exception as exc:
+            assert "HTTP Error 400" in str(exc)
+        else:
+            raise AssertionError("gateway should reject unregistered senders")
     finally:
         if server is not None:
             server.shutdown()

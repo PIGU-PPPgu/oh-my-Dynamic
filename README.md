@@ -12,7 +12,7 @@
 
 - 🎯 **明确目标**：不是只做 prompt 技巧，而是为 Codex Native Dynamic Workflows 提供可验证原型和接口提案
 - 🧠 **Codex App internal subagent backend**：在 Codex App 暴露 subagent tools/runtime 时，默认使用真实 Codex subagents，并继承当前 App 内部 LLM；无需 API key
-- 📨 **A2A / Agent Broker**：受控 message、artifact、handoff、review request 和 audit trace，让 subagents 不只是并行跑，还能有证据链地协作
+- 📨 **A2A / Agent Broker**：受控 message、artifact、handoff、review request/response 和 audit trace，让 subagents 不只是并行跑，还能有证据链地协作
 - 🤖 **多模型支持**：GLM、OpenAI GPT、Claude、Gemini、DeepSeek、通义千问/Qwen、Moonshot/Kimi、硅基流动…… 自动识别模型名选择对应 provider
 - 🔗 **串行编排**（Orchestrator）：Planner → Builder → Reviewer 流水线，含自动重试和 review 打回
 - 👥 **并行团队**（TeamEngine）：多 agent 并行抢任务，消息总线通信
@@ -52,8 +52,8 @@
 | `dynamic_replan.py` | 动态重规划（运行中调整策略） |
 | `tea_protocol.py` | TEA 工具进化协议（LLM 驱动的工具改进） |
 | `message_bus.py` | Agent 间消息总线（文件系统队列，线程安全） |
-| `agent_broker.py` | A2A-style 协作 broker：messages、artifacts、handoff、review request、audit trace |
-| `broker_gateway.py` | 本地 HTTP/SSE gateway：Agent Card、task snapshot、events、messages、artifacts、handoffs、review requests |
+| `agent_broker.py` | A2A-style 协作 broker：policy、messages、artifacts、handoff、review request/response、audit trace |
+| `broker_gateway.py` | 本地 HTTP/SSE gateway：Agent Card、agents/inbox、task snapshot、events、messages、artifacts、handoffs、review requests/responses |
 | `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
 | `pipeline.py` | 端到端 Pipeline（组合所有组件） |
 | `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
@@ -279,9 +279,10 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 
 - MCP-style：`mcp_tools()` 暴露 `oh_my_dynamic.run_workflow` 工具描述；`run_mcp_tool()` 可执行 workflow 并返回 text + structured content。
 - A2A-style：`a2a_agent_card()` 返回 Agent Card；`A2ATaskStore` 提供轻量 Task submit/get 结构，可用于后续 HTTP、SSE 或网关封装。
-- AgentBroker：`AgentBroker` 可注册 agents，发送 direct/broadcast message，发布 artifacts，创建 task handoff，发起 review request，并导出 A2A-style task snapshot。
+- AgentBroker：`AgentBroker` 可注册 agents，发送 direct/broadcast message，发布 artifacts，创建 task handoff，发起 review request/response，并导出 A2A-style task snapshot。
+- BrokerPolicy：默认要求 agent 注册，校验 sender/receiver、artifact 引用、消息/工件大小和 content type，避免无约束上下文串流。
 - Native runtime 集成：`SandboxedFanoutRuntime(..., broker=AgentBroker(...))` 会把 worker started/completed、worker artifacts、final answer 和 workflow completion 写入 broker trace。
-- Gateway：`python broker_gateway.py --host 127.0.0.1 --port 8765` 会提供 `/.well-known/agent.json`、`POST /tasks`、`GET /tasks/{id}`、`GET /tasks/{id}/events`、`POST /tasks/{id}/messages`、`/artifacts`、`/handoffs`、`/review-requests` 和 `/complete`。
+- Gateway：`python broker_gateway.py --host 127.0.0.1 --port 8765` 会提供 `/.well-known/agent.json`、`GET/POST /agents`、`GET /agents/{id}/inbox`、`POST /tasks`、`GET /tasks/{id}`、`GET /tasks/{id}/events`、`POST /tasks/{id}/messages`、`/artifacts`、`/handoffs`、`/review-requests`、`/review-responses` 和 `/complete`。
 
 当前实现已包含本地 HTTP/SSE gateway，但还不是托管服务或官方 App-native runtime。这样可以先稳定核心协作语义，再按部署目标接入 MCP stdio、远程 HTTP、SSE 或托管网关。
 

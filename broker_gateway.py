@@ -47,12 +47,34 @@ class BrokerGateway:
                 "description": "Coordinate agents through messages, artifacts, handoffs, review requests, and audit traces.",
                 "tags": ["a2a", "agent-broker", "artifacts", "audit-trace"],
                 "examples": [
+                    "POST /agents to register an agent.",
                     "POST /tasks to create a broker thread.",
                     "POST /tasks/{id}/handoffs to hand work from one agent to another.",
                 ],
             }
         )
         return card
+
+    def register_agent(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        agent = self.broker.register_agent(
+            str(payload.get("id", payload.get("agent_id", ""))),
+            str(payload.get("role", "agent")),
+            capabilities=list(payload.get("capabilities", [])),
+            metadata=dict(payload.get("metadata", {})),
+        )
+        return asdict(agent)
+
+    def list_agents(self) -> Dict[str, Any]:
+        return {"agents": [asdict(agent) for agent in self.broker.list_agents()]}
+
+    def read_inbox(self, agent_id: str, mark_delivered: bool = True) -> Dict[str, Any]:
+        return {
+            "agentId": agent_id,
+            "events": [
+                asdict(event)
+                for event in self.broker.read_inbox(agent_id, mark_delivered=mark_delivered)
+            ],
+        }
 
     def create_task(self, message: str, metadata: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         if not message.strip():
@@ -144,6 +166,21 @@ class BrokerGateway:
         )
         return asdict(event)
 
+    def respond_review(self, thread_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        event = self.broker.respond_review(
+            str(payload.get("from", payload.get("from_agent", payload.get("reviewer", "reviewer")))),
+            str(payload.get("to", payload.get("to_agent", "orchestrator"))),
+            str(payload.get("task_id", thread_id)),
+            str(payload.get("subject", "review_response")),
+            str(payload.get("body", "")),
+            str(payload.get("verdict", "commented")),
+            artifact_ids=list(payload.get("artifact_ids", [])),
+            thread_id=thread_id,
+            parent_id=str(payload.get("parent_id", "")),
+            metadata=dict(payload.get("metadata", {})),
+        )
+        return asdict(event)
+
     def complete_task(self, thread_id: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         payload = payload or {}
         artifact_ids = list(payload.get("artifact_ids", []))
@@ -181,6 +218,13 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
                 return
 
             parts = [part for part in path.split("/") if part]
+            if path == "/agents":
+                self._send_json(200, self.gateway.list_agents())
+                return
+            if len(parts) == 3 and parts[0] == "agents" and parts[2] == "inbox":
+                mark_delivered = parse_qs(parsed.query).get("mark_delivered", ["1"])[0] != "0"
+                self._send_json(200, self.gateway.read_inbox(parts[1], mark_delivered=mark_delivered))
+                return
             if len(parts) == 2 and parts[0] == "tasks":
                 self._send_json(200, self.gateway.get_task(parts[1]))
                 return
@@ -200,6 +244,10 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
             path = (urlparse(self.path).path.rstrip("/") or "/")
             payload = self._read_json()
             parts = [part for part in path.split("/") if part]
+
+            if path == "/agents":
+                self._send_json(201, self.gateway.register_agent(payload))
+                return
 
             if path == "/tasks":
                 message = str(payload.get("message", payload.get("query", "")))
@@ -228,6 +276,8 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
             return 201, self.gateway.create_handoff(thread_id, payload)
         if action == "review-requests":
             return 201, self.gateway.request_review(thread_id, payload)
+        if action == "review-responses":
+            return 201, self.gateway.respond_review(thread_id, payload)
         if action == "complete":
             return 200, self.gateway.complete_task(thread_id, payload)
         return 404, {"error": "not found"}
