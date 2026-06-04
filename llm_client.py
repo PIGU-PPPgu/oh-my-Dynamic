@@ -16,9 +16,9 @@
 
 支持的模型名格式：
   - "glm-5.1" / "glm-4-flash"           → 智谱 GLM
-  - "gpt-5.2" / "gpt-5-mini"              → OpenAI
-  - "claude-sonnet-4-6"                   → Anthropic Claude
-  - "gemini-3.5-flash"                    → Google Gemini
+  - "gpt-*" / "o*"                        → OpenAI
+  - "claude-*"                            → Anthropic Claude
+  - "gemini-*"                            → Google Gemini
   - "deepseek-chat" / "qwen-plus" 等     → 中国 OpenAI 兼容接口
   - "openrouter/xxx"                      → OpenRouter
 """
@@ -378,10 +378,10 @@ def list_providers() -> dict:
     """返回所有支持的 provider 及其环境变量"""
     return {
         "zhipu":     {"sdk": "zhipuai",     "env": "ZHIPUAI_API_KEY",    "models": ["glm-5.1", "glm-4-flash", "glm-4-plus"]},
-        "openai":    {"sdk": "openai",       "env": "OPENAI_API_KEY",     "models": ["gpt-5.2", "gpt-5.2-pro", "gpt-5-mini", "gpt-5-nano"]},
-        "anthropic": {"sdk": "anthropic",    "env": "ANTHROPIC_API_KEY",  "models": ["claude-opus-4-8", "claude-sonnet-4-6", "claude-haiku-4-5"]},
-        "google":    {"sdk": "google-generativeai", "env": "GOOGLE_API_KEY", "models": ["gemini-3.5-flash", "gemini-3.1-pro-preview", "gemini-flash-latest"]},
-        "openrouter":{"sdk": "openai",       "env": "OPENROUTER_API_KEY", "models": ["openrouter/openai/gpt-5.2", "openrouter/anthropic/claude-sonnet-4.6", "openrouter/google/gemini-3.5-flash"]},
+        "openai":    {"sdk": "openai",       "env": "OPENAI_API_KEY",     "models": ["gpt-4o", "gpt-4o-mini", "o3-mini"]},
+        "anthropic": {"sdk": "anthropic",    "env": "ANTHROPIC_API_KEY",  "models": ["claude-sonnet-4-20250514", "claude-3-5-haiku-20241022"]},
+        "google":    {"sdk": "google-generativeai", "env": "GOOGLE_API_KEY", "models": ["gemini-2.5-pro", "gemini-2.5-flash"]},
+        "openrouter":{"sdk": "openai",       "env": "OPENROUTER_API_KEY", "models": ["openrouter/openai/gpt-4o", "openrouter/anthropic/claude-sonnet-4", "openrouter/google/gemini-2.5-flash"]},
         "deepseek":  {"sdk": "openai",       "env": "DEEPSEEK_API_KEY",   "models": ["deepseek-chat", "deepseek-reasoner"]},
         "qwen":      {"sdk": "openai",       "env": "DASHSCOPE_API_KEY",  "models": ["qwen-plus", "qwen-max", "qwen-turbo"]},
         "moonshot":  {"sdk": "openai",       "env": "MOONSHOT_API_KEY",   "models": ["moonshot-v1-8k", "moonshot-v1-32k", "kimi-k2"]},

@@ -51,6 +51,8 @@ class CodexAppDispatchPlan:
     agents: List[CodexSubagentSpec]
     broker_dir: str = ".orchestry/agent_broker"
     max_parallel: int = 8
+    topological_layers: List[List[str]] = field(default_factory=list)
+    ready_batches: List[List[str]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -58,6 +60,8 @@ class CodexAppDispatchPlan:
             "goal": self.goal,
             "broker_dir": self.broker_dir,
             "max_parallel": self.max_parallel,
+            "topological_layers": self.topological_layers,
+            "ready_batches": self.ready_batches,
             "agents": [asdict(agent) for agent in self.agents],
         }
 
@@ -140,20 +144,75 @@ def create_dispatch_plan(
         raise ValueError("goal is required")
     if not agents:
         raise ValueError("at least one CodexSubagentSpec is required")
-    seen = set()
-    for agent in agents:
-        if not agent.id:
-            raise ValueError("agent id is required")
-        if agent.id in seen:
-            raise ValueError(f"duplicate agent id: {agent.id}")
-        seen.add(agent.id)
+    if max_parallel < 1:
+        raise ValueError("max_parallel must be at least 1")
+    layers = _topological_agent_layers(agents)
+    ready_batches = _ready_batches(layers, max_parallel)
     return CodexAppDispatchPlan(
         run_id=run_id or _run_id(),
         goal=goal,
         agents=agents,
         broker_dir=broker_dir,
         max_parallel=max_parallel,
+        topological_layers=layers,
+        ready_batches=ready_batches,
     )
+
+
+def _topological_agent_layers(agents: List[CodexSubagentSpec]) -> List[List[str]]:
+    specs_by_id: Dict[str, CodexSubagentSpec] = {}
+    for spec in agents:
+        if not spec.id:
+            raise ValueError("agent id is required")
+        if spec.id in specs_by_id:
+            raise ValueError(f"duplicate agent id: {spec.id}")
+        specs_by_id[spec.id] = spec
+
+    order = {spec.id: index for index, spec in enumerate(agents)}
+    dependents: Dict[str, List[str]] = {spec.id: [] for spec in agents}
+    indegree: Dict[str, int] = {spec.id: 0 for spec in agents}
+    for spec in agents:
+        seen_deps = set()
+        for dep_id in spec.dependencies:
+            if not dep_id:
+                raise ValueError(f"agent {spec.id} has an empty dependency id")
+            if dep_id in seen_deps:
+                raise ValueError(f"agent {spec.id} has duplicate dependency: {dep_id}")
+            if dep_id not in specs_by_id:
+                raise ValueError(f"agent {spec.id} depends on unknown agent id: {dep_id}")
+            if dep_id == spec.id:
+                raise ValueError(f"agent {spec.id} cannot depend on itself")
+            seen_deps.add(dep_id)
+            dependents[dep_id].append(spec.id)
+            indegree[spec.id] += 1
+
+    ready = [spec.id for spec in agents if indegree[spec.id] == 0]
+    layers: List[List[str]] = []
+    processed: List[str] = []
+    while ready:
+        layer = ready
+        layers.append(layer)
+        next_ready: List[str] = []
+        for agent_id in layer:
+            processed.append(agent_id)
+            for child_id in dependents[agent_id]:
+                indegree[child_id] -= 1
+                if indegree[child_id] == 0:
+                    next_ready.append(child_id)
+        ready = sorted(next_ready, key=lambda agent_id: order[agent_id])
+
+    if len(processed) != len(agents):
+        cycle_ids = [agent_id for agent_id, degree in indegree.items() if degree > 0]
+        raise ValueError("cycle detected in CodexSubagentSpec.dependencies: " + ", ".join(cycle_ids))
+    return layers
+
+
+def _ready_batches(layers: List[List[str]], max_parallel: int) -> List[List[str]]:
+    batches: List[List[str]] = []
+    for layer in layers:
+        for index in range(0, len(layer), max_parallel):
+            batches.append(layer[index:index + max_parallel])
+    return batches
 
 
 def build_subagent_prompt(plan: CodexAppDispatchPlan, spec: CodexSubagentSpec) -> str:
@@ -238,6 +297,7 @@ def ingest_subagent_envelope(
             kind=artifact.kind,
             content_type=artifact.content_type,
             metadata={**artifact.metadata, "thread_id": thread_id},
+            thread_id=thread_id,
         )
         artifact_ids_by_name[artifact.name] = published.id
 

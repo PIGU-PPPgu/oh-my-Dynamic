@@ -56,13 +56,103 @@ else
     echo "  ✅ marketplace plugin link"
 fi
 
-# 更新 marketplace.json
-if [ -f "$MARKETPLACE_DIR/marketplace.json" ]; then
-    echo "📋 marketplace.json 已存在，跳过（手动合并即可）"
-else
-    cp "$PROJECT_DIR/.agents/plugins/marketplace.json" "$MARKETPLACE_DIR/marketplace.json"
-    echo "  ✅ marketplace.json 已安装"
-fi
+# 更新 marketplace.json：保留其他插件，合并/更新 oh-my-dynamic 条目
+MARKETPLACE_JSON="$MARKETPLACE_DIR/marketplace.json"
+MARKETPLACE_TEMPLATE="$PROJECT_DIR/.agents/plugins/marketplace.json"
+
+echo "📋 更新 marketplace.json..."
+python - "$MARKETPLACE_JSON" "$MARKETPLACE_TEMPLATE" "$PLUGIN_DIR" <<'PY'
+import copy
+import json
+import shutil
+import sys
+from datetime import datetime
+from pathlib import Path
+
+marketplace_path = Path(sys.argv[1])
+template_path = Path(sys.argv[2])
+plugin_dir = str(Path(sys.argv[3]).resolve())
+plugin_name = "oh-my-dynamic"
+
+if not template_path.exists():
+    raise SystemExit(f"marketplace template 不存在: {template_path}")
+
+try:
+    with template_path.open("r", encoding="utf-8") as f:
+        template = json.load(f)
+except json.JSONDecodeError as exc:
+    raise SystemExit(f"marketplace template JSON 无效: {exc}") from exc
+
+template_plugins = template.get("plugins", [])
+template_entry = next(
+    (plugin for plugin in template_plugins if plugin.get("name") == plugin_name),
+    {
+        "name": plugin_name,
+        "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+        "category": "Developer Tools",
+    },
+)
+
+if marketplace_path.exists():
+    try:
+        with marketplace_path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"现有 marketplace.json JSON 无效，请先修复: {marketplace_path}: {exc}") from exc
+else:
+    data = {
+        "name": template.get("name", "oh-my-dynamic-plugins"),
+        "interface": template.get(
+            "interface",
+            {"displayName": "oh-my-Dynamic Multi-Agent Orchestration"},
+        ),
+        "plugins": [],
+    }
+
+plugins = data.setdefault("plugins", [])
+existing_index = next(
+    (index for index, plugin in enumerate(plugins) if plugin.get("name") == plugin_name),
+    None,
+)
+
+entry = copy.deepcopy(template_entry)
+if existing_index is not None:
+    merged = copy.deepcopy(plugins[existing_index])
+    merged.update(entry)
+    entry = merged
+
+entry["name"] = plugin_name
+entry["source"] = {
+    "source": "local",
+    "path": plugin_dir,
+}
+
+updated = copy.deepcopy(data)
+updated_plugins = list(updated.get("plugins", []))
+if existing_index is None:
+    updated_plugins.append(entry)
+else:
+    updated_plugins[existing_index] = entry
+updated["plugins"] = updated_plugins
+
+if marketplace_path.exists() and data == updated:
+    print("  ✅ marketplace.json 已是最新")
+    raise SystemExit(0)
+
+marketplace_path.parent.mkdir(parents=True, exist_ok=True)
+if marketplace_path.exists():
+    backup_path = marketplace_path.with_name(
+        f"{marketplace_path.name}.bak.{datetime.now().strftime('%Y%m%d%H%M%S')}"
+    )
+    shutil.copy2(marketplace_path, backup_path)
+    print(f"  ✅ 已备份原 marketplace.json: {backup_path}")
+
+with marketplace_path.open("w", encoding="utf-8") as f:
+    json.dump(updated, f, ensure_ascii=False, indent=2)
+    f.write("\n")
+
+print("  ✅ marketplace.json 已合并 oh-my-dynamic")
+PY
 
 # 4. 验证
 echo ""
@@ -82,6 +172,12 @@ else
     echo "  ❌ multi-agent-run skill 失败"
 fi
 
+if python -m json.tool "$MARKETPLACE_JSON" >/dev/null; then
+    echo "  ✅ marketplace.json JSON"
+else
+    echo "  ❌ marketplace.json JSON 失败"
+fi
+
 echo ""
 echo "🎉 安装完成!"
 echo ""
@@ -89,5 +185,10 @@ echo "使用方式:"
 echo '  Codex App: $oh-my-dynamic <query>'
 echo '  Codex App: $multi-agent-run <query>'
 echo "  或让 Codex 自动匹配复杂任务"
+echo ""
+echo "验证路径:"
+echo "  $SKILLS_DIR/oh-my-dynamic"
+echo "  $SKILLS_DIR/multi-agent-run"
+echo "  $MARKETPLACE_JSON"
 echo ""
 echo "重启 Codex App 或新开 thread 使插件生效。默认使用 App 内部 LLM，无需 API Key。"

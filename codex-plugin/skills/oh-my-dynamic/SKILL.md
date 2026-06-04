@@ -5,7 +5,10 @@ description: "Multi-agent orchestration engine for complex tasks. Use when you n
 
 # oh-my-Dynamic — Multi-Agent Orchestration Engine
 
-A self-contained multi-agent orchestration system that replicates Claude Dynamic Workflows. It decomposes complex queries into DAG-structured subtasks, executes them in parallel, and synthesizes results with stop-condition-aware iteration.
+A self-contained multi-agent orchestration system inspired by Claude Dynamic
+Workflows. It prototypes plugin-level orchestration, App-native subagent bridge
+contracts, DAG-structured subtasks, parallel execution, and synthesis with
+stop-condition-aware iteration.
 
 Important positioning: when Codex App exposes native subagent runtime/tools in
 the current session, this skill should use them as the preferred App execution

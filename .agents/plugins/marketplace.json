@@ -8,7 +8,7 @@
       "name": "oh-my-dynamic",
       "source": {
         "source": "local",
-        "path": "./plugins/oh-my-dynamic"
+        "path": "../../codex-plugin"
       },
       "policy": {
         "installation": "AVAILABLE",

@@ -17,8 +17,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 import json
+import re
 import threading
 import uuid
+
+
+SAFE_AGENT_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
 
 
 def _now_iso() -> str:
@@ -27,6 +31,19 @@ def _now_iso() -> str:
 
 def _id(prefix: str) -> str:
     return f"{prefix}_{uuid.uuid4().hex[:12]}"
+
+
+def validate_agent_id(agent_id: str, field_name: str = "agent_id") -> str:
+    """Validate a broker agent identifier before it becomes a path segment."""
+    normalized = str(agent_id).strip()
+    if not normalized:
+        raise ValueError(f"{field_name} is required")
+    if not SAFE_AGENT_ID_PATTERN.match(normalized):
+        raise ValueError(
+            f"{field_name} must match {SAFE_AGENT_ID_PATTERN.pattern}; "
+            "use letters, numbers, underscore, dot, or hyphen only"
+        )
+    return normalized
 
 
 @dataclass
@@ -147,8 +164,7 @@ class AgentBroker:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> BrokerAgent:
         """Register an agent and create its inbox."""
-        if not agent_id:
-            raise ValueError("agent_id is required")
+        agent_id = validate_agent_id(agent_id)
         agent = BrokerAgent(
             id=agent_id,
             role=role,
@@ -179,6 +195,8 @@ class AgentBroker:
         kind: str = "text",
         content_type: str = "text/plain",
         metadata: Optional[Dict[str, Any]] = None,
+        thread_id: str = "default",
+        task_id: str = "",
     ) -> BrokerArtifact:
         """Store an artifact and return its durable reference."""
         self._validate_agent(producer, "producer")
@@ -206,6 +224,8 @@ class AgentBroker:
             producer,
             "artifact_published",
             f"Artifact published: {name}",
+            thread_id=thread_id,
+            task_id=task_id,
             artifact_ids=[artifact.id],
             metadata={"kind": kind, "content_type": content_type},
         )
@@ -370,6 +390,7 @@ class AgentBroker:
 
     def read_inbox(self, agent_id: str, mark_delivered: bool = True) -> List[BrokerEvent]:
         """Read pending events for an agent."""
+        self._validate_agent(agent_id, "agent_id")
         inbox = self._inbox_path(agent_id)
         if not inbox.exists():
             return []
@@ -474,8 +495,7 @@ class AgentBroker:
             self._validate_agent_unlocked(agent_id, field_name)
 
     def _validate_agent_unlocked(self, agent_id: str, field_name: str) -> None:
-        if not agent_id:
-            raise ValueError(f"{field_name} is required")
+        agent_id = validate_agent_id(agent_id, field_name)
         if not self.policy.require_registered_agents:
             return
         if agent_id in self.policy.system_agents:
@@ -497,7 +517,12 @@ class AgentBroker:
         return [agent for agent in agents if agent != event.from_agent]
 
     def _inbox_path(self, agent_id: str) -> Path:
-        return self.inbox_dir / f"{agent_id}.jsonl"
+        agent_id = validate_agent_id(agent_id)
+        path = (self.inbox_dir / f"{agent_id}.jsonl").resolve()
+        inbox_root = self.inbox_dir.resolve()
+        if inbox_root not in path.parents:
+            raise ValueError(f"agent inbox path escapes broker inbox: {agent_id}")
+        return path
 
     def _load_agents_unlocked(self) -> Dict[str, Dict[str, Any]]:
         try:

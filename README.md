@@ -70,7 +70,27 @@
 
 ## 快速开始
 
-### 1. Codex App 零配置使用
+### 1. 安装 Codex App 插件
+
+在 Codex App 里使用前，先把插件安装到个人 `.agents` 目录：
+
+```bash
+cd ~/Desktop/oh-my-Dynamic && bash install_plugin.sh
+```
+
+安装完成后，重启 Codex App，或至少新开一个 thread，让插件与 skills 重新加载。
+
+可用这些路径验证安装结果：
+
+```bash
+ls -l ~/.agents/skills/oh-my-dynamic
+ls -l ~/.agents/skills/multi-agent-run
+python -m json.tool ~/.agents/plugins/marketplace.json >/dev/null
+```
+
+`~/.agents/plugins/marketplace.json` 中应包含 `oh-my-dynamic`，并指向当前仓库的 `~/Desktop/oh-my-Dynamic/codex-plugin`。安装脚本会保留 marketplace 中的其他插件条目；如果需要修改已有 JSON，会先创建 `.bak.<timestamp>` 备份。
+
+### 2. Codex App 零配置使用
 
 安装插件后，重启 Codex App 或新开一个 thread，直接输入：
 
@@ -101,7 +121,7 @@ $multi-agent-run review a Python change for security, correctness, and missing t
 
 也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 但这不表示本地 Python 进程可以直接调用 Codex App 内部 LLM。本地 `native_runtime.py` 只能调用传入的 `llm_fn`：demo 默认 mock，真实模型需要你配置外部 provider。App-native isolated sandboxes、tool permissions、scheduler 和 trace 由 Codex runtime 提供，不由本地 Python 原型伪造。
 
-### 2. 可选：安装本地 Python engine 依赖
+### 3. 可选：安装本地 Python engine 依赖
 
 ```bash
 # 推荐：可编辑安装
@@ -114,7 +134,7 @@ pip install -e ".[google]"     # Gemini
 pip install -e ".[all]"        # 全部可选 SDK
 ```
 
-### 3. 可选：配置外部 LLM API Key
+### 4. 可选：配置外部 LLM API Key
 
 复制示例配置文件：
 
@@ -157,17 +177,17 @@ export SILICONFLOW_API_KEY=your_siliconflow_key
 export LLM_API_KEY=your_fallback_key
 ```
 
-### 4. 可选：选择默认外部模型
+### 5. 可选：选择默认外部模型
 
 ```bash
 # 方式一：环境变量
-export LLM_DEFAULT_MODEL=gpt-5.2
+export LLM_DEFAULT_MODEL=gpt-4o
 
 # 方式二：代码中指定
-engine = Orchestrator(model="claude-sonnet-4-6")
+engine = Orchestrator(model="claude-sonnet-4-20250514")
 ```
 
-### 5. 运行测试
+### 6. 运行测试
 
 ```bash
 # 全部测试（不需要 API Key）
@@ -180,7 +200,7 @@ python validator.py api
 python validator.py e2e easy glm-5.1 --auto
 ```
 
-### 6. 可选：在代码中使用本地 Python engine
+### 7. 可选：在代码中使用本地 Python engine
 
 ```python
 from orchestrator import Orchestrator
@@ -193,14 +213,14 @@ result = engine.run(
 )
 
 # 指定模型
-engine = Orchestrator(model="gpt-5.2")
+engine = Orchestrator(model="gpt-4o")
 result = engine.run(goal="...", context="...")
 
 print(result["final_output"])
 print(f"完成率: {result['completed']}/{result['total']}")
 ```
 
-### 7. 运行 demo（无需 API Key）
+### 8. 运行 demo（无需 API Key）
 
 ```bash
 python examples/research_analysis.py
@@ -220,15 +240,15 @@ Demo 使用 deterministic mock LLM，适合快速验证端到端编排链路：
 
 ## 支持的模型
 
-模型名会自动匹配 provider，无需额外配置：
+模型名会按前缀/命名规则匹配 provider；具体可用模型会随厂商更新，请以各 provider 官方模型文档为准。下表是路由示例，不承诺这些模型永远可用：
 
 | Provider | 模型示例 | 环境变量 |
 |----------|---------|----------|
 | 智谱 GLM | `glm-5.1`, `glm-4-flash`, `glm-4-plus` | `ZHIPUAI_API_KEY` |
-| OpenAI | `gpt-5.2`, `gpt-5.2-pro`, `gpt-5-mini`, `gpt-5-nano` | `OPENAI_API_KEY` |
-| Anthropic | `claude-opus-4-8`, `claude-sonnet-4-6`, `claude-haiku-4-5` | `ANTHROPIC_API_KEY` |
-| Google | `gemini-3.5-flash`, `gemini-3.1-pro-preview`, `gemini-flash-latest` | `GOOGLE_API_KEY` |
-| OpenRouter | `openrouter/openai/gpt-5.2`, `openrouter/anthropic/claude-sonnet-4.6`, `openrouter/google/gemini-3.5-flash` | `OPENROUTER_API_KEY` |
+| OpenAI | `gpt-*`, `o*` 系列模型名，例如 `gpt-4o`, `gpt-4o-mini` | `OPENAI_API_KEY` |
+| Anthropic | `claude-*` 官方模型 ID，例如 `claude-sonnet-4-20250514` | `ANTHROPIC_API_KEY` |
+| Google | `gemini-*` 官方模型 ID，例如 `gemini-2.5-pro`, `gemini-2.5-flash` | `GOOGLE_API_KEY` |
+| OpenRouter | `openrouter/<provider>/<model>`，例如 `openrouter/anthropic/claude-sonnet-4` | `OPENROUTER_API_KEY` |
 | DeepSeek | `deepseek-chat`, `deepseek-reasoner` | `DEEPSEEK_API_KEY` |
 | 通义千问 / Qwen | `qwen-plus`, `qwen-max`, `dashscope/qwen-turbo` | `DASHSCOPE_API_KEY` |
 | Moonshot / Kimi | `moonshot-v1-8k`, `kimi-k2` | `MOONSHOT_API_KEY` |

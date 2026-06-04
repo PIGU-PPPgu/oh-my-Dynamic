@@ -13,23 +13,44 @@ from dataclasses import asdict
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
+import ipaddress
 import json
+import os
 import uuid
 
-from agent_broker import AgentBroker
+from agent_broker import AgentBroker, validate_agent_id
 from protocol_adapters import a2a_agent_card
+
+
+DEFAULT_MAX_BODY_BYTES = 1_048_576
 
 
 def _new_thread_id() -> str:
     return f"task-{uuid.uuid4().hex[:12]}"
 
 
+def _is_loopback_host(host: str) -> bool:
+    normalized = (host or "").strip().lower()
+    if normalized in ("localhost", "127.0.0.1", "::1"):
+        return True
+    try:
+        return ipaddress.ip_address(normalized).is_loopback
+    except ValueError:
+        return False
+
+
 class BrokerGateway:
     """Thin service layer around AgentBroker for HTTP handlers and tests."""
 
-    def __init__(self, broker: AgentBroker, base_url: str = "http://localhost:8765") -> None:
+    def __init__(
+        self,
+        broker: AgentBroker,
+        base_url: str = "http://localhost:8765",
+        auth_token: Optional[str] = None,
+    ) -> None:
         self.broker = broker
         self.base_url = base_url.rstrip("/")
+        self.auth_token = auth_token
 
     def agent_card(self) -> Dict[str, Any]:
         card = a2a_agent_card(self.base_url)
@@ -108,9 +129,9 @@ class BrokerGateway:
             "events": [asdict(event) for event in self.broker.list_events(thread_id=thread_id)],
         }
 
-    def send_message(self, thread_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def send_message(self, thread_id: str, payload: Dict[str, Any], actor: Optional[str] = None) -> Dict[str, Any]:
         event = self.broker.send_message(
-            str(payload.get("from", payload.get("from_agent", "orchestrator"))),
+            actor or str(payload.get("from", payload.get("from_agent", "orchestrator"))),
             payload.get("to", payload.get("to_agent")),
             str(payload.get("subject", "message")),
             str(payload.get("body", payload.get("message", ""))),
@@ -121,28 +142,21 @@ class BrokerGateway:
         )
         return asdict(event)
 
-    def publish_artifact(self, thread_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def publish_artifact(self, thread_id: str, payload: Dict[str, Any], actor: Optional[str] = None) -> Dict[str, Any]:
         artifact = self.broker.publish_artifact(
-            str(payload.get("producer", payload.get("from", "orchestrator"))),
+            actor or str(payload.get("producer", payload.get("from", "orchestrator"))),
             str(payload.get("name", "artifact")),
             str(payload.get("content", "")),
             kind=str(payload.get("kind", "text")),
             content_type=str(payload.get("content_type", "text/plain")),
             metadata={**dict(payload.get("metadata", {})), "thread_id": thread_id},
-        )
-        self.broker.trace(
-            artifact.producer,
-            "artifact_attached",
-            artifact.name,
             thread_id=thread_id,
-            artifact_ids=[artifact.id],
-            metadata={"artifact_kind": artifact.kind},
         )
         return asdict(artifact)
 
-    def create_handoff(self, thread_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def create_handoff(self, thread_id: str, payload: Dict[str, Any], actor: Optional[str] = None) -> Dict[str, Any]:
         event = self.broker.create_handoff(
-            str(payload.get("from", payload.get("from_agent", "orchestrator"))),
+            actor or str(payload.get("from", payload.get("from_agent", "orchestrator"))),
             str(payload.get("to", payload.get("to_agent", ""))),
             str(payload.get("task_id", thread_id)),
             str(payload.get("subject", "handoff")),
@@ -153,9 +167,9 @@ class BrokerGateway:
         )
         return asdict(event)
 
-    def request_review(self, thread_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def request_review(self, thread_id: str, payload: Dict[str, Any], actor: Optional[str] = None) -> Dict[str, Any]:
         event = self.broker.request_review(
-            str(payload.get("from", payload.get("from_agent", "orchestrator"))),
+            actor or str(payload.get("from", payload.get("from_agent", "orchestrator"))),
             str(payload.get("reviewer", payload.get("to", payload.get("to_agent", "reviewer")))),
             str(payload.get("task_id", thread_id)),
             str(payload.get("subject", "review_request")),
@@ -166,9 +180,9 @@ class BrokerGateway:
         )
         return asdict(event)
 
-    def respond_review(self, thread_id: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def respond_review(self, thread_id: str, payload: Dict[str, Any], actor: Optional[str] = None) -> Dict[str, Any]:
         event = self.broker.respond_review(
-            str(payload.get("from", payload.get("from_agent", payload.get("reviewer", "reviewer")))),
+            actor or str(payload.get("from", payload.get("from_agent", payload.get("reviewer", "reviewer")))),
             str(payload.get("to", payload.get("to_agent", "orchestrator"))),
             str(payload.get("task_id", thread_id)),
             str(payload.get("subject", "review_response")),
@@ -181,20 +195,27 @@ class BrokerGateway:
         )
         return asdict(event)
 
-    def complete_task(self, thread_id: str, payload: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def complete_task(
+        self,
+        thread_id: str,
+        payload: Optional[Dict[str, Any]] = None,
+        actor: Optional[str] = None,
+    ) -> Dict[str, Any]:
         payload = payload or {}
+        from_agent = actor or str(payload.get("from", "orchestrator"))
         artifact_ids = list(payload.get("artifact_ids", []))
         if "final_answer" in payload:
             artifact = self.broker.publish_artifact(
-                str(payload.get("from", "orchestrator")),
+                from_agent,
                 "final_answer",
                 str(payload.get("final_answer", "")),
                 kind="final_answer",
                 metadata={"thread_id": thread_id},
+                thread_id=thread_id,
             )
             artifact_ids.append(artifact.id)
         self.broker.trace(
-            str(payload.get("from", "orchestrator")),
+            from_agent,
             "workflow_completed",
             str(payload.get("body", "Workflow completed.")),
             thread_id=thread_id,
@@ -208,6 +229,7 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
     """HTTP handler for BrokerGateway."""
 
     gateway: BrokerGateway
+    max_body_bytes: int = DEFAULT_MAX_BODY_BYTES
 
     def do_GET(self) -> None:
         try:
@@ -216,6 +238,7 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
             if path in ("/", "/agent-card", "/.well-known/agent.json"):
                 self._send_json(200, self.gateway.agent_card())
                 return
+            self._require_auth()
 
             parts = [part for part in path.split("/") if part]
             if path == "/agents":
@@ -236,12 +259,17 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
                 return
 
             self._send_json(404, {"error": "not found"})
+        except PermissionError as exc:
+            self._send_json(401, {"error": str(exc)})
+        except ValueError as exc:
+            self._send_json(400, {"error": str(exc)})
         except Exception as exc:
             self._send_json(500, {"error": f"{type(exc).__name__}: {exc}"})
 
     def do_POST(self) -> None:
         try:
             path = (urlparse(self.path).path.rstrip("/") or "/")
+            self._require_auth()
             payload = self._read_json()
             parts = [part for part in path.split("/") if part]
 
@@ -262,28 +290,39 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
                 return
 
             self._send_json(404, {"error": "not found"})
+        except PermissionError as exc:
+            self._send_json(401, {"error": str(exc)})
         except ValueError as exc:
             self._send_json(400, {"error": str(exc)})
         except Exception as exc:
             self._send_json(500, {"error": f"{type(exc).__name__}: {exc}"})
 
     def _dispatch_task_action(self, thread_id: str, action: str, payload: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        actor = self._authenticated_actor()
         if action == "messages":
-            return 201, self.gateway.send_message(thread_id, payload)
+            return 201, self.gateway.send_message(thread_id, payload, actor=actor)
         if action == "artifacts":
-            return 201, self.gateway.publish_artifact(thread_id, payload)
+            return 201, self.gateway.publish_artifact(thread_id, payload, actor=actor)
         if action == "handoffs":
-            return 201, self.gateway.create_handoff(thread_id, payload)
+            return 201, self.gateway.create_handoff(thread_id, payload, actor=actor)
         if action == "review-requests":
-            return 201, self.gateway.request_review(thread_id, payload)
+            return 201, self.gateway.request_review(thread_id, payload, actor=actor)
         if action == "review-responses":
-            return 201, self.gateway.respond_review(thread_id, payload)
+            return 201, self.gateway.respond_review(thread_id, payload, actor=actor)
         if action == "complete":
-            return 200, self.gateway.complete_task(thread_id, payload)
+            return 200, self.gateway.complete_task(thread_id, payload, actor=actor)
         return 404, {"error": "not found"}
 
     def _read_json(self) -> Dict[str, Any]:
-        length = int(self.headers.get("Content-Length", "0") or "0")
+        raw_length = self.headers.get("Content-Length", "0") or "0"
+        try:
+            length = int(raw_length)
+        except ValueError as exc:
+            raise ValueError("Content-Length must be an integer") from exc
+        if length < 0:
+            raise ValueError("Content-Length must not be negative")
+        if length > self.max_body_bytes:
+            raise ValueError(f"request body exceeds {self.max_body_bytes} bytes")
         if length == 0:
             return {}
         raw = self.rfile.read(length).decode("utf-8")
@@ -294,6 +333,24 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
         if not isinstance(payload, dict):
             raise ValueError("JSON body must be an object")
         return payload
+
+    def _require_auth(self) -> None:
+        token = self.gateway.auth_token
+        if not token:
+            return
+        auth = self.headers.get("Authorization", "")
+        token_header = self.headers.get("X-Oh-My-Dynamic-Token", "")
+        if auth == f"Bearer {token}" or token_header == token:
+            return
+        raise PermissionError("missing or invalid gateway auth token")
+
+    def _authenticated_actor(self) -> Optional[str]:
+        if not self.gateway.auth_token:
+            return None
+        actor = self.headers.get("X-Agent-Id", "")
+        if not actor:
+            raise ValueError("X-Agent-Id is required when gateway auth is enabled")
+        return validate_agent_id(actor, "X-Agent-Id")
 
     def _send_json(self, status: int, payload: Dict[str, Any]) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -327,15 +384,20 @@ def create_server(
     host: str = "127.0.0.1",
     port: int = 8765,
     base_url: Optional[str] = None,
+    auth_token: Optional[str] = None,
+    max_body_bytes: int = DEFAULT_MAX_BODY_BYTES,
 ) -> ThreadingHTTPServer:
     """Create a configured broker gateway server."""
+    if not _is_loopback_host(host) and not auth_token:
+        raise ValueError("non-loopback gateway binding requires --auth-token or OH_MY_DYNAMIC_GATEWAY_TOKEN")
     broker = broker or AgentBroker()
-    gateway = BrokerGateway(broker, base_url or f"http://{host}:{port}")
+    gateway = BrokerGateway(broker, base_url or f"http://{host}:{port}", auth_token=auth_token)
 
     class Handler(BrokerGatewayHandler):
         pass
 
     Handler.gateway = gateway
+    Handler.max_body_bytes = max_body_bytes
     return ThreadingHTTPServer((host, port), Handler)
 
 
@@ -346,10 +408,18 @@ def main() -> None:
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--broker-dir", default=".orchestry/agent_broker")
+    parser.add_argument("--auth-token", default=os.environ.get("OH_MY_DYNAMIC_GATEWAY_TOKEN"))
+    parser.add_argument("--max-body-bytes", type=int, default=DEFAULT_MAX_BODY_BYTES)
     args = parser.parse_args()
 
     broker = AgentBroker(args.broker_dir)
-    server = create_server(broker, args.host, args.port)
+    server = create_server(
+        broker,
+        args.host,
+        args.port,
+        auth_token=args.auth_token,
+        max_body_bytes=args.max_body_bytes,
+    )
     print(f"oh-my-Dynamic AgentBroker gateway listening on http://{args.host}:{args.port}")
     server.serve_forever()
 

@@ -40,7 +40,7 @@ def test(name):
                 global _pass; _pass += 1
                 print(f"  ✅ {name}")
             except Exception as e:
-                _results.append({"name": name, "status": "FAIL", "error": str(e)})
+                _results.append({"name": name, "status": "FAIL", "error": str(e), "traceback": traceback.format_exc()})
                 global _fail; _fail += 1
                 print(f"  ❌ {name}: {e}")
         run.__name__ = name
@@ -424,6 +424,31 @@ def test_agent_broker_collaboration():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("AgentBroker: rejects unsafe agent ids")
+def test_agent_broker_rejects_unsafe_agent_ids():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+
+    d = tempfile.mkdtemp()
+    try:
+        broker = AgentBroker(str(Path(d) / "broker"))
+        unsafe_ids = ["../escape", "../../escape", "/tmp/escape", "bad/name", "bad\\name", ".hidden", "bad name"]
+        for unsafe_id in unsafe_ids:
+            try:
+                broker.register_agent(unsafe_id, "worker")
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"unsafe agent id should be rejected: {unsafe_id}")
+
+        broker.register_agent("safe.agent-01", "worker")
+        broker.send_message("broker", "safe.agent-01", "hello", "safe")
+        assert broker.read_inbox("safe.agent-01", mark_delivered=False)
+        assert not (Path(d) / "escape.jsonl").exists()
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("BrokerGateway: HTTP task lifecycle + SSE")
 def test_broker_gateway_http_lifecycle():
     import shutil, tempfile, threading, urllib.request
@@ -569,6 +594,103 @@ def test_broker_gateway_http_lifecycle():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("BrokerGateway: auth, actor binding, and body limits")
+def test_broker_gateway_auth_and_limits():
+    import shutil, tempfile, threading, urllib.error, urllib.request
+    from agent_broker import AgentBroker
+    from broker_gateway import create_server
+
+    d = tempfile.mkdtemp()
+    server = None
+    thread = None
+    try:
+        try:
+            create_server(AgentBroker(str(Path(d) / "blocked")), host="0.0.0.0", port=0)
+        except ValueError as exc:
+            assert "non-loopback" in str(exc)
+        else:
+            raise AssertionError("non-loopback gateway binding should require auth")
+
+        broker = AgentBroker(str(Path(d) / "broker"))
+        token = "test-token"
+        server = create_server(
+            broker,
+            host="127.0.0.1",
+            port=0,
+            auth_token=token,
+            max_body_bytes=256,
+        )
+        port = server.server_address[1]
+        base = f"http://127.0.0.1:{port}"
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+
+        def request(method, path, payload=None, headers=None):
+            data = None
+            if payload is not None:
+                data = json.dumps(payload).encode("utf-8")
+            req = urllib.request.Request(
+                base + path,
+                data=data,
+                method=method,
+                headers={"Content-Type": "application/json", **(headers or {})},
+            )
+            with urllib.request.urlopen(req, timeout=5) as response:
+                return json.loads(response.read().decode("utf-8"))
+
+        card = request("GET", "/.well-known/agent.json")
+        assert card["capabilities"]["agentBroker"]
+
+        try:
+            request("GET", "/agents")
+        except urllib.error.HTTPError as exc:
+            assert exc.code == 401
+        else:
+            raise AssertionError("gateway should require auth for non-public GET")
+
+        auth = {"Authorization": f"Bearer {token}"}
+        planner = request("POST", "/agents", {"id": "planner", "role": "planner"}, headers=auth)
+        assert planner["id"] == "planner"
+
+        task = request("POST", "/tasks", {"message": "secure workflow"}, headers=auth)
+        task_id = task["id"]
+
+        actor_auth = {**auth, "X-Agent-Id": "planner"}
+        message = request("POST", f"/tasks/{task_id}/messages", {
+            "from": "orchestrator",
+            "to": "orchestrator",
+            "subject": "actor binding",
+            "body": "payload sender should be ignored in token mode",
+        }, headers=actor_auth)
+        assert message["from_agent"] == "planner"
+
+        try:
+            request("POST", f"/tasks/{task_id}/messages", {
+                "from": "planner",
+                "to": "orchestrator",
+                "subject": "missing actor",
+                "body": "bad",
+            }, headers=auth)
+        except urllib.error.HTTPError as exc:
+            assert exc.code == 400
+        else:
+            raise AssertionError("gateway should require X-Agent-Id for task actions in auth mode")
+
+        try:
+            request("POST", "/tasks", {"message": "x" * 300}, headers=auth)
+        except urllib.error.HTTPError as exc:
+            assert exc.code == 400
+        else:
+            raise AssertionError("gateway should reject oversized request bodies before JSON processing")
+    finally:
+        if server is not None:
+            server.shutdown()
+            server.server_close()
+        if thread is not None:
+            thread.join(timeout=5)
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("CodexAppBridge: dispatch envelope ingestion")
 def test_codex_app_bridge_ingestion():
     import shutil, tempfile
@@ -612,6 +734,9 @@ def test_codex_app_bridge_ingestion():
             run_id="codex-thread-1",
         )
         register_dispatch_plan(broker, plan)
+        plan_dict = plan.to_dict()
+        assert plan_dict["topological_layers"] == [["planner"], ["builder"], ["reviewer"]]
+        assert plan_dict["ready_batches"] == [["planner"], ["builder"], ["reviewer"]]
         prompt = build_subagent_prompt(plan, plan.agents[0])
         assert "current Codex App model/runtime" in prompt
         assert "Return exactly one JSON object" in prompt
@@ -669,6 +794,53 @@ def test_codex_app_bridge_ingestion():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("CodexAppBridge: dependency validation")
+def test_codex_app_bridge_dependency_validation():
+    from codex_app_bridge import CodexSubagentSpec, create_dispatch_plan
+
+    plan = create_dispatch_plan(
+        "Layered dispatch",
+        [
+            CodexSubagentSpec(id="planner", role="planner", goal="Plan"),
+            CodexSubagentSpec(id="researcher", role="researcher", goal="Research"),
+            CodexSubagentSpec(id="builder", role="builder", goal="Build", dependencies=["planner"]),
+            CodexSubagentSpec(
+                id="reviewer",
+                role="reviewer",
+                goal="Review",
+                dependencies=["researcher", "builder"],
+            ),
+        ],
+        max_parallel=1,
+        run_id="codex-thread-2",
+    )
+    assert plan.topological_layers == [["planner", "researcher"], ["builder"], ["reviewer"]]
+    assert plan.ready_batches == [["planner"], ["researcher"], ["builder"], ["reviewer"]]
+
+    try:
+        create_dispatch_plan(
+            "Bad dependency",
+            [CodexSubagentSpec(id="builder", role="builder", goal="Build", dependencies=["missing"])],
+        )
+    except ValueError as exc:
+        assert "unknown agent id" in str(exc)
+    else:
+        raise AssertionError("unknown dependency should be rejected")
+
+    try:
+        create_dispatch_plan(
+            "Cycle",
+            [
+                CodexSubagentSpec(id="a", role="a", goal="A", dependencies=["b"]),
+                CodexSubagentSpec(id="b", role="b", goal="B", dependencies=["a"]),
+            ],
+        )
+    except ValueError as exc:
+        assert "cycle detected" in str(exc)
+    else:
+        raise AssertionError("dependency cycle should be rejected")
+
+
 @test("Native Runtime: sandboxed fan-out")
 def test_native_runtime_fanout():
     from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
@@ -696,6 +868,101 @@ def test_native_runtime_fanout():
     assert len({r.sandbox.root for r in trace.results}) == 32
     assert all(r.tool_grants[0].name == "read" for r in trace.results)
     assert "reduced" in trace.final_answer
+
+
+@test("Native Runtime: dependency scheduling")
+def test_native_runtime_dependency_scheduling():
+    from native_runtime import AgentSpec, SandboxedFanoutRuntime
+
+    calls = []
+
+    def mock_llm(sys, user):
+        if "Worker results:" in user:
+            return "dependency reducer complete"
+        agent_id = next(
+            line.split(": ", 1)[1]
+            for line in user.splitlines()
+            if line.startswith("Agent id: ")
+        )
+        calls.append(agent_id)
+        if agent_id == "builder":
+            assert "planner output" in user
+        if agent_id == "reviewer":
+            assert "builder output" in user
+            assert "researcher output" in user
+        return f"{agent_id} output"
+
+    agents = [
+        AgentSpec(id="planner", role="planner", goal="Plan"),
+        AgentSpec(id="researcher", role="researcher", goal="Research"),
+        AgentSpec(id="auditor", role="auditor", goal="Audit"),
+        AgentSpec(id="builder", role="builder", goal="Build", dependencies=["planner"]),
+        AgentSpec(id="reviewer", role="reviewer", goal="Review", dependencies=["builder", "researcher"]),
+    ]
+    runtime = SandboxedFanoutRuntime(mock_llm, max_workers=2, keep_sandboxes=False)
+    trace = runtime.run("dependency test", agents)
+
+    assert trace.topological_layers == [["planner", "researcher", "auditor"], ["builder"], ["reviewer"]]
+    assert trace.ready_batches == [["planner", "researcher"], ["auditor"], ["builder"], ["reviewer"]]
+    assert [result.agent_id for result in trace.results] == ["planner", "researcher", "auditor", "builder", "reviewer"]
+    assert calls.index("builder") > calls.index("planner")
+    assert calls.index("reviewer") > calls.index("builder")
+    assert calls.index("reviewer") > calls.index("researcher")
+    assert trace.summary()["completed"] == 5
+
+
+@test("Native Runtime: invalid dependencies and dependency failures")
+def test_native_runtime_dependency_failures():
+    from native_runtime import AgentSpec, SandboxedFanoutRuntime
+
+    calls = []
+
+    def mock_llm(sys, user):
+        if "Worker results:" in user:
+            return "dependency failure reducer complete"
+        if "Agent id: root" in user:
+            calls.append("root")
+            raise RuntimeError("root failed")
+        if "Agent id: child" in user:
+            calls.append("child")
+        return "ok"
+
+    runtime = SandboxedFanoutRuntime(mock_llm, max_workers=2, keep_sandboxes=False)
+    trace = runtime.run(
+        "dependency failure test",
+        [
+            AgentSpec(id="root", role="root", goal="Fail"),
+            AgentSpec(id="child", role="child", goal="Skip", dependencies=["root"]),
+        ],
+    )
+    child = next(result for result in trace.results if result.agent_id == "child")
+    assert calls == ["root"]
+    assert child.status == "failed"
+    assert "Dependency failed" in child.error
+    assert trace.summary()["failed"] == 2
+
+    try:
+        runtime.run(
+            "Bad dependency",
+            [AgentSpec(id="child", role="child", goal="Skip", dependencies=["missing"])],
+        )
+    except ValueError as exc:
+        assert "unknown agent id" in str(exc)
+    else:
+        raise AssertionError("unknown dependency should be rejected")
+
+    try:
+        runtime.run(
+            "Cycle",
+            [
+                AgentSpec(id="a", role="a", goal="A", dependencies=["b"]),
+                AgentSpec(id="b", role="b", goal="B", dependencies=["a"]),
+            ],
+        )
+    except ValueError as exc:
+        assert "cycle detected" in str(exc)
+    else:
+        raise AssertionError("dependency cycle should be rejected")
 
 
 @test("Native Runtime: broker trace + artifacts")
@@ -1042,9 +1309,14 @@ if __name__ == "__main__":
         test_llm_provider_routing,
         test_protocol_adapters,
         test_agent_broker_collaboration,
+        test_agent_broker_rejects_unsafe_agent_ids,
         test_broker_gateway_http_lifecycle,
+        test_broker_gateway_auth_and_limits,
         test_codex_app_bridge_ingestion,
+        test_codex_app_bridge_dependency_validation,
         test_native_runtime_fanout,
+        test_native_runtime_dependency_scheduling,
+        test_native_runtime_dependency_failures,
         test_native_runtime_broker_trace,
         test_synthesis_single,
         test_worktree_basic,
