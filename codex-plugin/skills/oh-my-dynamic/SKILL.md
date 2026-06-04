@@ -17,7 +17,10 @@ subagents, parallel agents, or equivalent multi-agent execution. The App-native
 path should spawn real Codex internal subagents, let them inherit the current
 Codex App LLM/runtime, and avoid any external provider setup. If those native
 subagent tools are not available, fall back to the zero-config in-chat workflow
-below. The project also includes `native_runtime.py`, a local executable
+below. If the user explicitly asks for dozens/hundreds of real Codex agents,
+maximum fan-out, or a CLI swarm, use `codex_cli_swarm.py` as the second backend:
+it shells out to many `codex exec` workers and ingests their JSON envelopes into
+AgentBroker. The project also includes `native_runtime.py`, a local executable
 prototype that can fan out many isolated workers with separate sandbox
 directories, per-worker context, tool grants, trace capture, and reducer
 synthesis. `agent_broker.py` provides the shared collaboration contract:
@@ -27,6 +30,8 @@ inboxes, and audit traces.
 transport surface is needed.
 `codex_app_bridge.py` defines the App-native bridge: dispatch specs, subagent
 prompts, structured JSON envelopes, and AgentBroker ingestion.
+`codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
+process-level fan-out.
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -43,12 +48,14 @@ When this skill is triggered inside Codex App, the default App-mode priority is:
 4. Use the Codex App bridge contract: create a dispatch plan, prompt each subagent to return the structured JSON envelope, then ingest envelopes into AgentBroker.
 5. Coordinate subagents through the parent orchestrator and the AgentBroker contract: registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and traceable synthesis. Do not rely on hidden peer-to-peer side channels.
 6. If native Codex subagent runtime/tools are unavailable, use zero-config in-chat workflow execution as the fallback.
+7. If the user explicitly asks for tens/hundreds of real Codex agents, prefer `codex_cli_swarm.py` over the in-chat fallback.
 
 In App fallback/zero-config mode:
 
 - Use the current Codex App assistant/model as the reasoning engine.
 - Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key.
 - Do **not** run `llm_client.py` or the Python `DynamicPipeline` unless the user explicitly asks to use the local Python engine, a real provider, or a dashboard artifact.
+- Do run `codex_cli_swarm.py` when the user explicitly asks for large-scale Codex CLI worker fan-out.
 - Treat the modules in `~/Desktop/oh-my-Dynamic` as the reference implementation and mirror their workflow in-chat.
 - Be explicit if the user asks about native parallel sandboxed subagents and no
   Codex subagent runtime/tools are available in the current session: App-native

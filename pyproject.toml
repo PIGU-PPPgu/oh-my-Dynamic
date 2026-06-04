@@ -29,11 +29,13 @@ dev = [
 
 [project.scripts]
 oh-my-dynamic-gateway = "broker_gateway:main"
+oh-my-dynamic-codex-swarm = "codex_cli_swarm:main"
 
 [tool.setuptools]
 py-modules = [
   "agent_broker",
   "broker_gateway",
+  "codex_cli_swarm",
   "codex_app_bridge",
   "agents",
   "dag",

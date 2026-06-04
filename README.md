@@ -55,6 +55,7 @@
 | `agent_broker.py` | A2A-style 协作 broker：policy、messages、artifacts、handoff、review request/response、audit trace |
 | `broker_gateway.py` | 本地 HTTP/SSE gateway：Agent Card、agents/inbox、task snapshot、events、messages、artifacts、handoffs、review requests/responses |
 | `codex_app_bridge.py` | Codex App subagent bridge：dispatch plan、subagent prompt、JSON envelope、broker ingestion |
+| `codex_cli_swarm.py` | Codex CLI swarm backend：并发启动多个 `codex exec` 进程，回收 JSON envelope，并写入 AgentBroker |
 | `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
 | `pipeline.py` | 端到端 Pipeline（组合所有组件） |
 | `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
@@ -116,10 +117,20 @@ $multi-agent-run review a Python change for security, correctness, and missing t
 |------|----------|----------------------|---------------------------|
 | Codex App internal subagent backend | Codex App 当前内部 LLM，由 App-native subagents 继承 | 否 | 是，前提是 Codex runtime 提供 subagent tools/runtime、isolated sandboxes、tool permissions 和 scheduler |
 | Codex App 插件级编排 fallback | Codex App 当前会话的内部 LLM | 否 | 否；是在当前会话中执行 dynamic-workflow-style 编排 |
+| `codex_cli_swarm.py` backend | 本机 `codex exec` 登录态/配置 | 否（使用已有 Codex CLI 登录态） | 是，进程级独立上下文；可并发几十到上百个 Codex CLI workers，结果进入 AgentBroker |
 | 本地 `native_runtime.py` fan-out | 调用传入的 `llm_fn`，demo 默认 mock | 否（mock）/ 是（真实外部模型） | 是本地 isolated worker runtime：独立 sandbox 目录、独立 context、tool grants、trace |
 | 本地 Python engine + 外部模型 | `llm_client.py` 路由到配置的 provider | 是 | 可并发 worker，但不是 Codex App 内部 subagents |
 
-也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 但这不表示本地 Python 进程可以直接调用 Codex App 内部 LLM。本地 `native_runtime.py` 只能调用传入的 `llm_fn`：demo 默认 mock，真实模型需要你配置外部 provider。App-native isolated sandboxes、tool permissions、scheduler 和 trace 由 Codex runtime 提供，不由本地 Python 原型伪造。
+也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 但这不表示本地 Python 进程可以直接调用 Codex App 内部 LLM。本地 `native_runtime.py` 只能调用传入的 `llm_fn`：demo 默认 mock，真实模型需要你配置外部 provider。若你明确要求几十/几百个真实 Codex agents，可切到 `codex_cli_swarm.py`：它通过本机 `codex exec` 批量启动独立 Codex CLI worker，并把 JSON envelope 写入 `AgentBroker`。App-native isolated sandboxes、tool permissions、scheduler 和 trace 仍由 Codex runtime 提供，不由本地 Python 原型伪造。
+
+Codex CLI swarm 可直接运行：
+
+```bash
+oh-my-dynamic-codex-swarm --agents 50 --max-parallel 10 "并行审查这个仓库的安全、架构、测试和文档"
+
+# 未安装 console script 时也可：
+python -m codex_cli_swarm --agents 50 --max-parallel 10 "并行审查这个仓库"
+```
 
 ### 3. 可选：安装本地 Python engine 依赖
 
@@ -279,14 +290,15 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 
 1. **Codex App internal subagent backend**：真实 App-native subagents、内部 LLM 继承、API key free，由 Codex runtime 管理。
 2. **插件级编排**：skill/plugin 在当前会话中组织拆解、worker lane、review 和 synthesis，不等同于 isolated runtime subagents。
-3. **本地 Python runtime 原型**：可测试 sandboxed fan-out、tool grants 和 reducer 形状，但本地 Python 进程不能直接调用 Codex App 内部 LLM；真实 App-native isolated sandboxes、tool permissions、scheduler 仍属于 Codex runtime。
+3. **Codex CLI swarm backend**：`codex_cli_swarm.py` 可批量启动真实 `codex exec` worker，适合用户明确要求几十/几百 Codex agents 的场景；它是外部进程 swarm，不是 App 原生 runtime。
+4. **本地 Python runtime 原型**：可测试 sandboxed fan-out、tool grants 和 reducer 形状，但本地 Python 进程不能直接调用 Codex App 内部 LLM；真实 App-native isolated sandboxes、tool permissions、scheduler 仍属于 Codex runtime。
 
 我们希望推动 Codex 官方支持这些能力：
 
 | 目标能力 | 当前 Codex App 状态 | oh-my-Dynamic 当前做法 | 期望官方 runtime |
 |----------|---------------------|------------------------|------------------|
 | App 原生 fan-out | subagent tools/runtime 可用时应默认使用；能力由 Codex runtime 提供 | 插件选择 App backend；否则用 `native_runtime.py` 本地 fan-out 原型 | `spawn_subagents()` 原生调度 |
-| 几十到上百个 isolated subagents | App backend 可用时由 Codex runtime 管理 | `SandboxedFanoutRuntime` 可跑 100+ isolated workers 原型 | 每个 subagent 独立上下文窗口 |
+| 几十到上百个 isolated subagents | App backend 可用时由 Codex runtime 管理 | `codex_cli_swarm.py` 可批量启动真实 `codex exec` workers；`SandboxedFanoutRuntime` 可跑 100+ mock/外部模型 workers 原型 | 每个 subagent 独立上下文窗口 |
 | 每个 agent 独立工具权限和沙箱 | App-native 权限/沙箱由 Codex runtime 提供 | `AgentSandbox` + `ToolGrant` + worktree / subprocess 原型 | per-agent sandbox + least privilege tools |
 | 原生 DAG 调度与汇总 | App-native scheduler/trace 由 Codex runtime 提供 | `dag.py` + `native_runtime.py` + `synthesis.py` | runtime 级 DAG execution graph |
 | Agent 间受控沟通 | App subagents 通过父 orchestrator 协调；直接 P2P 取决于 runtime | `codex_app_bridge.py` + `agent_broker.py` 提供 envelope ingestion、message、artifact、handoff、review、A2A snapshot | runtime 原生 A2A broker + audit policy |
@@ -303,6 +315,7 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 - AgentBroker：`AgentBroker` 可注册 agents，发送 direct/broadcast message，发布 artifacts，创建 task handoff，发起 review request/response，并导出 A2A-style task snapshot。
 - BrokerPolicy：默认要求 agent 注册，校验 sender/receiver、artifact 引用、消息/工件大小和 content type，避免无约束上下文串流。
 - Codex App bridge：`codex_app_bridge.py` 生成 App-native subagent dispatch plan 和 prompt，要求真实 Codex subagents 返回 JSON envelope，再把 envelope ingest 到 `AgentBroker`。
+- Codex CLI swarm：`CodexCliSwarmRuntime` 生成每个 worker 的 prompt，调用 `codex exec --output-last-message`，解析 JSON envelope，并把 artifacts/messages/review trace ingest 到同一个 `AgentBroker`。
 - Native runtime 集成：`SandboxedFanoutRuntime(..., broker=AgentBroker(...))` 会把 worker started/completed、worker artifacts、final answer 和 workflow completion 写入 broker trace。
 - Gateway：`python broker_gateway.py --host 127.0.0.1 --port 8765` 会提供 `/.well-known/agent.json`、`GET/POST /agents`、`GET /agents/{id}/inbox`、`POST /tasks`、`GET /tasks/{id}`、`GET /tasks/{id}/events`、`POST /tasks/{id}/messages`、`/artifacts`、`/handoffs`、`/review-requests`、`/review-responses` 和 `/complete`。
 

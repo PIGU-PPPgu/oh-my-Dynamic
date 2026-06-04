@@ -16,6 +16,7 @@ When triggered inside Codex App, this skill must work immediately after installa
 - Do **not** require provider API keys or `.env` configuration for App-native subagent execution.
 - Do **not** tell the user to use Codex CLI.
 - Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
+- Exception: if the user explicitly asks for dozens/hundreds of real Codex agents, maximum fan-out, CLI swarm, or equivalent large-scale execution, use the local `codex_cli_swarm.py` backend instead of the ordinary in-chat fallback. This backend launches many `codex exec` processes, each with an isolated prompt/output file, and ingests their JSON envelopes into AgentBroker.
 - Use the Codex App bridge contract for real subagents: dispatch plan, per-subagent prompt, structured JSON envelope, and AgentBroker ingestion.
 - Coordinate subagent collaboration through registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and auditable synthesis. Prefer parent-orchestrated A2A-style exchange over hidden peer-to-peer communication.
 - Use `broker_gateway.py` only when the user asks for a local HTTP/SSE transport surface or external tool integration; ordinary Codex App usage should stay inside the App-native subagent path.
@@ -24,7 +25,9 @@ When triggered inside Codex App, this skill must work immediately after installa
 Boundary: local Python runtime, including `native_runtime.py`, cannot directly
 call the Codex App internal LLM API unless Codex App/runtime exposes an explicit
 bridge. Python runtime mode still uses the supplied `llm_fn` or external
-provider APIs when configured.
+provider APIs when configured. `codex_cli_swarm.py` is different: it does not
+call App internals from Python; it shells out to the user's installed
+`codex exec`, so it uses the existing Codex CLI login/config.
 
 For fallback App usage, or for synthesizing after native subagents return,
 present the multi-agent workflow directly in the response:
@@ -33,11 +36,12 @@ present the multi-agent workflow directly in the response:
 2. Assign roles such as planner, researcher, builder, reviewer, synthesizer.
 3. Mark dependencies and identify which tasks can run in parallel.
 4. For real App subagents, require the structured bridge JSON envelope and ingest results into AgentBroker.
-5. Track registered workers, messages, artifacts, handoffs, review requests/responses, and inboxes explicitly.
-6. Produce worker results for each task.
-7. Review the combined result for gaps.
-8. Replan once if needed.
-9. Synthesize a final answer.
+5. For explicit large-scale Codex fan-out, use `CodexCliSwarmRuntime` with a user-visible parallelism setting and broker ingestion.
+6. Track registered workers, messages, artifacts, handoffs, review requests/responses, and inboxes explicitly.
+7. Produce worker results for each task.
+8. Review the combined result for gaps.
+9. Replan once if needed.
+10. Synthesize a final answer.
 
 ## When to Trigger
 

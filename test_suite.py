@@ -841,6 +841,143 @@ def test_codex_app_bridge_dependency_validation():
         raise AssertionError("dependency cycle should be rejected")
 
 
+@test("CodexCliSwarm: fake codex exec fan-out + broker ingestion")
+def test_codex_cli_swarm_fake_exec():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+    from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+prompt = args[-1]
+match = re.search(r"Agent id: ([^\\n]+)", prompt)
+agent_id = match.group(1).strip()
+status = "failed" if "FAIL_AGENT" in prompt else "completed"
+summary = f"summary for {agent_id}"
+payload = {
+    "agent_id": agent_id,
+    "status": status,
+    "summary": summary,
+    "artifacts": [{"name": "result", "kind": "analysis", "content_type": "text/plain", "content": prompt[:500]}],
+    "messages": [{"to_agent": "orchestrator", "subject": f"done {agent_id}", "body": summary, "artifact_names": ["result"]}],
+    "handoffs": [],
+    "review_requests": [],
+    "review_responses": [],
+    "metadata": {"fake_codex": True},
+    "error": "" if status == "completed" else "forced failure",
+}
+out.write_text(json.dumps(payload), encoding="utf-8")
+print(json.dumps({"agent_id": agent_id, "status": status}))
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+
+        broker = AgentBroker(str(Path(d) / "broker"))
+        runtime = CodexCliSwarmRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "swarm"),
+            max_parallel=2,
+            timeout_s=5,
+            keep_workdirs=True,
+            broker=broker,
+        )
+        agents = [
+            CodexCliAgentSpec(id="planner", role="planner", goal="Plan"),
+            CodexCliAgentSpec(id="researcher", role="researcher", goal="Research"),
+            CodexCliAgentSpec(id="builder", role="builder", goal="Build", dependencies=["planner", "researcher"]),
+            CodexCliAgentSpec(id="reviewer", role="reviewer", goal="Review", dependencies=["builder"]),
+        ]
+        trace = runtime.run("fake codex swarm", agents)
+        assert trace.summary()["completed"] == 4
+        assert trace.topological_layers == [["planner", "researcher"], ["builder"], ["reviewer"]]
+        assert trace.ready_batches == [["planner", "researcher"], ["builder"], ["reviewer"]]
+        assert len(broker.to_a2a_task(trace.run_id)["artifacts"]) >= 4
+        builder = next(result for result in trace.results if result.agent_id == "builder")
+        builder_prompt = Path(builder.prompt_path).read_text(encoding="utf-8")
+        assert "summary for planner" in builder_prompt
+        assert "summary for researcher" in builder_prompt
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("CodexCliSwarm: dependency failure blocks downstream")
+def test_codex_cli_swarm_dependency_failure():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+    from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+prompt = args[-1]
+agent_id = re.search(r"Agent id: ([^\\n]+)", prompt).group(1).strip()
+status = "failed" if "FAIL_AGENT" in prompt else "completed"
+out.write_text(json.dumps({
+    "agent_id": agent_id,
+    "status": status,
+    "summary": f"{status} {agent_id}",
+    "artifacts": [{"name": "result", "content": prompt}],
+    "messages": [],
+    "handoffs": [],
+    "review_requests": [],
+    "review_responses": [],
+    "metadata": {},
+    "error": "forced failure" if status == "failed" else ""
+}), encoding="utf-8")
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+
+        broker = AgentBroker(str(Path(d) / "broker"))
+        runtime = CodexCliSwarmRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "swarm"),
+            max_parallel=4,
+            timeout_s=5,
+            keep_workdirs=False,
+            broker=broker,
+        )
+        trace = runtime.run(
+            "dependency failure",
+            [
+                CodexCliAgentSpec(id="planner", role="planner", goal="FAIL_AGENT"),
+                CodexCliAgentSpec(id="builder", role="builder", goal="Build", dependencies=["planner"]),
+            ],
+        )
+        by_id = {result.agent_id: result for result in trace.results}
+        assert by_id["planner"].status == "failed"
+        assert by_id["builder"].status == "failed"
+        assert "Dependency failed" in by_id["builder"].error
+        assert trace.summary()["failed"] == 2
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("Native Runtime: sandboxed fan-out")
 def test_native_runtime_fanout():
     from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
@@ -1314,6 +1451,8 @@ if __name__ == "__main__":
         test_broker_gateway_auth_and_limits,
         test_codex_app_bridge_ingestion,
         test_codex_app_bridge_dependency_validation,
+        test_codex_cli_swarm_fake_exec,
+        test_codex_cli_swarm_dependency_failure,
         test_native_runtime_fanout,
         test_native_runtime_dependency_scheduling,
         test_native_runtime_dependency_failures,
