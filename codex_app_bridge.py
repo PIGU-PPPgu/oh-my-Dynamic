@@ -395,6 +395,52 @@ def register_dispatch_plan(broker: AgentBroker, plan: CodexAppDispatchPlan) -> N
         )
 
 
+def complete_dispatch_plan(
+    broker: AgentBroker,
+    plan: CodexAppDispatchPlan,
+    final_answer: str = "",
+    status: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Mark a Codex App dispatch plan as a terminal broker workflow."""
+    events = broker.list_events(thread_id=plan.run_id)
+    completed = sum(1 for event in events if event.kind == "trace" and event.subject == "codex_subagent_completed")
+    failed = sum(1 for event in events if event.kind == "trace" and event.subject == "codex_subagent_failed")
+    terminal = completed + failed
+    if status is None:
+        if terminal < len(plan.agents):
+            raise ValueError("cannot infer workflow status before all planned agents return")
+        status = "failed" if failed else "completed"
+    if status not in ("completed", "failed"):
+        raise ValueError("status must be completed or failed")
+
+    artifact_ids: List[str] = []
+    if final_answer:
+        artifact = broker.publish_artifact(
+            "orchestrator",
+            "final_answer",
+            final_answer,
+            kind="final_answer",
+            metadata={"run_id": plan.run_id},
+            thread_id=plan.run_id,
+        )
+        artifact_ids.append(artifact.id)
+
+    broker.trace(
+        "orchestrator",
+        "workflow_completed" if status == "completed" else "workflow_failed",
+        final_answer or f"Codex App dispatch plan {status}.",
+        thread_id=plan.run_id,
+        artifact_ids=artifact_ids,
+        metadata={
+            "backend": "codex_app_bridge",
+            "completed": completed,
+            "failed": failed,
+            "planned_agents": len(plan.agents),
+        },
+    )
+    return broker.to_a2a_task(plan.run_id)
+
+
 def _extract_json_object(text: str) -> Dict[str, Any]:
     fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
     if fenced:

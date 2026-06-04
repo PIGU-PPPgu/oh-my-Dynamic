@@ -252,14 +252,19 @@ class CodexCliSwarmRuntime:
         order = {spec.id: index for index, spec in enumerate(spec for layer in layers for spec in layer)}
         results = sorted(results_by_id.values(), key=lambda result: order[result.agent_id])
         if self.broker:
+            completed_count = sum(1 for result in results if result.status == "completed")
+            failed_count = sum(1 for result in results if result.status == "failed")
+            terminal_subject = "workflow_completed" if failed_count == 0 else "workflow_failed"
             self.broker.trace(
                 "orchestrator",
-                "codex_cli_swarm_completed",
-                f"Codex CLI swarm completed with {len(results)} agents.",
+                terminal_subject,
+                f"Codex CLI swarm finished with {completed_count} completed and {failed_count} failed agents.",
                 thread_id=run_id,
                 metadata={
-                    "completed": sum(1 for result in results if result.status == "completed"),
-                    "failed": sum(1 for result in results if result.status == "failed"),
+                    "backend": "codex_cli_swarm",
+                    "backend_event": "codex_cli_swarm_completed" if failed_count == 0 else "codex_cli_swarm_failed",
+                    "completed": completed_count,
+                    "failed": failed_count,
                 },
             )
 

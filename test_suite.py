@@ -698,6 +698,7 @@ def test_codex_app_bridge_ingestion():
     from codex_app_bridge import (
         CodexSubagentSpec,
         build_subagent_prompt,
+        complete_dispatch_plan,
         create_dispatch_plan,
         ingest_subagent_envelope,
         parse_subagent_envelope,
@@ -781,7 +782,29 @@ def test_codex_app_bridge_ingestion():
         assert "review_request" in kinds
         assert any(event.subject == "codex_subagent_completed" for event in events)
         snapshot = broker.to_a2a_task(plan.run_id)
+        assert snapshot["status"]["state"] == "working"
         assert snapshot["artifacts"][0]["name"] == "plan"
+        for agent_id, summary in [("builder", "Build ready."), ("reviewer", "Review ready.")]:
+            ingest_subagent_envelope(
+                broker,
+                plan.run_id,
+                parse_subagent_envelope(json.dumps({
+                    "agent_id": agent_id,
+                    "status": "completed",
+                    "summary": summary,
+                    "artifacts": [{"name": "result", "kind": "analysis", "content": summary}],
+                    "messages": [],
+                    "handoffs": [],
+                    "review_requests": [],
+                    "review_responses": [],
+                    "metadata": {},
+                    "error": "",
+                })),
+                role=agent_id,
+            )
+        completed_snapshot = complete_dispatch_plan(broker, plan, final_answer="Dispatch complete.")
+        assert completed_snapshot["status"]["state"] == "completed"
+        assert any(item["name"] == "final_answer" for item in completed_snapshot["artifacts"])
 
         bad = parse_subagent_envelope('{"agent_id":"planner","status":"completed","summary":"bad","messages":[{"to_agent":"orchestrator","subject":"bad","body":"bad","artifact_names":["missing"]}]}')
         try:
@@ -904,6 +927,7 @@ sys.exit(0)
         ]
         trace = runtime.run("fake codex swarm", agents)
         assert trace.summary()["completed"] == 4
+        assert broker.to_a2a_task(trace.run_id)["status"]["state"] == "completed"
         assert trace.topological_layers == [["planner", "researcher"], ["builder"], ["reviewer"]]
         assert trace.ready_batches == [["planner", "researcher"], ["builder"], ["reviewer"]]
         assert len(broker.to_a2a_task(trace.run_id)["artifacts"]) >= 4
@@ -984,6 +1008,7 @@ sys.exit(0)
         assert by_id["builder"].status == "failed"
         assert "Dependency failed" in by_id["builder"].error
         assert trace.summary()["failed"] == 2
+        assert broker.to_a2a_task(trace.run_id)["status"]["state"] == "failed"
     finally:
         shutil.rmtree(d, ignore_errors=True)
 

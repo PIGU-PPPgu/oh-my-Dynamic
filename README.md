@@ -320,7 +320,7 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 - A2A-style：`a2a_agent_card()` 返回 Agent Card；`A2ATaskStore` 提供轻量 Task submit/get 结构，可用于后续 HTTP、SSE 或网关封装。
 - AgentBroker：`AgentBroker` 可注册 agents，发送 direct/broadcast message，发布 artifacts，创建 task handoff，发起 review request/response，并导出 A2A-style task snapshot。
 - BrokerPolicy：默认要求 agent 注册，校验 sender/receiver、artifact 引用、消息/工件大小和 content type，避免无约束上下文串流。
-- Codex App bridge：`codex_app_bridge.py` 生成 App-native subagent dispatch plan 和 prompt，要求真实 Codex subagents 返回 JSON envelope，再把 envelope ingest 到 `AgentBroker`。
+- Codex App bridge：`codex_app_bridge.py` 生成 App-native subagent dispatch plan 和 prompt，要求真实 Codex subagents 返回 JSON envelope，再把 envelope ingest 到 `AgentBroker`。parent orchestrator 可调用 `complete_dispatch_plan()` 写入 canonical `workflow_completed/workflow_failed`，让 A2A-style task snapshot 进入 terminal state。
 - Codex CLI swarm：`CodexCliSwarmRuntime` 生成每个 worker 的 prompt，经 stdin 调用 `codex exec --output-last-message`，把 stdout/stderr 流式写入文件，解析 JSON envelope，并把 artifacts/messages/review trace ingest 到同一个 `AgentBroker`。每次 run 会写 `manifest.json` 和 `trace.json` 方便复盘。
 - Native runtime 集成：`SandboxedFanoutRuntime(..., broker=AgentBroker(...))` 会把 worker started/completed、worker artifacts、final answer 和 workflow completion 写入 broker trace。
 - Gateway：`python broker_gateway.py --host 127.0.0.1 --port 8765` 会提供 `/.well-known/agent.json`、`GET/POST /agents`、`GET /agents/{id}/inbox`、`POST /tasks`、`GET /tasks/{id}`、`GET /tasks/{id}/events`、`POST /tasks/{id}/messages`、`/artifacts`、`/handoffs`、`/review-requests`、`/review-responses` 和 `/complete`。
