@@ -1,0 +1,29 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Verify install assets
+        run: |
+          bash -n install_plugin.sh
+          python -m json.tool .agents/plugins/marketplace.json >/dev/null
+      - name: Compile
+        run: python -m py_compile *.py examples/*.py
+      - name: Test
+        run: python test_suite.py
+      - name: CLI help
+        run: |
+          python -m codex_cli_swarm --help >/dev/null
+          python examples/codex_cli_swarm_review.py --help >/dev/null

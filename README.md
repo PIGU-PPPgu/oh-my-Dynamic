@@ -348,6 +348,12 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 ### Layer 3: 端到端测试
 - 完整编排流程 + 真实 API 调用
 
+发布和真实 Codex CLI swarm 验证：
+
+- [Release Checklist](docs/RELEASE_CHECKLIST.md)
+- [Codex CLI Swarm Smoke Tests](docs/CODEX_CLI_SWARM_SMOKE.md)
+- [Changelog](CHANGELOG.md)
+
 ## 贡献
 
 欢迎 PR！请确保：

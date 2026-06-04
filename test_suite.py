@@ -1097,6 +1097,86 @@ sys.exit(0)
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("CodexCliSwarm: process failure modes preserve trace")
+def test_codex_cli_swarm_failure_modes():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+    from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+import time
+
+args = sys.argv[1:]
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+prompt = sys.stdin.read()
+agent_id = re.search(r"Agent id: ([^\\n]+)", prompt).group(1).strip()
+if "NONZERO" in prompt:
+    print("simulated stderr failure", file=sys.stderr)
+    sys.exit(7)
+if "MALFORMED" in prompt:
+    out.write_text("{not-json", encoding="utf-8")
+    sys.exit(0)
+if "TIMEOUT" in prompt:
+    time.sleep(5)
+payload = {
+    "agent_id": agent_id,
+    "status": "completed",
+    "summary": f"ok {agent_id}",
+    "artifacts": [{"name": "result", "content": "ok"}],
+    "messages": [],
+    "handoffs": [],
+    "review_requests": [],
+    "review_responses": [],
+    "metadata": {},
+    "error": ""
+}
+out.write_text(json.dumps(payload), encoding="utf-8")
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+
+        broker = AgentBroker(str(Path(d) / "broker"))
+        runtime = CodexCliSwarmRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "swarm"),
+            max_parallel=3,
+            timeout_s=1,
+            keep_workdirs=False,
+            broker=broker,
+        )
+        trace = runtime.run(
+            "failure modes",
+            [
+                CodexCliAgentSpec(id="nonzero", role="worker", goal="NONZERO"),
+                CodexCliAgentSpec(id="malformed", role="worker", goal="MALFORMED"),
+                CodexCliAgentSpec(id="timeout", role="worker", goal="TIMEOUT"),
+            ],
+        )
+        by_id = {result.agent_id: result for result in trace.results}
+        assert trace.summary()["failed"] == 3
+        assert by_id["nonzero"].returncode == 7
+        assert "simulated stderr failure" in by_id["nonzero"].error
+        assert "ValueError" in by_id["malformed"].error
+        assert "timed out" in by_id["timeout"].error
+        assert broker.to_a2a_task(trace.run_id)["status"]["state"] == "failed"
+        assert Path(trace.trace_path).exists()
+        assert Path(trace.manifest_path).exists()
+        assert not Path(trace.swarm_root).exists()
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("Native Runtime: sandboxed fan-out")
 def test_native_runtime_fanout():
     from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
@@ -1572,6 +1652,7 @@ if __name__ == "__main__":
         test_codex_app_bridge_dependency_validation,
         test_codex_cli_swarm_fake_exec,
         test_codex_cli_swarm_dependency_failure,
+        test_codex_cli_swarm_failure_modes,
         test_native_runtime_fanout,
         test_native_runtime_dependency_scheduling,
         test_native_runtime_dependency_failures,
