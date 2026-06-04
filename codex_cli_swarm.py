@@ -297,8 +297,6 @@ class CodexCliSwarmRuntime:
             str(self.codex_cwd),
             "--sandbox",
             spec.sandbox,
-            "--ask-for-approval",
-            spec.approval_policy,
             "--skip-git-repo-check",
             "--ephemeral",
             "--output-last-message",
