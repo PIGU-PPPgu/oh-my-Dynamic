@@ -859,7 +859,9 @@ import sys
 
 args = sys.argv[1:]
 out = pathlib.Path(args[args.index("--output-last-message") + 1])
-prompt = args[-1]
+if args[-1] != "-":
+    raise SystemExit("expected prompt to be read from stdin via '-'")
+prompt = sys.stdin.read()
 match = re.search(r"Agent id: ([^\\n]+)", prompt)
 agent_id = match.group(1).strip()
 status = "failed" if "FAIL_AGENT" in prompt else "completed"
@@ -909,6 +911,12 @@ sys.exit(0)
         builder_prompt = Path(builder.prompt_path).read_text(encoding="utf-8")
         assert "summary for planner" in builder_prompt
         assert "summary for researcher" in builder_prompt
+        assert Path(trace.manifest_path).exists()
+        assert Path(trace.trace_path).exists()
+        manifest = json.loads(Path(trace.manifest_path).read_text(encoding="utf-8"))
+        assert manifest["max_parallel"] == 2
+        trace_payload = json.loads(Path(trace.trace_path).read_text(encoding="utf-8"))
+        assert trace_payload["run_id"] == trace.run_id
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -931,7 +939,9 @@ import sys
 
 args = sys.argv[1:]
 out = pathlib.Path(args[args.index("--output-last-message") + 1])
-prompt = args[-1]
+if args[-1] != "-":
+    raise SystemExit("expected prompt to be read from stdin via '-'")
+prompt = sys.stdin.read()
 agent_id = re.search(r"Agent id: ([^\\n]+)", prompt).group(1).strip()
 status = "failed" if "FAIL_AGENT" in prompt else "completed"
 out.write_text(json.dumps({

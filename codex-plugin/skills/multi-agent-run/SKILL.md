@@ -16,7 +16,7 @@ When triggered inside Codex App, this skill must work immediately after installa
 - Do **not** require provider API keys or `.env` configuration for App-native subagent execution.
 - Do **not** tell the user to use Codex CLI.
 - Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
-- Exception: if the user explicitly asks for dozens/hundreds of real Codex agents, maximum fan-out, CLI swarm, or equivalent large-scale execution, use the local `codex_cli_swarm.py` backend instead of the ordinary in-chat fallback. This backend launches many `codex exec` processes, each with an isolated prompt/output file, and ingests their JSON envelopes into AgentBroker.
+- Exception: if the user explicitly asks for dozens/hundreds of real Codex agents, maximum fan-out, CLI swarm, or equivalent large-scale execution, use the local `codex_cli_swarm.py` backend instead of the ordinary in-chat fallback. This backend launches many `codex exec` processes, feeds each worker prompt through stdin, streams stdout/stderr to per-agent files, keeps a run manifest/trace, and ingests JSON envelopes into AgentBroker.
 - Use the Codex App bridge contract for real subagents: dispatch plan, per-subagent prompt, structured JSON envelope, and AgentBroker ingestion.
 - Coordinate subagent collaboration through registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and auditable synthesis. Prefer parent-orchestrated A2A-style exchange over hidden peer-to-peer communication.
 - Use `broker_gateway.py` only when the user asks for a local HTTP/SSE transport surface or external tool integration; ordinary Codex App usage should stay inside the App-native subagent path.

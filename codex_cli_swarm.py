@@ -16,6 +16,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -92,6 +93,8 @@ class CodexCliSwarmTrace:
     ready_batches: List[List[str]]
     broker_thread_id: str = ""
     broker_event_count: int = 0
+    manifest_path: str = ""
+    trace_path: str = ""
 
     def summary(self) -> Dict[str, object]:
         completed = sum(1 for result in self.results if result.status == "completed")
@@ -124,6 +127,8 @@ class CodexCliSwarmTrace:
             "ready_batches": self.ready_batches,
             "broker_thread_id": self.broker_thread_id,
             "broker_event_count": self.broker_event_count,
+            "manifest_path": self.manifest_path,
+            "trace_path": self.trace_path,
         }
 
 
@@ -137,6 +142,7 @@ class CodexCliSwarmRuntime:
         workspace_root: str = ".orchestry/codex_cli_swarm",
         max_parallel: int = 16,
         timeout_s: int = 1800,
+        total_timeout_s: Optional[int] = None,
         keep_workdirs: bool = True,
         broker: Optional[AgentBroker] = None,
         inherited_env: Optional[Dict[str, str]] = None,
@@ -145,11 +151,15 @@ class CodexCliSwarmRuntime:
             raise ValueError("max_parallel must be at least 1")
         if timeout_s < 1:
             raise ValueError("timeout_s must be at least 1")
+        if total_timeout_s is not None and total_timeout_s < 1:
+            raise ValueError("total_timeout_s must be at least 1 when provided")
         self.codex_bin = codex_bin
         self.codex_cwd = Path(codex_cwd).resolve()
-        self.workspace_root = Path(workspace_root)
+        root = Path(workspace_root).expanduser()
+        self.workspace_root = root.resolve() if root.is_absolute() else (Path.cwd() / root).resolve()
         self.max_parallel = max_parallel
         self.timeout_s = timeout_s
+        self.total_timeout_s = total_timeout_s
         self.keep_workdirs = keep_workdirs
         self.broker = broker
         self.inherited_env = inherited_env or {}
@@ -168,6 +178,12 @@ class CodexCliSwarmRuntime:
         start = time.time()
         swarm_root = self.workspace_root / run_id
         swarm_root.mkdir(parents=True, exist_ok=True)
+        manifest_path = swarm_root / "manifest.json"
+        trace_path = swarm_root / "trace.json"
+        self._write_json(
+            manifest_path,
+            self._build_manifest(run_id, goal, agents, started_at, swarm_root, layer_ids, ready_batches),
+        )
 
         if self.broker:
             self.broker.register_agent("orchestrator", "orchestrator", ["plan", "reduce"])
@@ -211,6 +227,11 @@ class CodexCliSwarmRuntime:
                     runnable.append(spec)
 
             for batch in self._agent_batches(runnable, self.max_parallel):
+                remaining_timeout = self._remaining_timeout_s(start)
+                if remaining_timeout is not None and remaining_timeout <= 0:
+                    for spec in batch:
+                        results_by_id[spec.id] = self._total_timeout_result(spec, swarm_root / spec.id, run_id)
+                    continue
                 with ThreadPoolExecutor(max_workers=len(batch)) as pool:
                     futures = {
                         pool.submit(
@@ -220,6 +241,7 @@ class CodexCliSwarmRuntime:
                             swarm_root / spec.id,
                             {dep_id: results_by_id[dep_id] for dep_id in spec.dependencies},
                             run_id,
+                            remaining_timeout,
                         ): spec
                         for spec in batch
                     }
@@ -257,9 +279,19 @@ class CodexCliSwarmRuntime:
             ready_batches=ready_batches,
             broker_thread_id=run_id if self.broker else "",
             broker_event_count=broker_event_count,
+            manifest_path=str(manifest_path.resolve()),
+            trace_path=str(trace_path.resolve()),
         )
 
+        self._write_json(trace_path, trace.to_dict())
         if not self.keep_workdirs:
+            durable_manifest_path = self.workspace_root / f"{run_id}.manifest.json"
+            durable_trace_path = self.workspace_root / f"{run_id}.trace.json"
+            shutil.copy2(manifest_path, durable_manifest_path)
+            shutil.copy2(trace_path, durable_trace_path)
+            trace.manifest_path = str(durable_manifest_path.resolve())
+            trace.trace_path = str(durable_trace_path.resolve())
+            self._write_json(durable_trace_path, trace.to_dict())
             shutil.rmtree(swarm_root, ignore_errors=True)
         return trace
 
@@ -270,6 +302,7 @@ class CodexCliSwarmRuntime:
         work_dir: Path,
         dependency_results: Dict[str, CodexCliAgentResult],
         run_id: str,
+        timeout_s: Optional[int],
     ) -> CodexCliAgentResult:
         work_dir.mkdir(parents=True, exist_ok=True)
         prompt_path = work_dir / "prompt.md"
@@ -302,25 +335,52 @@ class CodexCliSwarmRuntime:
             "--output-last-message",
             str(output_path),
             *spec.extra_args,
-            prompt,
+            "-",
         ]
         env = os.environ.copy()
         env.update(self.inherited_env)
+        worker_timeout_s = timeout_s if timeout_s is not None else self.timeout_s
+        worker_timeout_s = max(1, min(self.timeout_s, worker_timeout_s))
 
         try:
-            completed = subprocess.run(
-                command,
-                cwd=str(self.codex_cwd),
-                env=env,
-                capture_output=True,
-                text=True,
-                timeout=self.timeout_s,
-            )
-            stdout_path.write_text(completed.stdout or "", encoding="utf-8")
-            stderr_path.write_text(completed.stderr or "", encoding="utf-8")
-            raw_output = output_path.read_text(encoding="utf-8") if output_path.exists() else completed.stdout
-            if completed.returncode != 0:
-                error = completed.stderr.strip() or f"codex exec exited with {completed.returncode}"
+            with (
+                prompt_path.open("r", encoding="utf-8") as prompt_file,
+                stdout_path.open("w", encoding="utf-8") as stdout_file,
+                stderr_path.open("w", encoding="utf-8") as stderr_file,
+            ):
+                process = subprocess.Popen(
+                    command,
+                    cwd=str(self.codex_cwd),
+                    env=env,
+                    stdin=prompt_file,
+                    stdout=stdout_file,
+                    stderr=stderr_file,
+                    text=True,
+                )
+                try:
+                    returncode = process.wait(timeout=worker_timeout_s)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+                    return self._failed_process_result(
+                        spec,
+                        work_dir,
+                        prompt_path,
+                        output_path,
+                        stdout_path,
+                        stderr_path,
+                        started_at,
+                        start,
+                        -1,
+                        f"codex exec timed out after {worker_timeout_s}s",
+                        run_id,
+                    )
+
+            stdout_text = stdout_path.read_text(encoding="utf-8") if stdout_path.exists() else ""
+            stderr_text = stderr_path.read_text(encoding="utf-8") if stderr_path.exists() else ""
+            raw_output = output_path.read_text(encoding="utf-8") if output_path.exists() else stdout_text
+            if returncode != 0:
+                error = stderr_text.strip() or f"codex exec exited with {returncode}"
                 return self._failed_process_result(
                     spec,
                     work_dir,
@@ -330,7 +390,7 @@ class CodexCliSwarmRuntime:
                     stderr_path,
                     started_at,
                     start,
-                    completed.returncode,
+                    returncode,
                     error,
                     run_id,
                 )
@@ -347,7 +407,7 @@ class CodexCliSwarmRuntime:
                 started_at=started_at,
                 completed_at=_now(),
                 duration_s=time.time() - start,
-                returncode=completed.returncode,
+                returncode=returncode,
                 work_dir=str(work_dir.resolve()),
                 prompt_path=str(prompt_path.resolve()),
                 output_path=str(output_path.resolve()),
@@ -356,22 +416,6 @@ class CodexCliSwarmRuntime:
                 artifact_ids=dict(ingested.get("artifact_ids", {})),
                 event_ids=list(ingested.get("event_ids", [])),
                 error=envelope.error,
-            )
-        except subprocess.TimeoutExpired as exc:
-            stdout_path.write_text(exc.stdout or "", encoding="utf-8")
-            stderr_path.write_text(exc.stderr or "", encoding="utf-8")
-            return self._failed_process_result(
-                spec,
-                work_dir,
-                prompt_path,
-                output_path,
-                stdout_path,
-                stderr_path,
-                started_at,
-                start,
-                -1,
-                f"codex exec timed out after {self.timeout_s}s",
-                run_id,
             )
         except Exception as exc:
             return self._failed_process_result(
@@ -535,6 +579,63 @@ class CodexCliSwarmRuntime:
             parts.append(f"## {dep_id} ({result.role}, {result.status})\n{body[:4000]}")
         return "\n\n".join(parts)
 
+    def _remaining_timeout_s(self, start: float) -> Optional[int]:
+        if self.total_timeout_s is None:
+            return None
+        remaining = self.total_timeout_s - (time.time() - start)
+        if remaining <= 0:
+            return 0
+        return max(1, int(remaining))
+
+    def _total_timeout_result(self, spec: CodexCliAgentSpec, work_dir: Path, run_id: str) -> CodexCliAgentResult:
+        work_dir.mkdir(parents=True, exist_ok=True)
+        started_at = _now()
+        error = f"Codex CLI swarm total timeout reached before starting {spec.id}"
+        return self._failed_process_result(
+            spec,
+            work_dir,
+            work_dir / "prompt.md",
+            work_dir / "last_message.txt",
+            work_dir / "stdout.txt",
+            work_dir / "stderr.txt",
+            started_at,
+            time.time(),
+            -1,
+            error,
+            run_id,
+        )
+
+    def _build_manifest(
+        self,
+        run_id: str,
+        goal: str,
+        agents: List[CodexCliAgentSpec],
+        started_at: str,
+        swarm_root: Path,
+        topological_layers: List[List[str]],
+        ready_batches: List[List[str]],
+    ) -> Dict[str, object]:
+        return {
+            "run_id": run_id,
+            "goal": goal,
+            "started_at": started_at,
+            "codex_bin": self.codex_bin,
+            "codex_cwd": str(self.codex_cwd),
+            "workspace_root": str(self.workspace_root),
+            "swarm_root": str(swarm_root.resolve()),
+            "max_parallel": self.max_parallel,
+            "timeout_s": self.timeout_s,
+            "total_timeout_s": self.total_timeout_s,
+            "keep_workdirs": self.keep_workdirs,
+            "topological_layers": topological_layers,
+            "ready_batches": ready_batches,
+            "agents": [asdict(agent) for agent in agents],
+        }
+
+    def _write_json(self, path: Path, payload: Dict[str, object]) -> None:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+
     def _topological_layers(self, agents: List[CodexCliAgentSpec]) -> List[List[CodexCliAgentSpec]]:
         specs_by_id: Dict[str, CodexCliAgentSpec] = {}
         for spec in agents:
@@ -605,7 +706,9 @@ def main() -> None:
     parser.add_argument("--workspace-root", default=".orchestry/codex_cli_swarm")
     parser.add_argument("--broker-dir", default=".orchestry/agent_broker")
     parser.add_argument("--timeout-s", type=int, default=1800)
-    parser.add_argument("--keep-workdirs", action="store_true")
+    parser.add_argument("--total-timeout-s", type=int, default=None)
+    parser.add_argument("--discard-workdirs", action="store_true", help="Delete per-agent workdirs after writing durable trace files.")
+    parser.add_argument("--keep-workdirs", action="store_true", help="Deprecated no-op; workdirs are kept by default.")
     args = parser.parse_args()
 
     if args.agents < 1:
@@ -618,7 +721,8 @@ def main() -> None:
         workspace_root=args.workspace_root,
         max_parallel=args.max_parallel,
         timeout_s=args.timeout_s,
-        keep_workdirs=args.keep_workdirs,
+        total_timeout_s=args.total_timeout_s,
+        keep_workdirs=not args.discard_workdirs,
         broker=broker,
     )
     specs = [
