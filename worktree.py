@@ -20,12 +20,9 @@ Git Worktree 隔离 —— 每个 Agent 独立工作目录。
 """
 
 from __future__ import annotations
-import os
 import re
 import subprocess
-import shutil
 import json
-import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -110,8 +107,10 @@ class WorktreeManager:
                 "created_at": wt.created_at,
                 "status": wt.status,
             }
-        with open(self._state_file, "w") as f:
+        tmp_path = self._state_file.with_suffix(".tmp")
+        with open(tmp_path, "w") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        tmp_path.replace(self._state_file)
     
     def _git(self, *args: str, cwd: Optional[str] = None) -> str:
         """执行 git 命令"""
@@ -129,12 +128,28 @@ class WorktreeManager:
     def _get_current_branch(self) -> str:
         """获取当前分支名"""
         return self._git("branch", "--show-current") or "main"
+
+    def _branch_exists(self, branch_name: str) -> bool:
+        result = subprocess.run(
+            ["git", "show-ref", "--verify", "--quiet", f"refs/heads/{branch_name}"],
+            cwd=str(self.repo_path),
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        return result.returncode == 0
+
+    def _delete_branch_if_exists(self, branch_name: str) -> None:
+        if self._branch_exists(branch_name):
+            self._git("branch", "-D", branch_name)
     
     def create(
         self, 
         agent_name: str, 
         base_branch: Optional[str] = None,
         agent_id: str = "",
+        branch_name: Optional[str] = None,
+        worktree_path: Optional[str] = None,
     ) -> Worktree:
         """
         为一个 Agent 创建独立的 git worktree。
@@ -153,29 +168,23 @@ class WorktreeManager:
             raise ValueError(f"Worktree '{agent_name}' 已存在")
         
         base = base_branch or self._get_current_branch()
-        branch_name = f"agent/{agent_name}"
-        worktree_path = str(self.worktrees_dir / agent_name)
+        branch_name = branch_name or f"agent/{agent_name}"
+        worktree_path = str(Path(worktree_path).resolve()) if worktree_path else str(self.worktrees_dir / agent_name)
         
         # 创建 worktrees 目录
         self.worktrees_dir.mkdir(exist_ok=True)
-        
-        # 确保 .worktrees 在 gitignore 里
-        gitignore = self.repo_path / ".gitignore"
-        if gitignore.exists():
-            content = gitignore.read_text()
-            if ".worktrees/" not in content:
-                gitignore.write_text(content + "\n.worktrees/\n")
-        else:
-            gitignore.write_text(".worktrees/\n")
-        
+
         # 创建分支 + worktree
         try:
             self._git("branch", branch_name, base)
         except RuntimeError:
-            # 分支可能已存在（之前 abandon 的），删除后重建
-            self._git("branch", "-D", branch_name)
+            if not self._branch_exists(branch_name):
+                raise
+            # 分支可能已存在（之前 abandon 的），删除后重建。
+            self._delete_branch_if_exists(branch_name)
             self._git("branch", branch_name, base)
         
+        Path(worktree_path).parent.mkdir(parents=True, exist_ok=True)
         self._git("worktree", "add", worktree_path, branch_name)
         
         wt = Worktree(
@@ -266,7 +275,7 @@ class WorktreeManager:
             self._git("worktree", "remove", wt.path, "--force")
         
         try:
-            self._git("branch", "-D", wt.branch)
+            self._delete_branch_if_exists(wt.branch)
         except RuntimeError:
             pass
         

@@ -20,10 +20,12 @@ jobs:
           bash -n install_plugin.sh
           python -m json.tool .agents/plugins/marketplace.json >/dev/null
       - name: Compile
-        run: python -m py_compile *.py examples/*.py
+        run: python -m py_compile *.py examples/*.py scripts/*.py
       - name: Test
         run: python test_suite.py
       - name: CLI help
         run: |
           python -m codex_cli_swarm --help >/dev/null
+          python -m dynamic_workflow --help >/dev/null
+          python scripts/record_swarm_evidence.py --help >/dev/null
           python examples/codex_cli_swarm_review.py --help >/dev/null

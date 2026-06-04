@@ -764,6 +764,79 @@ def test_broker_gateway_auth_and_limits():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("Protocol: artifact compatibility, thread filtering, and event cursor")
+def test_protocol_artifact_compatibility_and_cursor():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+    from broker_gateway import BrokerGateway
+
+    d = tempfile.mkdtemp()
+    try:
+        broker = AgentBroker(str(Path(d) / "broker"))
+        broker.register_agent("planner", "planner")
+        broker.register_agent("builder", "builder")
+
+        old_record = {
+            "id": "artifact_old",
+            "producer": "planner",
+            "name": "old-plan",
+            "kind": "plan",
+            "content": "old artifact without thread fields",
+            "content_type": "text/plain",
+            "metadata": {},
+            "created_at": "2026-01-01T00:00:00+00:00",
+        }
+        broker.artifacts_path.write_text(json.dumps(old_record) + "\n", encoding="utf-8")
+        assert broker.list_artifacts()[0].thread_id == "default"
+        assert broker.list_artifacts()[0].task_id == ""
+
+        first = broker.send_message("planner", "builder", "first", "one", thread_id="thread-a", artifact_ids=["artifact_old"])
+        broker.send_message("builder", "planner", "second", "two", thread_id="thread-a")
+        leaked = broker.publish_artifact("planner", "other-thread", "secret-ish", thread_id="thread-b")
+        snapshot = broker.to_a2a_task("thread-a")
+        artifact_ids = {item["artifactId"] for item in snapshot["artifacts"]}
+        assert "artifact_old" in artifact_ids
+        assert leaked.id not in artifact_ids
+
+        gateway = BrokerGateway(broker)
+        cursor_snapshot = gateway.list_events("thread-a", after=first.id)
+        assert all(event["id"] != first.id for event in cursor_snapshot["events"])
+        assert [event["subject"] for event in cursor_snapshot["events"]] == ["second"]
+        card = gateway.agent_card()
+        assert card["capabilities"]["capabilityDiscovery"]
+        assert "registeredAgents" in card["capabilities"]
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("BrokerReducer: artifacts, errors, reviews, dependencies")
+def test_broker_reducer_uses_full_broker_evidence():
+    import shutil, tempfile
+    from agent_broker import AgentBroker
+    from broker_reducer import reduce_broker_thread
+
+    d = tempfile.mkdtemp()
+    try:
+        broker = AgentBroker(str(Path(d) / "broker"))
+        broker.register_agent("builder", "builder", metadata={"dependencies": ["planner"]})
+        broker.register_agent("reviewer", "reviewer")
+        artifact = broker.publish_artifact("builder", "patch", "diff --git a/a b/a", kind="worktree_diff", thread_id="thread-r")
+        broker.trace("builder", "codex_subagent_completed", "Builder completed.", thread_id="thread-r", artifact_ids=[artifact.id])
+        broker.trace("reviewer", "codex_subagent_failed", "Reviewer failed.", thread_id="thread-r")
+        broker.request_review("builder", "reviewer", "task-1", "Review patch", "Please inspect.", thread_id="thread-r", artifact_ids=[artifact.id])
+        broker.respond_review("reviewer", "builder", "task-1", "Review result", "Needs test coverage.", "changes_requested", thread_id="thread-r")
+
+        result = reduce_broker_thread(broker, "thread-r", "reduce evidence")
+        assert result.terminal_state == "partial"
+        assert artifact.id in result.artifact_ids
+        assert "Failed agents: 1" in result.final_answer
+        assert "Review responses: 1" in result.final_answer
+        assert "agent(s) failed" in result.risk_summary
+        assert result.recommended_next_agents
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("CodexAppBridge: dispatch envelope ingestion")
 def test_codex_app_bridge_ingestion():
     import shutil, tempfile
@@ -1196,6 +1269,333 @@ sys.exit(0)
         assert not Path(trace.swarm_root).exists()
     finally:
         shutil.rmtree(d, ignore_errors=True)
+
+
+@test("CodexCliSwarm: worktree mode creates isolated patch artifacts")
+def test_codex_cli_swarm_worktree_mode_patch_artifacts():
+    import shutil, tempfile, subprocess
+    from agent_broker import AgentBroker
+    from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+
+    d = tempfile.mkdtemp()
+    init_test_git_repo(d)
+    try:
+        Path(d, "a.txt").write_text("base a\n", encoding="utf-8")
+        Path(d, "b.txt").write_text("base b\n", encoding="utf-8")
+        subprocess.run(["git", "add", "a.txt", "b.txt"], cwd=d, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "base files"], cwd=d, check=True, capture_output=True)
+
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+cwd = pathlib.Path(args[args.index("--cd") + 1])
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+prompt = sys.stdin.read()
+agent_id = re.search(r"Agent id: ([^\\n]+)", prompt).group(1).strip()
+target = "a.txt" if agent_id == "writer_a" else "b.txt"
+(cwd / target).write_text(f"changed by {agent_id}\\n", encoding="utf-8")
+out.write_text(json.dumps({
+    "agent_id": agent_id,
+    "status": "completed",
+    "summary": f"changed {target}",
+    "artifacts": [{"name": "result", "content": target}],
+    "messages": [],
+    "handoffs": [],
+    "review_requests": [],
+    "review_responses": [],
+    "metadata": {},
+    "error": ""
+}), encoding="utf-8")
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+
+        broker = AgentBroker(str(Path(d) / "broker"))
+        runtime = CodexCliSwarmRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "swarm"),
+            worktree_root=str(Path(d) / ".orchestry" / "worktrees"),
+            max_parallel=2,
+            timeout_s=5,
+            broker=broker,
+        )
+        trace = runtime.run(
+            "write isolated patches",
+            [
+                CodexCliAgentSpec(id="writer_a", role="writer", goal="Change a", workspace_mode="worktree", write_intent="patch"),
+                CodexCliAgentSpec(id="writer_b", role="writer", goal="Change b", workspace_mode="worktree", write_intent="patch"),
+            ],
+        )
+        assert trace.summary()["completed"] == 2
+        assert Path(d, "a.txt").read_text(encoding="utf-8") == "base a\n"
+        assert Path(d, "b.txt").read_text(encoding="utf-8") == "base b\n"
+        assert len({result.agent_cwd for result in trace.results}) == 2
+        worktree_artifacts = [artifact for artifact in broker.list_artifacts() if artifact.kind == "worktree_diff"]
+        names = {artifact.name for artifact in worktree_artifacts}
+        assert {"diff_stat", "patch", "changed_files"}.issubset(names)
+        assert any("changed by writer_a" in artifact.content for artifact in worktree_artifacts if artifact.name == "patch")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("CodexCliSwarm: worktree failure preserves failed envelope and diff")
+def test_codex_cli_swarm_worktree_failure_preserves_diff():
+    import shutil, tempfile, subprocess
+    from agent_broker import AgentBroker
+    from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+
+    d = tempfile.mkdtemp()
+    init_test_git_repo(d)
+    try:
+        Path(d, "failing.txt").write_text("base\n", encoding="utf-8")
+        subprocess.run(["git", "add", "failing.txt"], cwd=d, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "base file"], cwd=d, check=True, capture_output=True)
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+cwd = pathlib.Path(args[args.index("--cd") + 1])
+prompt = sys.stdin.read()
+agent_id = re.search(r"Agent id: ([^\\n]+)", prompt).group(1).strip()
+(cwd / "failing.txt").write_text(f"partial change by {agent_id}\\n", encoding="utf-8")
+print("simulated worker failure", file=sys.stderr)
+sys.exit(9)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+        broker = AgentBroker(str(Path(d) / "broker"))
+        runtime = CodexCliSwarmRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "swarm"),
+            worktree_root=str(Path(d) / ".orchestry" / "worktrees"),
+            max_parallel=1,
+            timeout_s=5,
+            broker=broker,
+        )
+        trace = runtime.run(
+            "failure diff",
+            [CodexCliAgentSpec(id="failing_writer", role="writer", goal="Fail", workspace_mode="worktree", write_intent="patch")],
+        )
+        result = trace.results[0]
+        assert result.status == "failed"
+        assert result.returncode == 9
+        assert Path(result.worktree_path).exists()
+        patch_artifacts = [artifact for artifact in broker.list_artifacts() if artifact.kind == "worktree_diff" and artifact.name == "patch"]
+        assert any("partial change by failing_writer" in artifact.content for artifact in patch_artifacts)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("DynamicWorkflow: planner JSON validation")
+def test_dynamic_workflow_planner_json_validation():
+    from dynamic_workflow import parse_planner_decision, parse_replan_decision
+
+    decision = parse_planner_decision({
+        "agents": [
+            {"id": "planner", "role": "planner", "goal": "Plan"},
+            {"id": "builder", "role": "builder", "goal": "Build", "dependencies": ["planner"]},
+        ],
+        "dependencies": {"builder": ["planner"]},
+        "max_parallel": 2,
+        "confidence": 0.8,
+    })
+    assert decision.max_parallel == 2
+    assert decision.agents[1].dependencies == ["planner"]
+
+    invalid_payloads = [
+        {"agents": [{"id": "missing_role", "goal": "x"}]},
+        {"agents": [{"id": "dup", "role": "a", "goal": "x"}, {"id": "dup", "role": "b", "goal": "y"}]},
+        {"agents": [{"id": "builder", "role": "builder", "goal": "Build", "dependencies": ["ghost"]}]},
+    ]
+    for payload in invalid_payloads:
+        try:
+            parse_planner_decision(payload)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"invalid planner payload should fail: {payload}")
+
+    try:
+        parse_replan_decision({"agents": [{"id": "planner", "role": "planner", "goal": "again"}]}, {"planner"})
+    except ValueError as exc:
+        assert "duplicate agent id" in str(exc)
+    else:
+        raise AssertionError("replanner should reject duplicate existing agent ids")
+
+
+@test("DynamicWorkflow: fake planner, replanner, reducer")
+def test_dynamic_workflow_fake_planner_replanner_reducer():
+    import shutil, tempfile
+    from dynamic_workflow import DynamicWorkflowRuntime
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+prompt = sys.stdin.read()
+agent_id = re.search(r"Agent id: ([^\\n]+)", prompt).group(1).strip()
+out.write_text(json.dumps({
+    "agent_id": agent_id,
+    "status": "completed",
+    "summary": f"{agent_id} complete",
+    "artifacts": [{"name": "result", "content": f"artifact {agent_id}"}],
+    "messages": [],
+    "handoffs": [],
+    "review_requests": [],
+    "review_responses": [],
+    "metadata": {},
+    "error": ""
+}), encoding="utf-8")
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+        replan_calls = {"count": 0}
+
+        def planner(goal):
+            return {
+                "agents": [
+                    {"id": "a", "role": "worker", "goal": "A"},
+                    {"id": "b", "role": "worker", "goal": "B"},
+                    {"id": "c", "role": "worker", "goal": "C", "dependencies": ["a"]},
+                ],
+                "max_parallel": 2,
+                "confidence": 0.9,
+            }
+
+        def replanner(goal, snapshot):
+            replan_calls["count"] += 1
+            if replan_calls["count"] == 1:
+                return {"agents": [{"id": "d", "role": "reviewer", "goal": "Review"}], "confidence": 0.7}
+            return {"agents": [], "stop_reason": "ready_for_reducer", "confidence": 0.8}
+
+        runtime = DynamicWorkflowRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "dynamic"),
+            broker_dir=str(Path(d) / "broker"),
+            max_rounds=3,
+            max_agents=10,
+            max_parallel=2,
+            timeout_s=5,
+            planner_fn=planner,
+            replanner_fn=replanner,
+        )
+        trace = runtime.run("dynamic fake")
+        assert trace.summary()["completed"] == 4
+        assert len(trace.rounds) == 2
+        assert trace.reducer_result.terminal_state == "completed"
+        assert "Completed agents: 4" in trace.reducer_result.final_answer
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("DynamicWorkflow: limits stop rounds and agents")
+def test_dynamic_workflow_limits():
+    import shutil, tempfile
+    from dynamic_workflow import DynamicWorkflowRuntime
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+agent_id = re.search(r"Agent id: ([^\\n]+)", sys.stdin.read()).group(1).strip()
+out.write_text(json.dumps({"agent_id": agent_id, "status": "completed", "summary": "ok", "artifacts": [], "messages": [], "handoffs": [], "review_requests": [], "review_responses": [], "metadata": {}, "error": ""}), encoding="utf-8")
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+
+        def planner(goal):
+            return {
+                "agents": [
+                    {"id": "a", "role": "worker", "goal": "A"},
+                    {"id": "b", "role": "worker", "goal": "B"},
+                    {"id": "c", "role": "worker", "goal": "C"},
+                ],
+                "max_parallel": 3,
+            }
+
+        runtime = DynamicWorkflowRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "dynamic"),
+            broker_dir=str(Path(d) / "broker"),
+            max_rounds=1,
+            max_agents=2,
+            max_parallel=3,
+            timeout_s=5,
+            planner_fn=planner,
+            replanner_fn=lambda goal, snapshot: {"agents": [{"id": "d", "role": "worker", "goal": "D"}]},
+        )
+        trace = runtime.run("limits")
+        assert trace.summary()["completed"] == 2
+        assert trace.stop_reason in {"max_rounds", "max_agents"}
+
+        runtime_no_new = DynamicWorkflowRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "dynamic2"),
+            broker_dir=str(Path(d) / "broker2"),
+            max_rounds=3,
+            max_agents=5,
+            max_parallel=1,
+            timeout_s=5,
+            planner_fn=lambda goal: {"agents": [{"id": "solo", "role": "worker", "goal": "Solo"}]},
+            replanner_fn=lambda goal, snapshot: {"agents": []},
+        )
+        trace_no_new = runtime_no_new.run("no new")
+        assert trace_no_new.stop_reason == "no_new_agents"
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("CLI: dynamic workflow, swarm, and evidence help")
+def test_cli_help_entrypoints():
+    import subprocess
+
+    commands = [
+        [sys.executable, "-m", "dynamic_workflow", "--help"],
+        [sys.executable, "-m", "codex_cli_swarm", "--help"],
+        [sys.executable, "scripts/record_swarm_evidence.py", "--help"],
+    ]
+    for command in commands:
+        result = subprocess.run(command, cwd=Path(__file__).resolve().parent, capture_output=True, text=True)
+        assert result.returncode == 0, f"{command} failed: {result.stderr}"
+        assert "usage:" in result.stdout.lower()
 
 
 @test("Native Runtime: sandboxed fan-out")
@@ -1667,11 +2067,19 @@ if __name__ == "__main__":
         test_agent_broker_rejects_unsafe_agent_ids,
         test_broker_gateway_http_lifecycle,
         test_broker_gateway_auth_and_limits,
+        test_protocol_artifact_compatibility_and_cursor,
+        test_broker_reducer_uses_full_broker_evidence,
         test_codex_app_bridge_ingestion,
         test_codex_app_bridge_dependency_validation,
         test_codex_cli_swarm_fake_exec,
         test_codex_cli_swarm_dependency_failure,
         test_codex_cli_swarm_failure_modes,
+        test_codex_cli_swarm_worktree_mode_patch_artifacts,
+        test_codex_cli_swarm_worktree_failure_preserves_diff,
+        test_dynamic_workflow_planner_json_validation,
+        test_dynamic_workflow_fake_planner_replanner_reducer,
+        test_dynamic_workflow_limits,
+        test_cli_help_entrypoints,
         test_native_runtime_fanout,
         test_native_runtime_dependency_scheduling,
         test_native_runtime_dependency_failures,

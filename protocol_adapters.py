@@ -69,17 +69,50 @@ def mcp_tools() -> List[Dict[str, Any]]:
         },
         "required": ["query"],
     }
+    dynamic_schema = {
+        "type": "object",
+        "properties": {
+            "query": {"type": "string", "description": "Goal for a planner/replanner dynamic workflow."},
+            "max_rounds": {"type": "integer", "minimum": 1, "maximum": 10, "default": 3},
+            "max_agents": {"type": "integer", "minimum": 1, "maximum": 200, "default": 50},
+            "max_parallel": {"type": "integer", "minimum": 1, "maximum": 50, "default": 5},
+        },
+        "required": ["query"],
+    }
     return [
         MCPToolDescriptor(
             name="oh_my_dynamic.run_workflow",
             description="Decompose a complex task into a DAG, run multi-agent workers, dynamically replan, and synthesize the final answer.",
             inputSchema=schema,
-        ).to_dict()
+        ).to_dict(),
+        MCPToolDescriptor(
+            name="oh_my_dynamic.run_dynamic_workflow",
+            description="Run a Codex CLI planner/replanner workflow with broker-aware reduction.",
+            inputSchema=dynamic_schema,
+        ).to_dict(),
     ]
 
 
 def run_mcp_tool(name: str, arguments: Dict[str, Any], llm_fn: Callable[[str, str], str]) -> Dict[str, Any]:
     """Execute a known MCP-style tool call."""
+    if name == "oh_my_dynamic.run_dynamic_workflow":
+        from dynamic_workflow import DynamicWorkflowRuntime
+
+        query = str(arguments.get("query", "")).strip()
+        if not query:
+            raise ValueError("query is required")
+        runtime = DynamicWorkflowRuntime(
+            max_rounds=int(arguments.get("max_rounds", 3)),
+            max_agents=int(arguments.get("max_agents", 50)),
+            max_parallel=int(arguments.get("max_parallel", 5)),
+            codex_bin=str(arguments.get("codex_bin", "codex")),
+            codex_cwd=str(arguments.get("cd", ".")),
+        )
+        trace = runtime.run(query)
+        return {
+            "content": [{"type": "text", "text": trace.reducer_result.final_answer}],
+            "structuredContent": trace.to_dict(),
+        }
     if name != "oh_my_dynamic.run_workflow":
         raise ValueError(f"Unknown MCP tool: {name}")
 
@@ -112,7 +145,7 @@ def a2a_agent_card(base_url: str = "http://localhost:8765") -> Dict[str, Any]:
         "name": "oh-my-Dynamic",
         "description": "Multi-agent dynamic workflow orchestrator with DAG execution, dynamic replan, and synthesis.",
         "url": base_url.rstrip("/"),
-        "version": "1.5.0",
+        "version": "1.7.0",
         "capabilities": {
             "streaming": False,
             "pushNotifications": False,

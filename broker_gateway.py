@@ -59,9 +59,18 @@ class BrokerGateway:
         card["capabilities"] = {
             **card.get("capabilities", {}),
             "streaming": True,
+            "streamingMode": "cursor_snapshot",
             "stateTransitionHistory": True,
             "artifacts": True,
             "agentBroker": True,
+            "capabilityDiscovery": True,
+            "supportedEventKinds": list(self.broker.policy.allowed_event_kinds),
+            "artifactContentTypes": list(self.broker.policy.allowed_content_types),
+            "auth": {
+                "gatewayToken": bool(self.auth_token),
+                "agentActorToken": bool(self.auth_token),
+            },
+            "registeredAgents": [agent.id for agent in self.broker.list_agents()],
         }
         card["skills"].append(
             {
@@ -132,10 +141,16 @@ class BrokerGateway:
     def get_task(self, thread_id: str) -> Dict[str, Any]:
         return self.broker.to_a2a_task(thread_id)
 
-    def list_events(self, thread_id: str) -> Dict[str, Any]:
+    def list_events(self, thread_id: str, after: str = "") -> Dict[str, Any]:
+        events = [asdict(event) for event in self.broker.list_events(thread_id=thread_id)]
+        if after:
+            ids = [event["id"] for event in events]
+            if after in ids:
+                events = events[ids.index(after) + 1:]
         return {
             "taskId": thread_id,
-            "events": [asdict(event) for event in self.broker.list_events(thread_id=thread_id)],
+            "after": after,
+            "events": events,
         }
 
     def send_message(self, thread_id: str, payload: Dict[str, Any], actor: Optional[str] = None) -> Dict[str, Any]:
@@ -262,10 +277,11 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
                 self._send_json(200, self.gateway.get_task(parts[1]))
                 return
             if len(parts) == 3 and parts[0] == "tasks" and parts[2] == "events":
+                after = parse_qs(parsed.query).get("after", [""])[0]
                 if self.headers.get("Accept") == "text/event-stream" or parse_qs(parsed.query).get("stream") == ["1"]:
-                    self._send_sse(self.gateway.list_events(parts[1])["events"])
+                    self._send_sse(self.gateway.list_events(parts[1], after=after)["events"])
                 else:
-                    self._send_json(200, self.gateway.list_events(parts[1]))
+                    self._send_json(200, self.gateway.list_events(parts[1], after=after))
                 return
 
             self._send_json(404, {"error": "not found"})

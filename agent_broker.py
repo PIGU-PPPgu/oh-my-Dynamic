@@ -72,6 +72,8 @@ class BrokerArtifact:
     content: str
     content_type: str = "text/plain"
     metadata: Dict[str, Any] = field(default_factory=dict)
+    thread_id: str = "default"
+    task_id: str = ""
     created_at: str = ""
 
     def __post_init__(self) -> None:
@@ -231,6 +233,8 @@ class AgentBroker:
             content=content,
             content_type=content_type,
             metadata=metadata or {},
+            thread_id=thread_id,
+            task_id=task_id,
         )
         blob_path = self.artifact_dir / f"{artifact.id}.txt"
         with self._lock:
@@ -261,6 +265,8 @@ class AgentBroker:
         for record in records:
             record = dict(record)
             record.pop("blob_path", None)
+            record.setdefault("thread_id", record.get("metadata", {}).get("thread_id", "default"))
+            record.setdefault("task_id", record.get("metadata", {}).get("task_id", ""))
             artifacts.append(BrokerArtifact(**record))
         return artifacts
 
@@ -453,7 +459,11 @@ class AgentBroker:
         artifacts = {
             artifact.id: artifact
             for artifact in self.list_artifacts()
-            if any(artifact.id in event.artifact_ids for event in events)
+            if artifact.thread_id == thread_id
+            or (
+                artifact.thread_id == "default"
+                and any(artifact.id in event.artifact_ids for event in events)
+            )
         }
         state = "working"
         if any(event.kind == "trace" and event.subject == "workflow_completed" for event in events):

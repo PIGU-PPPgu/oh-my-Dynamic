@@ -32,6 +32,10 @@ transport surface is needed.
 prompts, structured JSON envelopes, and AgentBroker ingestion.
 `codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
 process-level fan-out.
+`dynamic_workflow.py` defines the v1.7 planner/replanner runtime: start with a
+planner, fan out Codex CLI workers, let a replanner add follow-up agents, then
+run a broker-aware reducer over artifacts, failures, dependency graph, review
+responses, and optional worktree diff artifacts.
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -39,6 +43,12 @@ runtime mode still uses the `llm_fn` passed into it, or external provider APIs
 when configured.
 
 ## Codex App Default: Native Subagents First
+
+One-line App trigger:
+
+```text
+[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
+```
 
 When this skill is triggered inside Codex App, the default App-mode priority is:
 
@@ -49,12 +59,15 @@ When this skill is triggered inside Codex App, the default App-mode priority is:
 5. Coordinate subagents through the parent orchestrator and the AgentBroker contract: registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and traceable synthesis. Do not rely on hidden peer-to-peer side channels.
 6. If native Codex subagent runtime/tools are unavailable, use zero-config in-chat workflow execution as the fallback.
 7. If the user explicitly asks for tens/hundreds of real Codex agents, prefer `codex_cli_swarm.py` over the in-chat fallback.
+8. If the user explicitly asks for concurrent code writing, use worktree mode with `workspace_mode="worktree"` and `write_intent="patch"`. Do not auto-merge.
+9. If the user does not clearly grant write intent, default to read-only review.
 
 In App fallback/zero-config mode:
 
 - Use the current Codex App assistant/model as the reasoning engine.
 - Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key.
 - Do **not** run `llm_client.py` or the Python `DynamicPipeline` unless the user explicitly asks to use the local Python engine, a real provider, or a dashboard artifact.
+- Do run `dynamic_workflow.py` when the user explicitly asks for the local planner/replanner CLI backend.
 - Do run `codex_cli_swarm.py` when the user explicitly asks for large-scale Codex CLI worker fan-out.
 - Treat the modules in the installed oh-my-Dynamic repository as the reference implementation and mirror their workflow in-chat.
 - Be explicit if the user asks about native parallel sandboxed subagents and no
@@ -75,7 +88,7 @@ In zero-config mode, execute this workflow directly in the conversation:
 2. **Build a DAG** in text form: task id, role, dependencies, expected output.
 3. **Run worker passes** using your own reasoning. If independent subtasks exist, analyze them as separate worker lanes in one response.
 4. **Review** each worker result for completeness, correctness, and gaps.
-5. **Replan once** if important gaps remain.
+5. **Replan** if important gaps remain, until ready for reducer or max rounds are reached.
 6. **Synthesize** a final answer that cites the task breakdown and gives actionable next steps.
 
 Only ask a clarification question if the task cannot be reasonably scoped. Otherwise proceed.

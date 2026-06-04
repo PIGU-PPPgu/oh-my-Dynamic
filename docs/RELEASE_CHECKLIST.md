@@ -8,9 +8,11 @@ Use this checklist before tagging or pushing a public release.
 git status --short
 bash -n install_plugin.sh
 python3 -m json.tool .agents/plugins/marketplace.json >/dev/null
-python3 -m py_compile *.py examples/*.py
+python3 -m py_compile *.py examples/*.py scripts/*.py
 python3 test_suite.py
+python3 -m dynamic_workflow --help >/dev/null
 python3 -m codex_cli_swarm --help >/dev/null
+python3 scripts/record_swarm_evidence.py --help >/dev/null
 python3 examples/codex_cli_swarm_review.py --help >/dev/null
 ```
 
@@ -19,6 +21,9 @@ python3 examples/codex_cli_swarm_review.py --help >/dev/null
 ```bash
 python3 test_suite.py --stress
 python3 examples/codex_cli_swarm_review.py --agents 20 --max-parallel 5 --total-timeout-s 3600
+python3 scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
+python3 scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
+python3 scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 ```
 
 ## Version And Tag
@@ -29,7 +34,7 @@ python3 examples/codex_cli_swarm_review.py --agents 20 --max-parallel 5 --total-
 4. Tag the exact commit:
 
 ```bash
-git tag v1.6.0
+git tag v1.7.0
 git push origin main --tags
 ```
 

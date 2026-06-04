@@ -7,6 +7,12 @@ description: "Run a multi-agent workflow on any complex task. One command to dec
 
 This skill decomposes any complex task into parallel subtasks, executes them with multiple agents, and synthesizes a coherent answer.
 
+One-line trigger:
+
+```text
+[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
+```
+
 ## Codex App Default: Native Subagents First
 
 When triggered inside Codex App, this skill must work immediately after installation:
@@ -14,9 +20,12 @@ When triggered inside Codex App, this skill must work immediately after installa
 - If Codex subagent runtime/tools are available and the user asks for dynamic workflows, real subagents, parallel agents, or equivalent multi-agent execution, spawn real Codex internal subagents by default.
 - Do **not** set a model override for spawned subagents. Let them inherit the current Codex App internal LLM/runtime.
 - Do **not** require provider API keys or `.env` configuration for App-native subagent execution.
-- Do **not** tell the user to use Codex CLI.
+- Do **not** tell the user to use Codex CLI for ordinary App usage.
 - Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
+- If the user asks for dynamic workflow but not huge scale, use the planner/replanner flow conceptually in App mode; outside App-native subagents, the local `dynamic_workflow.py` runtime is the matching CLI backend.
 - Exception: if the user explicitly asks for dozens/hundreds of real Codex agents, maximum fan-out, CLI swarm, or equivalent large-scale execution, use the local `codex_cli_swarm.py` backend instead of the ordinary in-chat fallback. This backend launches many `codex exec` processes, feeds each worker prompt through stdin, streams stdout/stderr to per-agent files, keeps a run manifest/trace, and ingests JSON envelopes into AgentBroker.
+- If the user explicitly asks for concurrent code writing, use worktree mode: `workspace_mode="worktree"` and `write_intent="patch"`. Do not auto-merge agent worktrees.
+- If the user has not clearly granted write intent, stay read-only review by default.
 - Use the Codex App bridge contract for real subagents: dispatch plan, per-subagent prompt, structured JSON envelope, and AgentBroker ingestion.
 - Coordinate subagent collaboration through registered agents, explicit messages, artifacts, handoffs, review requests/responses, inboxes, and auditable synthesis. Prefer parent-orchestrated A2A-style exchange over hidden peer-to-peer communication.
 - Use `broker_gateway.py` only when the user asks for a local HTTP/SSE transport surface or external tool integration; ordinary Codex App usage should stay inside the App-native subagent path.
@@ -40,7 +49,7 @@ present the multi-agent workflow directly in the response:
 6. Track registered workers, messages, artifacts, handoffs, review requests/responses, and inboxes explicitly.
 7. Produce worker results for each task.
 8. Review the combined result for gaps.
-9. Replan once if needed.
+9. Replan as needed until the task is ready for reducer, max rounds are reached, or no useful new agents remain.
 10. Synthesize a final answer.
 
 ## When to Trigger
@@ -158,4 +167,4 @@ Always present results in this structure:
 - GLM-5.1 is slow (~40s/call). Warn user if local provider mode generates 5+ subtasks.
 - JSON parsing can fail — pipeline has fallback but results may be less structured.
 - Token budget is estimated. Keep budget generous for complex queries.
-- Don't run more than 3 parallel workers — GLM rate limits.
+- In local external-provider mode, keep provider rate limits in mind; GLM and other API providers may need lower parallelism.
