@@ -347,7 +347,17 @@ def test_agent_broker_collaboration():
     d = tempfile.mkdtemp()
     try:
         broker = AgentBroker(d)
-        broker.register_agent("planner", "planner", ["decompose"])
+        broker.register_agent("planner", "planner", ["decompose"], metadata={"goal": "original"})
+        merged_planner = broker.register_agent(
+            "planner",
+            "spoofed",
+            ["summarize"],
+            metadata={"goal": "overwrite", "confidence": 0.9},
+        )
+        assert merged_planner.role == "planner"
+        assert set(merged_planner.capabilities) == {"decompose", "summarize"}
+        assert merged_planner.metadata["goal"] == "original"
+        assert merged_planner.metadata["confidence"] == 0.9
         broker.register_agent("builder", "builder", ["write"])
         broker.register_agent("reviewer", "reviewer", ["review"])
 
@@ -612,6 +622,7 @@ def test_broker_gateway_auth_and_limits():
             raise AssertionError("non-loopback gateway binding should require auth")
 
         broker = AgentBroker(str(Path(d) / "broker"))
+        broker.register_agent("external", "external")
         token = "test-token"
         server = create_server(
             broker,
@@ -651,18 +662,59 @@ def test_broker_gateway_auth_and_limits():
         auth = {"Authorization": f"Bearer {token}"}
         planner = request("POST", "/agents", {"id": "planner", "role": "planner"}, headers=auth)
         assert planner["id"] == "planner"
+        assert planner["agent_token"].startswith("agt_")
+        builder = request("POST", "/agents", {"id": "builder", "role": "builder"}, headers=auth)
+        assert builder["agent_token"].startswith("agt_")
 
         task = request("POST", "/tasks", {"message": "secure workflow"}, headers=auth)
         task_id = task["id"]
 
-        actor_auth = {**auth, "X-Agent-Id": "planner"}
+        actor_auth = {**auth, "X-Agent-Id": "planner", "X-Agent-Token": planner["agent_token"]}
         message = request("POST", f"/tasks/{task_id}/messages", {
             "from": "orchestrator",
-            "to": "orchestrator",
+            "to": "builder",
             "subject": "actor binding",
             "body": "payload sender should be ignored in token mode",
         }, headers=actor_auth)
         assert message["from_agent"] == "planner"
+
+        try:
+            request("POST", f"/tasks/{task_id}/messages", {
+                "from": "planner",
+                "to": "orchestrator",
+                "subject": "bad actor token",
+                "body": "bad",
+            }, headers={**auth, "X-Agent-Id": "planner", "X-Agent-Token": "wrong"})
+        except urllib.error.HTTPError as exc:
+            assert exc.code == 401
+        else:
+            raise AssertionError("gateway should reject wrong per-agent actor token")
+
+        try:
+            request("POST", f"/tasks/{task_id}/messages", {
+                "from": "external",
+                "to": "orchestrator",
+                "subject": "missing issued token",
+                "body": "bad",
+            }, headers={**auth, "X-Agent-Id": "external"})
+        except urllib.error.HTTPError as exc:
+            assert exc.code == 401
+        else:
+            raise AssertionError("gateway should reject registered actors without an issued token")
+
+        try:
+            request("GET", "/agents/builder/inbox?mark_delivered=0", headers=actor_auth)
+        except urllib.error.HTTPError as exc:
+            assert exc.code == 401
+        else:
+            raise AssertionError("planner should not read builder inbox")
+
+        builder_inbox = request(
+            "GET",
+            "/agents/builder/inbox?mark_delivered=0",
+            headers={**auth, "X-Agent-Id": "builder", "X-Agent-Token": builder["agent_token"]},
+        )
+        assert any(event["from_agent"] == "planner" for event in builder_inbox["events"])
 
         try:
             request("POST", f"/tasks/{task_id}/messages", {

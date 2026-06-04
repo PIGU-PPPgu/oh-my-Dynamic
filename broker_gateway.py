@@ -47,10 +47,12 @@ class BrokerGateway:
         broker: AgentBroker,
         base_url: str = "http://localhost:8765",
         auth_token: Optional[str] = None,
+        agent_tokens: Optional[Dict[str, str]] = None,
     ) -> None:
         self.broker = broker
         self.base_url = base_url.rstrip("/")
         self.auth_token = auth_token
+        self.agent_tokens = dict(agent_tokens or {})
 
     def agent_card(self) -> Dict[str, Any]:
         card = a2a_agent_card(self.base_url)
@@ -83,7 +85,14 @@ class BrokerGateway:
             capabilities=list(payload.get("capabilities", [])),
             metadata=dict(payload.get("metadata", {})),
         )
-        return asdict(agent)
+        data = asdict(agent)
+        if self.auth_token and agent.id not in self.broker.policy.system_agents:
+            token = str(payload.get("agent_token", payload.get("token", ""))).strip()
+            if not token:
+                token = self.agent_tokens.get(agent.id) or f"agt_{uuid.uuid4().hex}"
+            self.agent_tokens[agent.id] = token
+            data["agent_token"] = token
+        return data
 
     def list_agents(self) -> Dict[str, Any]:
         return {"agents": [asdict(agent) for agent in self.broker.list_agents()]}
@@ -246,6 +255,7 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
                 return
             if len(parts) == 3 and parts[0] == "agents" and parts[2] == "inbox":
                 mark_delivered = parse_qs(parsed.query).get("mark_delivered", ["1"])[0] != "0"
+                self._authorize_agent_access(parts[1])
                 self._send_json(200, self.gateway.read_inbox(parts[1], mark_delivered=mark_delivered))
                 return
             if len(parts) == 2 and parts[0] == "tasks":
@@ -350,7 +360,26 @@ class BrokerGatewayHandler(BaseHTTPRequestHandler):
         actor = self.headers.get("X-Agent-Id", "")
         if not actor:
             raise ValueError("X-Agent-Id is required when gateway auth is enabled")
-        return validate_agent_id(actor, "X-Agent-Id")
+        actor = validate_agent_id(actor, "X-Agent-Id")
+        expected_token = self.gateway.agent_tokens.get(actor)
+        if expected_token:
+            supplied_token = self.headers.get("X-Agent-Token", "")
+            if supplied_token != expected_token:
+                raise PermissionError("missing or invalid agent actor token")
+        elif actor not in self.gateway.broker.policy.system_agents:
+            registered_ids = {agent.id for agent in self.gateway.broker.list_agents()}
+            if actor in registered_ids:
+                raise PermissionError("missing agent actor token")
+        return actor
+
+    def _authorize_agent_access(self, agent_id: str) -> None:
+        if not self.gateway.auth_token:
+            return
+        target = validate_agent_id(agent_id, "agent_id")
+        actor = self._authenticated_actor()
+        if actor == target or actor in self.gateway.broker.policy.system_agents:
+            return
+        raise PermissionError("actor is not authorized for this agent resource")
 
     def _send_json(self, status: int, payload: Dict[str, Any]) -> None:
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -385,13 +414,19 @@ def create_server(
     port: int = 8765,
     base_url: Optional[str] = None,
     auth_token: Optional[str] = None,
+    agent_tokens: Optional[Dict[str, str]] = None,
     max_body_bytes: int = DEFAULT_MAX_BODY_BYTES,
 ) -> ThreadingHTTPServer:
     """Create a configured broker gateway server."""
     if not _is_loopback_host(host) and not auth_token:
         raise ValueError("non-loopback gateway binding requires --auth-token or OH_MY_DYNAMIC_GATEWAY_TOKEN")
     broker = broker or AgentBroker()
-    gateway = BrokerGateway(broker, base_url or f"http://{host}:{port}", auth_token=auth_token)
+    gateway = BrokerGateway(
+        broker,
+        base_url or f"http://{host}:{port}",
+        auth_token=auth_token,
+        agent_tokens=agent_tokens,
+    )
 
     class Handler(BrokerGatewayHandler):
         pass

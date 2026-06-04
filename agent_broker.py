@@ -165,21 +165,39 @@ class AgentBroker:
     ) -> BrokerAgent:
         """Register an agent and create its inbox."""
         agent_id = validate_agent_id(agent_id)
-        agent = BrokerAgent(
-            id=agent_id,
-            role=role,
-            capabilities=capabilities or [],
-            metadata=metadata or {},
-        )
         with self._lock:
             agents = self._load_agents_unlocked()
+            existing = agents.get(agent_id)
+            if existing:
+                current = BrokerAgent(**existing)
+                merged_capabilities = list(dict.fromkeys([*current.capabilities, *(capabilities or [])]))
+                merged_metadata = {**(metadata or {}), **current.metadata}
+                agent = BrokerAgent(
+                    id=agent_id,
+                    role=current.role,
+                    capabilities=merged_capabilities,
+                    metadata=merged_metadata,
+                    created_at=current.created_at,
+                )
+            else:
+                agent = BrokerAgent(
+                    id=agent_id,
+                    role=role,
+                    capabilities=capabilities or [],
+                    metadata=metadata or {},
+                )
             agents[agent.id] = asdict(agent)
             self.agents_path.write_text(
                 json.dumps(agents, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
             self._inbox_path(agent.id).touch(exist_ok=True)
-        self.trace("broker", "agent_registered", f"Registered {agent.id}", metadata={"agent": asdict(agent)})
+        self.trace(
+            "broker",
+            "agent_registered",
+            f"Registered {agent.id}",
+            metadata={"agent": asdict(agent), "merged": bool(existing)},
+        )
         return agent
 
     def list_agents(self) -> List[BrokerAgent]:
