@@ -23,6 +23,8 @@ from __future__ import annotations
 import re
 import subprocess
 import json
+import threading
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -30,6 +32,7 @@ from typing import Optional
 
 
 _AGENT_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+_WORKTREE_CREATE_LOCK = threading.Lock()
 
 
 def _validate_agent_name(agent_name: str) -> str:
@@ -107,7 +110,7 @@ class WorktreeManager:
                 "created_at": wt.created_at,
                 "status": wt.status,
             }
-        tmp_path = self._state_file.with_suffix(".tmp")
+        tmp_path = self._state_file.with_name(f"{self._state_file.name}.{uuid.uuid4().hex}.tmp")
         with open(tmp_path, "w") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         tmp_path.replace(self._state_file)
@@ -174,31 +177,33 @@ class WorktreeManager:
         # 创建 worktrees 目录
         self.worktrees_dir.mkdir(exist_ok=True)
 
-        # 创建分支 + worktree
-        try:
-            self._git("branch", branch_name, base)
-        except RuntimeError:
-            if not self._branch_exists(branch_name):
-                raise
-            # 分支可能已存在（之前 abandon 的），删除后重建。
-            self._delete_branch_if_exists(branch_name)
-            self._git("branch", branch_name, base)
-        
-        Path(worktree_path).parent.mkdir(parents=True, exist_ok=True)
-        self._git("worktree", "add", worktree_path, branch_name)
-        
-        wt = Worktree(
-            name=agent_name,
-            path=worktree_path,
-            branch=branch_name,
-            base_branch=base,
-            agent_id=agent_id,
-            created_at=datetime.now().isoformat(),
-            status="active",
-        )
-        
-        self._worktrees[agent_name] = wt
-        self._save_state()
+        with _WORKTREE_CREATE_LOCK:
+            # 创建分支 + worktree
+            try:
+                self._git("branch", branch_name, base)
+            except RuntimeError:
+                if not self._branch_exists(branch_name):
+                    raise
+                # 分支可能已存在（之前 abandon 的），删除后重建。
+                self._delete_branch_if_exists(branch_name)
+                self._git("branch", branch_name, base)
+
+            Path(worktree_path).parent.mkdir(parents=True, exist_ok=True)
+            self._git("worktree", "add", worktree_path, branch_name)
+
+            wt = Worktree(
+                name=agent_name,
+                path=worktree_path,
+                branch=branch_name,
+                base_branch=base,
+                agent_id=agent_id,
+                created_at=datetime.now().isoformat(),
+                status="active",
+            )
+
+            self._load_state()
+            self._worktrees[agent_name] = wt
+            self._save_state()
         
         return wt
     
