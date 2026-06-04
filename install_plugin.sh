@@ -86,11 +86,11 @@ except json.JSONDecodeError as exc:
 template_plugins = template.get("plugins", [])
 template_entry = next(
     (plugin for plugin in template_plugins if plugin.get("name") == plugin_name),
-    {
-        "name": plugin_name,
-        "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
-        "category": "Developer Tools",
-    },
+	    {
+	        "name": plugin_name,
+	        "policy": {"installation": "AVAILABLE", "authentication": "NONE"},
+	        "category": "Developer Tools",
+	    },
 )
 
 if marketplace_path.exists():

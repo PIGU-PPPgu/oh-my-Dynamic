@@ -83,7 +83,12 @@ Use this only if the user explicitly asks for local engine execution, real provi
 
 ```python
 import sys
-sys.path.insert(0, '/Users/iguppp/Desktop/oh-my-Dynamic')
+from pathlib import Path
+
+project_root = Path.cwd()
+if not (project_root / "pipeline.py").exists():
+    raise RuntimeError("Run this local engine snippet from the oh-my-Dynamic repository root.")
+sys.path.insert(0, str(project_root))
 
 from pipeline import DynamicPipeline
 from llm_client import call_glm

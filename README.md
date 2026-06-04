@@ -76,7 +76,8 @@
 在 Codex App 里使用前，先把插件安装到个人 `.agents` 目录：
 
 ```bash
-cd ~/Desktop/oh-my-Dynamic && bash install_plugin.sh
+cd /path/to/oh-my-Dynamic
+bash install_plugin.sh
 ```
 
 安装完成后，重启 Codex App，或至少新开一个 thread，让插件与 skills 重新加载。
@@ -89,7 +90,7 @@ ls -l ~/.agents/skills/multi-agent-run
 python -m json.tool ~/.agents/plugins/marketplace.json >/dev/null
 ```
 
-`~/.agents/plugins/marketplace.json` 中应包含 `oh-my-dynamic`，并指向当前仓库的 `~/Desktop/oh-my-Dynamic/codex-plugin`。安装脚本会保留 marketplace 中的其他插件条目；如果需要修改已有 JSON，会先创建 `.bak.<timestamp>` 备份。
+`~/.agents/plugins/marketplace.json` 中应包含 `oh-my-dynamic`，并指向当前 clone 的 `codex-plugin` 目录。安装脚本会保留 marketplace 中的其他插件条目；如果需要修改已有 JSON，会先创建 `.bak.<timestamp>` 备份。当前安装方式使用符号链接，移动或删除这个仓库会让已安装插件失效；移动后重新运行 `bash install_plugin.sh` 即可刷新路径。
 
 ### 2. Codex App 零配置使用
 
@@ -136,6 +137,9 @@ python -m codex_cli_swarm --agents 20 --max-parallel 5 --total-timeout-s 3600 "�
 
 # 显式丢弃 per-agent workdirs 时，仍会在 workspace root 留下 compact manifest/trace
 python -m codex_cli_swarm --agents 20 --max-parallel 5 --discard-workdirs "并行审查这个仓库"
+
+# 端到端 repo review demo
+python examples/codex_cli_swarm_review.py --agents 8 --max-parallel 4
 ```
 
 ### 3. 可选：安装本地 Python engine 依赖

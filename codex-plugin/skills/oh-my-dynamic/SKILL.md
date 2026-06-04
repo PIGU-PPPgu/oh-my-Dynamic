@@ -56,7 +56,7 @@ In App fallback/zero-config mode:
 - Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key.
 - Do **not** run `llm_client.py` or the Python `DynamicPipeline` unless the user explicitly asks to use the local Python engine, a real provider, or a dashboard artifact.
 - Do run `codex_cli_swarm.py` when the user explicitly asks for large-scale Codex CLI worker fan-out.
-- Treat the modules in `~/Desktop/oh-my-Dynamic` as the reference implementation and mirror their workflow in-chat.
+- Treat the modules in the installed oh-my-Dynamic repository as the reference implementation and mirror their workflow in-chat.
 - Be explicit if the user asks about native parallel sandboxed subagents and no
   Codex subagent runtime/tools are available in the current session: App-native
   spawning cannot be used from this skill until the App/runtime exposes those
