@@ -828,6 +828,10 @@ def test_codex_app_bridge_ingestion():
         )
         assert result["agent_id"] == "planner"
         assert "plan" in result["artifact_ids"]
+        builder_prompt = build_subagent_prompt(plan, plan.agents[1], dependency_outputs={"planner": envelope})
+        assert "Dependency outputs:" in builder_prompt
+        assert "Plan ready." in builder_prompt
+        assert "1. build" in builder_prompt
         events = broker.list_events(thread_id=plan.run_id)
         kinds = [event.kind for event in events]
         assert "handoff" in kinds
@@ -858,6 +862,9 @@ def test_codex_app_bridge_ingestion():
         assert completed_snapshot["status"]["state"] == "completed"
         assert any(item["name"] == "final_answer" for item in completed_snapshot["artifacts"])
 
+        before_artifacts = len(broker.list_artifacts())
+        before_events = len(broker.list_events(thread_id=plan.run_id))
+
         bad = parse_subagent_envelope('{"agent_id":"planner","status":"completed","summary":"bad","messages":[{"to_agent":"orchestrator","subject":"bad","body":"bad","artifact_names":["missing"]}]}')
         try:
             ingest_subagent_envelope(broker, plan.run_id, bad, role="planner")
@@ -865,6 +872,29 @@ def test_codex_app_bridge_ingestion():
             assert "unknown envelope artifact names" in str(exc)
         else:
             raise AssertionError("unknown artifact_names should be rejected")
+        assert len(broker.list_artifacts()) == before_artifacts
+        assert len(broker.list_events(thread_id=plan.run_id)) == before_events
+
+        bad_target = parse_subagent_envelope(json.dumps({
+            "agent_id": "planner",
+            "status": "completed",
+            "summary": "bad target",
+            "artifacts": [{"name": "result", "kind": "analysis", "content": "should not persist"}],
+            "messages": [{"to_agent": "ghost", "subject": "bad", "body": "bad", "artifact_names": ["result"]}],
+            "handoffs": [],
+            "review_requests": [],
+            "review_responses": [],
+            "metadata": {},
+            "error": "",
+        }))
+        try:
+            ingest_subagent_envelope(broker, plan.run_id, bad_target, role="planner")
+        except ValueError as exc:
+            assert "to_agent is not registered" in str(exc)
+        else:
+            raise AssertionError("unknown target agent should be rejected before broker writes")
+        assert len(broker.list_artifacts()) == before_artifacts
+        assert len(broker.list_events(thread_id=plan.run_id)) == before_events
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -987,6 +1017,8 @@ sys.exit(0)
         builder_prompt = Path(builder.prompt_path).read_text(encoding="utf-8")
         assert "summary for planner" in builder_prompt
         assert "summary for researcher" in builder_prompt
+        assert "Artifacts:" in builder_prompt
+        assert "broker_id=artifact_" in builder_prompt
         assert Path(trace.manifest_path).exists()
         assert Path(trace.trace_path).exists()
         manifest = json.loads(Path(trace.manifest_path).read_text(encoding="utf-8"))

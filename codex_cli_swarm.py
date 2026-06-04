@@ -581,8 +581,41 @@ class CodexCliSwarmRuntime:
                 parts.append(f"## {dep_id}\n(status unavailable)")
                 continue
             body = result.summary or result.error or "(no summary)"
-            parts.append(f"## {dep_id} ({result.role}, {result.status})\n{body[:4000]}")
+            artifact_context = self._dependency_artifact_context(result)
+            parts.append(
+                "\n".join([
+                    f"## {dep_id} ({result.role}, {result.status})",
+                    f"Summary: {body[:2000]}",
+                    f"Error: {result.error or '(none)'}",
+                    f"Output file: {result.output_path}",
+                    f"Artifacts:\n{artifact_context}",
+                ])
+            )
         return "\n\n".join(parts)
+
+    def _dependency_artifact_context(self, result: CodexCliAgentResult) -> str:
+        output_path = Path(result.output_path)
+        if not output_path.exists():
+            return "(none; output file missing)"
+        try:
+            payload = json.loads(output_path.read_text(encoding="utf-8"))
+        except Exception:
+            return "(none; output file is not JSON)"
+        artifacts = payload.get("artifacts", [])
+        if not isinstance(artifacts, list) or not artifacts:
+            return "(none)"
+        lines = []
+        for artifact in artifacts[:5]:
+            if not isinstance(artifact, dict):
+                continue
+            name = str(artifact.get("name", "result"))
+            kind = str(artifact.get("kind", "text"))
+            content_type = str(artifact.get("content_type", "text/plain"))
+            content = str(artifact.get("content", ""))[:1200]
+            artifact_id = result.artifact_ids.get(name, "")
+            id_part = f", broker_id={artifact_id}" if artifact_id else ""
+            lines.append(f"- {name} ({kind}, {content_type}{id_part}): {content}")
+        return "\n".join(lines) if lines else "(none)"
 
     def _remaining_timeout_s(self, start: float) -> Optional[int]:
         if self.total_timeout_s is None:

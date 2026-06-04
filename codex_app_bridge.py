@@ -22,7 +22,7 @@ import json
 import re
 import uuid
 
-from agent_broker import AgentBroker
+from agent_broker import AgentBroker, validate_agent_id
 
 
 def _run_id() -> str:
@@ -215,7 +215,11 @@ def _ready_batches(layers: List[List[str]], max_parallel: int) -> List[List[str]
     return batches
 
 
-def build_subagent_prompt(plan: CodexAppDispatchPlan, spec: CodexSubagentSpec) -> str:
+def build_subagent_prompt(
+    plan: CodexAppDispatchPlan,
+    spec: CodexSubagentSpec,
+    dependency_outputs: Optional[Dict[str, CodexSubagentEnvelope]] = None,
+) -> str:
     """Build the prompt for a real Codex App subagent."""
     return (
         "You are a real Codex App subagent participating in an oh-my-Dynamic "
@@ -234,6 +238,7 @@ def build_subagent_prompt(plan: CodexAppDispatchPlan, spec: CodexSubagentSpec) -
         f"Dependencies: {json.dumps(spec.dependencies, ensure_ascii=False)}\n"
         f"Tool policy: {spec.tool_policy}\n"
         f"Context:\n{spec.context or '(none)'}\n\n"
+        f"Dependency outputs:\n{_format_dependency_outputs(spec, dependency_outputs or {})}\n\n"
         "Required JSON schema:\n"
         "{\n"
         '  "agent_id": "<your agent id>",\n'
@@ -286,6 +291,7 @@ def ingest_subagent_envelope(
     capabilities: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """Ingest one Codex App subagent envelope into AgentBroker."""
+    _validate_envelope_for_ingest(broker, envelope)
     broker.register_agent(envelope.agent_id, role, capabilities or ["codex_app_subagent"], envelope.metadata)
     artifact_ids_by_name: Dict[str, str] = {}
 
@@ -458,6 +464,87 @@ def _extract_json_object(text: str) -> Dict[str, Any]:
     if not isinstance(data, dict):
         raise ValueError("subagent envelope must be a JSON object")
     return data
+
+
+def _format_dependency_outputs(
+    spec: CodexSubagentSpec,
+    dependency_outputs: Dict[str, CodexSubagentEnvelope],
+) -> str:
+    if not spec.dependencies:
+        return "(none)"
+    parts: List[str] = []
+    for dep_id in spec.dependencies:
+        envelope = dependency_outputs.get(dep_id)
+        if envelope is None:
+            parts.append(f"## {dep_id}\n(status unavailable; parent has not provided this dependency output)")
+            continue
+        artifact_lines = []
+        for artifact in envelope.artifacts[:5]:
+            content = artifact.content[:1200]
+            artifact_lines.append(f"- {artifact.name} ({artifact.kind}, {artifact.content_type}): {content}")
+        parts.append(
+            "\n".join([
+                f"## {dep_id} ({envelope.status})",
+                f"Summary: {envelope.summary or '(no summary)'}",
+                f"Error: {envelope.error or '(none)'}",
+                "Artifacts:",
+                *(artifact_lines or ["- (none)"]),
+            ])
+        )
+    return "\n\n".join(parts)
+
+
+def _validate_envelope_for_ingest(broker: AgentBroker, envelope: CodexSubagentEnvelope) -> None:
+    validate_agent_id(envelope.agent_id, "envelope.agent_id")
+    artifact_names = [artifact.name for artifact in envelope.artifacts]
+    duplicates = sorted({name for name in artifact_names if artifact_names.count(name) > 1})
+    if duplicates:
+        raise ValueError(f"duplicate envelope artifact names: {', '.join(duplicates)}")
+
+    known_artifact_names = set(artifact_names)
+    for artifact in envelope.artifacts:
+        if len(artifact.content) > broker.policy.max_artifact_chars:
+            raise ValueError("artifact content exceeds broker policy limit")
+        if artifact.content_type not in broker.policy.allowed_content_types:
+            raise ValueError(f"content_type not allowed by broker policy: {artifact.content_type}")
+
+    known_agents = {agent.id for agent in broker.list_agents()} | set(broker.policy.system_agents)
+    known_agents.add(envelope.agent_id)
+
+    def require_agent(agent_id: Optional[str], field_name: str) -> None:
+        if agent_id is None:
+            return
+        normalized = validate_agent_id(agent_id, field_name)
+        if broker.policy.require_registered_agents and normalized not in known_agents:
+            raise ValueError(f"{field_name} is not registered: {normalized}")
+
+    def require_artifacts(names: List[str]) -> None:
+        missing = [name for name in names if name not in known_artifact_names]
+        if missing:
+            raise ValueError(f"unknown envelope artifact names: {', '.join(missing)}")
+
+    def require_event_size(subject: str, body: str) -> None:
+        if len(subject) > broker.policy.max_subject_chars:
+            raise ValueError("event subject exceeds broker policy limit")
+        if len(body) > broker.policy.max_body_chars:
+            raise ValueError("event body exceeds broker policy limit")
+
+    for message in envelope.messages:
+        require_agent(message.to_agent, "to_agent")
+        require_artifacts(message.artifact_names)
+        require_event_size(message.subject, message.body)
+    for handoff in envelope.handoffs:
+        require_agent(handoff.to_agent, "to_agent")
+        require_artifacts(handoff.artifact_names)
+        require_event_size(handoff.subject, handoff.body)
+    for request in envelope.review_requests:
+        require_agent(request.reviewer, "reviewer")
+        require_artifacts(request.artifact_names)
+        require_event_size(request.subject, request.body)
+    for response in envelope.review_responses:
+        require_agent(response.to_agent, "to_agent")
+        require_artifacts(response.artifact_names)
+        require_event_size(response.subject, response.body)
 
 
 def _artifact(data: Dict[str, Any]) -> EnvelopeArtifact:
