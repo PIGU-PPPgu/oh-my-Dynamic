@@ -134,7 +134,8 @@ Dynamic Workflow v1.7 可直接运行：
 python -m dynamic_workflow "review and improve this repo" \
   --max-rounds 3 \
   --max-agents 50 \
-  --max-parallel 5
+  --max-parallel 5 \
+  --planner-timeout-s 120
 ```
 
 Codex CLI swarm 可直接运行：

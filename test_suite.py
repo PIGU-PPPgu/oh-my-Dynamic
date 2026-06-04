@@ -1583,6 +1583,55 @@ sys.exit(0)
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("DynamicWorkflow: planner timeout records broker evidence")
+def test_dynamic_workflow_planner_timeout_records_evidence():
+    import shutil, tempfile
+    from dynamic_workflow import DynamicWorkflowRuntime
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import time
+time.sleep(10)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+        runtime = DynamicWorkflowRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "dynamic"),
+            broker_dir=str(Path(d) / "broker"),
+            timeout_s=5,
+            planner_timeout_s=1,
+        )
+        try:
+            runtime.run("planner should timeout")
+        except RuntimeError as exc:
+            assert "planner" in str(exc)
+            assert "timed out" in str(exc)
+        else:
+            raise AssertionError("planner timeout should raise RuntimeError")
+
+        events = runtime.broker.list_events()
+        subjects = {event.subject for event in events}
+        assert "dynamic_planner_started" in subjects
+        assert "dynamic_planner_failed" in subjects
+        artifacts = runtime.broker.list_artifacts()
+        assert any(artifact.name == "planner_failure" for artifact in artifacts)
+        worker_dirs = [
+            event.metadata["worker_dir"]
+            for event in events
+            if event.subject == "dynamic_planner_failed"
+        ]
+        assert worker_dirs and Path(worker_dirs[0], "prompt.md").exists()
+        assert Path(worker_dirs[0], "stderr.txt").exists()
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("CLI: dynamic workflow, swarm, and evidence help")
 def test_cli_help_entrypoints():
     import subprocess
@@ -2079,6 +2128,7 @@ if __name__ == "__main__":
         test_dynamic_workflow_planner_json_validation,
         test_dynamic_workflow_fake_planner_replanner_reducer,
         test_dynamic_workflow_limits,
+        test_dynamic_workflow_planner_timeout_records_evidence,
         test_cli_help_entrypoints,
         test_native_runtime_fanout,
         test_native_runtime_dependency_scheduling,

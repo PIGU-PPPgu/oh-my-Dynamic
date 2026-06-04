@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.1 - 2026-06-04
+
+- Added planner/replanner observability for `dynamic_workflow.py`: durable worker dirs, prompt/stdout/stderr capture, broker start/complete/failure traces, and failure artifacts.
+- Added `--planner-timeout-s` so blocking planner/replanner `codex exec` calls fail with evidence instead of hanging silently.
+- Added regression coverage for planner timeout evidence capture.
+
 ## 1.7.0 - 2026-06-04
 
 - Added `dynamic_workflow.py` with Codex CLI planner/replanner rounds, max round/agent limits, shared broker thread tracing, and broker-aware reduction.

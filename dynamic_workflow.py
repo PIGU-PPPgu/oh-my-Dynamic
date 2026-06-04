@@ -15,7 +15,6 @@ import json
 import os
 import re
 import subprocess
-import tempfile
 import time
 import uuid
 
@@ -134,6 +133,7 @@ class DynamicWorkflowRuntime:
         max_parallel: int = 5,
         timeout_s: int = 1800,
         total_timeout_s: Optional[int] = None,
+        planner_timeout_s: Optional[int] = None,
         planner_fn: Optional[PlannerFn] = None,
         replanner_fn: Optional[ReplannerFn] = None,
         broker: Optional[AgentBroker] = None,
@@ -154,6 +154,7 @@ class DynamicWorkflowRuntime:
         self.max_parallel = max_parallel
         self.timeout_s = timeout_s
         self.total_timeout_s = total_timeout_s
+        self.planner_timeout_s = planner_timeout_s if planner_timeout_s is not None else min(timeout_s, 120)
         self.planner_fn = planner_fn
         self.replanner_fn = replanner_fn
 
@@ -175,7 +176,7 @@ class DynamicWorkflowRuntime:
             },
         )
 
-        planner = self._planner_decision(goal)
+        planner = self._planner_decision(goal, run_id)
         planned: Dict[str, DynamicAgentPlan] = {agent.id: agent for agent in planner.agents}
         pending = list(planner.agents[: self.max_agents])
         completed_ids: Set[str] = set()
@@ -221,7 +222,7 @@ class DynamicWorkflowRuntime:
                 break
 
             reduction = reduce_broker_thread(self.broker, run_id, goal)
-            replanner = self._replan_decision(goal, reduction, planned)
+            replanner = self._replan_decision(goal, reduction, planned, run_id)
             if replanner.stop_reason == "ready_for_reducer":
                 stop_reason = "ready_for_reducer"
                 break
@@ -276,8 +277,8 @@ class DynamicWorkflowRuntime:
         trace_path.write_text(json.dumps(trace.to_dict(), ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
         return trace
 
-    def _planner_decision(self, goal: str) -> PlannerDecision:
-        payload = self.planner_fn(goal) if self.planner_fn else self._run_codex_json_worker("planner", _planner_prompt(goal))
+    def _planner_decision(self, goal: str, run_id: str) -> PlannerDecision:
+        payload = self.planner_fn(goal) if self.planner_fn else self._run_codex_json_worker("planner", _planner_prompt(goal), run_id)
         return parse_planner_decision(payload)
 
     def _replan_decision(
@@ -285,6 +286,7 @@ class DynamicWorkflowRuntime:
         goal: str,
         reduction: BrokerReductionResult,
         planned: Dict[str, DynamicAgentPlan],
+        run_id: str,
     ) -> ReplanDecision:
         snapshot = {
             "reducer": reduction.to_dict(),
@@ -293,30 +295,47 @@ class DynamicWorkflowRuntime:
         payload = (
             self.replanner_fn(goal, snapshot)
             if self.replanner_fn
-            else self._run_codex_json_worker("replanner", _replanner_prompt(goal, snapshot))
+            else self._run_codex_json_worker("replanner", _replanner_prompt(goal, snapshot), run_id)
         )
         return parse_replan_decision(payload, existing_agent_ids=set(planned))
 
-    def _run_codex_json_worker(self, role: str, prompt: str) -> Dict[str, Any]:
+    def _run_codex_json_worker(self, role: str, prompt: str, run_id: str) -> Dict[str, Any]:
         self.workspace_root.mkdir(parents=True, exist_ok=True)
-        with tempfile.TemporaryDirectory(prefix=f"ohmy_{role}_") as tmp:
-            tmp_path = Path(tmp)
-            prompt_path = tmp_path / "prompt.md"
-            output_path = tmp_path / "last_message.txt"
-            prompt_path.write_text(prompt, encoding="utf-8")
-            command = [
-                self.codex_bin,
-                "exec",
-                "--cd",
-                str(self.codex_cwd),
-                "--sandbox",
-                "workspace-write",
-                "--skip-git-repo-check",
-                "--ephemeral",
-                "--output-last-message",
-                str(output_path),
-                "-",
-            ]
+        worker_dir = self.workspace_root / run_id / f"{role}_{uuid.uuid4().hex[:8]}"
+        worker_dir.mkdir(parents=True, exist_ok=True)
+        prompt_path = worker_dir / "prompt.md"
+        output_path = worker_dir / "last_message.txt"
+        stdout_path = worker_dir / "stdout.txt"
+        stderr_path = worker_dir / "stderr.txt"
+        command_path = worker_dir / "command.json"
+        prompt_path.write_text(prompt, encoding="utf-8")
+        command = [
+            self.codex_bin,
+            "exec",
+            "--cd",
+            str(self.codex_cwd),
+            "--sandbox",
+            "workspace-write",
+            "--skip-git-repo-check",
+            "--ephemeral",
+            "--output-last-message",
+            str(output_path),
+            "-",
+        ]
+        command_path.write_text(json.dumps(command, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+        self.broker.trace(
+            "orchestrator",
+            f"dynamic_{role}_started",
+            f"Started {role} JSON worker.",
+            thread_id=run_id,
+            metadata={
+                "worker_dir": str(worker_dir),
+                "prompt_path": str(prompt_path),
+                "output_path": str(output_path),
+                "timeout_s": self.planner_timeout_s,
+            },
+        )
+        try:
             with prompt_path.open("r", encoding="utf-8") as stdin:
                 completed = subprocess.run(
                     command,
@@ -325,11 +344,59 @@ class DynamicWorkflowRuntime:
                     stdin=stdin,
                     capture_output=True,
                     text=True,
-                    timeout=self.timeout_s,
+                    timeout=self.planner_timeout_s,
                 )
-            raw = output_path.read_text(encoding="utf-8") if output_path.exists() else completed.stdout
-            if completed.returncode != 0:
-                raise RuntimeError(completed.stderr.strip() or f"codex {role} exited with {completed.returncode}")
+        except subprocess.TimeoutExpired as exc:
+            stdout_text = exc.stdout if isinstance(exc.stdout, str) else (exc.stdout or b"").decode("utf-8", errors="replace")
+            stderr_text = exc.stderr if isinstance(exc.stderr, str) else (exc.stderr or b"").decode("utf-8", errors="replace")
+            stdout_path.write_text(stdout_text, encoding="utf-8")
+            stderr_path.write_text(stderr_text, encoding="utf-8")
+            error = f"codex {role} timed out after {self.planner_timeout_s}s"
+            artifact = self.broker.publish_artifact(
+                "orchestrator",
+                f"{role}_failure",
+                "\n".join([error, f"worker_dir={worker_dir}", f"stderr={stderr_text[:4000]}"]),
+                kind="error",
+                thread_id=run_id,
+            )
+            self.broker.trace(
+                "orchestrator",
+                f"dynamic_{role}_failed",
+                error,
+                thread_id=run_id,
+                artifact_ids=[artifact.id],
+                metadata={"worker_dir": str(worker_dir), "timeout_s": self.planner_timeout_s},
+            )
+            raise RuntimeError(error) from exc
+
+        stdout_path.write_text(completed.stdout or "", encoding="utf-8")
+        stderr_path.write_text(completed.stderr or "", encoding="utf-8")
+        raw = output_path.read_text(encoding="utf-8") if output_path.exists() else completed.stdout
+        if completed.returncode != 0:
+            error = completed.stderr.strip() or f"codex {role} exited with {completed.returncode}"
+            artifact = self.broker.publish_artifact(
+                "orchestrator",
+                f"{role}_failure",
+                "\n".join([error, f"worker_dir={worker_dir}"]),
+                kind="error",
+                thread_id=run_id,
+            )
+            self.broker.trace(
+                "orchestrator",
+                f"dynamic_{role}_failed",
+                error,
+                thread_id=run_id,
+                artifact_ids=[artifact.id],
+                metadata={"worker_dir": str(worker_dir), "returncode": completed.returncode},
+            )
+            raise RuntimeError(error)
+        self.broker.trace(
+            "orchestrator",
+            f"dynamic_{role}_completed",
+            f"Completed {role} JSON worker.",
+            thread_id=run_id,
+            metadata={"worker_dir": str(worker_dir), "output_path": str(output_path)},
+        )
         return _load_json_object(raw)
 
     def _round_spec(
@@ -520,6 +587,7 @@ def main() -> None:
     parser.add_argument("--broker-dir", default=".orchestry/agent_broker_dynamic")
     parser.add_argument("--timeout-s", type=int, default=1800)
     parser.add_argument("--total-timeout-s", type=int, default=None)
+    parser.add_argument("--planner-timeout-s", type=int, default=None, help="Timeout for planner/replanner codex exec JSON workers.")
     args = parser.parse_args()
     if not args.goal:
         parser.print_help()
@@ -534,6 +602,7 @@ def main() -> None:
         max_parallel=args.max_parallel,
         timeout_s=args.timeout_s,
         total_timeout_s=args.total_timeout_s,
+        planner_timeout_s=args.planner_timeout_s,
     )
     trace = runtime.run(args.goal)
     print(json.dumps(trace.summary(), ensure_ascii=False, indent=2))
