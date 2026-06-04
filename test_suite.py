@@ -30,6 +30,27 @@ _fail = 0
 _skip = 0
 
 
+def init_test_git_repo(path: str) -> None:
+    """Create a deterministic test git repository with a valid initial commit."""
+    import subprocess
+
+    commands = [
+        ["git", "init", path],
+        ["git", "config", "user.email", "test@example.com"],
+        ["git", "config", "user.name", "oh-my-Dynamic Tests"],
+        ["git", "commit", "--allow-empty", "-m", "init"],
+    ]
+    for command in commands:
+        kwargs = {"capture_output": True, "text": True}
+        if command[0:2] == ["git", "config"] or command[0:2] == ["git", "commit"]:
+            kwargs["cwd"] = path
+        result = subprocess.run(command, **kwargs)
+        if result.returncode != 0:
+            raise AssertionError(
+                f"{' '.join(command)} failed: stdout={result.stdout!r} stderr={result.stderr!r}"
+            )
+
+
 def test(name):
     """装饰器：注册测试"""
     def wrapper(fn):
@@ -1367,13 +1388,12 @@ def test_synthesis_single():
 
 @test("Worktree: 创建 + 清理")
 def test_worktree_basic():
-    import tempfile, subprocess
+    import tempfile
     from worktree import WorktreeManager
     
     # 创建临时 git 仓库
     d = tempfile.mkdtemp()
-    subprocess.run(["git", "init", d], capture_output=True)
-    subprocess.run(["git", "commit", "--allow-empty", "-m", "init"], cwd=d, capture_output=True)
+    init_test_git_repo(d)
     
     try:
         mgr = WorktreeManager(d)
@@ -1390,12 +1410,11 @@ def test_worktree_basic():
 
 @test("Worktree: 拒绝不安全 agent 名称")
 def test_worktree_rejects_unsafe_name():
-    import tempfile, subprocess
+    import tempfile
     from worktree import WorktreeManager
 
     d = tempfile.mkdtemp()
-    subprocess.run(["git", "init", d], capture_output=True)
-    subprocess.run(["git", "commit", "--allow-empty", "-m", "init"], cwd=d, capture_output=True)
+    init_test_git_repo(d)
 
     try:
         mgr = WorktreeManager(d)
