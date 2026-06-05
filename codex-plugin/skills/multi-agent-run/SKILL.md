@@ -13,10 +13,10 @@ One-line trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
 ```
 
-Current v1.8.1 status:
+Current v1.9.0 status:
 
 - Stable: Codex CLI swarm, dynamic workflow planner/replanner, broker reducer,
-  and `examples/real_repo_review.py`.
+  `examples/real_repo_review.py`, and static observability dashboards.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
 - Experimental: Codex App bridge, A2A gateway, and TEA protocol.
@@ -33,8 +33,9 @@ When triggered inside Codex App, this skill must work immediately after installa
 - If the user asks for dynamic workflow but not huge scale, use the planner/replanner flow conceptually in App mode; outside App-native subagents, the local `dynamic_workflow.py` runtime is the matching CLI backend.
 - Exception: if the user explicitly asks for dozens/hundreds of real Codex agents, maximum fan-out, CLI swarm, or equivalent large-scale execution, use the local `codex_cli_swarm.py` backend instead of the ordinary in-chat fallback. This backend launches many `codex exec` processes, feeds each worker prompt through stdin, streams stdout/stderr to per-agent files, keeps a run manifest/trace, and ingests JSON envelopes into AgentBroker.
 - If the user asks for a real repo review demo or evidence run, use `python examples/real_repo_review.py --agents 5 --max-parallel 3`; add `--dry-run` only for CI/demo shape checks that must not launch Codex CLI.
+- If the user asks to inspect progress/evidence after a run, use `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`.
 - If the user asks for streaming progress or resume, use `python -m dynamic_workflow "goal" --stream-events --checkpoint-dir .orchestry/checkpoints` and resume with `python -m dynamic_workflow --resume RUN_ID`.
-- Treat `dynamic_workflow.py` as the planner/replanner/reducer orchestration layer and `codex_cli_swarm.py` as the Codex CLI worker execution layer.
+- Treat `dynamic_workflow.py` as the planner/replanner/reducer orchestration layer and `codex_cli_swarm.py` plus `codex_swarm_*` helpers as the Codex CLI worker execution layer.
 - If the user explicitly asks for concurrent code writing, use worktree mode: `workspace_mode="worktree"` and `write_intent="patch"`. Do not auto-merge agent worktrees.
 - If the user has not clearly granted write intent, stay read-only review by default.
 - Use the Codex App bridge contract for real subagents: dispatch plan, per-subagent prompt, structured JSON envelope, and AgentBroker ingestion.

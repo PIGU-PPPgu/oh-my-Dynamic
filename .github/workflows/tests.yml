@@ -23,10 +23,17 @@ jobs:
         run: python -m py_compile *.py examples/*.py scripts/*.py
       - name: Test
         run: python test_suite.py
+      - name: Coverage
+        run: |
+          python -m pip install 'coverage[toml]>=7.4.0'
+          python -m coverage run test_suite.py
+          python -m coverage report --fail-under=70
       - name: CLI help
         run: |
           python -m codex_cli_swarm --help >/dev/null
+          python -m codex_swarm_cli --help >/dev/null
           python -m dynamic_workflow --help >/dev/null
           python scripts/record_swarm_evidence.py --help >/dev/null
+          python scripts/render_workflow_observability.py --help >/dev/null
           python examples/codex_cli_swarm_review.py --help >/dev/null
           python examples/real_repo_review.py --help >/dev/null

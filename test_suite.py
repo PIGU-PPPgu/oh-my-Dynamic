@@ -109,6 +109,31 @@ def test_dag_basic():
     assert len(layers[2]) == 1  # D
 
 
+@test("DAG: TaskStatus normalization and legacy JSON")
+def test_dag_status_normalization():
+    from dag import DAG, DAGNode, normalize_status, status_value
+    from task import TaskStatus
+
+    dag = DAG()
+    parent = dag.add_node(DAGNode.create("Parent"))
+    child = dag.add_node(DAGNode.create("Child", dependencies=[parent.id], status="pending"))
+
+    assert normalize_status(parent.status) == TaskStatus.TODO
+    assert normalize_status("completed") == TaskStatus.DONE
+    assert status_value(TaskStatus.IN_PROGRESS) == "running"
+    assert dag.get_ready_nodes()[0].id == parent.id
+
+    parent.status = TaskStatus.DONE
+    assert dag.get_ready_nodes()[0].id == child.id
+    child.status = "completed"
+
+    stats = dag.completion_stats()
+    payload = dag.to_dict()
+    assert stats["completed"] == 2
+    assert payload["nodes"][parent.id]["status"] == "completed"
+    assert payload["nodes"][child.id]["status"] == "completed"
+
+
 @test("DAG: 环检测")
 def test_dag_cycle():
     from dag import DAG, DAGNode
@@ -1148,6 +1173,56 @@ def test_codex_worker_helpers():
     assert clamp_worker_timeout(120, 0) == 1
 
 
+@test("CodexSwarmScheduler: batching, cycles, and import compatibility")
+def test_codex_swarm_scheduler_and_import_compatibility():
+    from codex_cli_swarm import CodexCliAgentResult, CodexCliAgentSpec, CodexCliSwarmTrace
+    from codex_swarm_models import CodexCliAgentSpec as ModelSpec
+    from codex_swarm_scheduler import agent_batches, dependency_failure_message, ready_batches, topological_layers
+
+    assert CodexCliAgentSpec is ModelSpec
+    assert CodexCliAgentResult.__name__ == "CodexCliAgentResult"
+    assert CodexCliSwarmTrace.__name__ == "CodexCliSwarmTrace"
+
+    specs = [
+        CodexCliAgentSpec(id="planner", role="planner", goal="Plan"),
+        CodexCliAgentSpec(id="researcher", role="researcher", goal="Research"),
+        CodexCliAgentSpec(id="builder", role="builder", goal="Build", dependencies=["planner", "researcher"]),
+    ]
+    layers = topological_layers(specs)
+    layer_ids = [[spec.id for spec in layer] for layer in layers]
+    assert layer_ids == [["planner", "researcher"], ["builder"]]
+    assert ready_batches(layer_ids, 1) == [["planner"], ["researcher"], ["builder"]]
+    assert [[spec.id for spec in batch] for batch in agent_batches(specs, 2)] == [["planner", "researcher"], ["builder"]]
+
+    failed = CodexCliAgentResult(
+        agent_id="planner",
+        role="planner",
+        status="failed",
+        summary="bad",
+        started_at="s",
+        completed_at="c",
+        duration_s=0,
+        returncode=-1,
+        work_dir="",
+        prompt_path="",
+        output_path="",
+        stdout_path="",
+        stderr_path="",
+        error="planner failed",
+    )
+    assert "planner failed" in dependency_failure_message(specs[-1], ["planner"], {"planner": failed})
+
+    try:
+        topological_layers([
+            CodexCliAgentSpec(id="a", role="worker", goal="A", dependencies=["b"]),
+            CodexCliAgentSpec(id="b", role="worker", goal="B", dependencies=["a"]),
+        ])
+    except ValueError as exc:
+        assert "cycle detected" in str(exc)
+    else:
+        raise AssertionError("cycle should be rejected")
+
+
 @test("CodexCliSwarm: dependency failure blocks downstream")
 def test_codex_cli_swarm_dependency_failure():
     import shutil, tempfile
@@ -1850,20 +1925,126 @@ def test_real_repo_review_dry_run_evidence():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("WorkflowObserver: renders static dashboard evidence")
+def test_workflow_observer_static_dashboard():
+    import shutil, tempfile
+    from workflow_observer import render_observability_dashboard
+
+    d = tempfile.mkdtemp()
+    try:
+        source = Path(d) / ".orchestry"
+        broker = source / "agent_broker_fixture"
+        broker.mkdir(parents=True)
+        run_id = "obs-run"
+        events = [
+            {
+                "id": "event_1",
+                "kind": "trace",
+                "from_agent": "planner",
+                "to_agent": None,
+                "subject": "agent_started",
+                "body": "Planner started",
+                "thread_id": run_id,
+                "status": "running",
+                "metadata": {},
+                "created_at": "2026-06-05T00:00:00Z",
+            },
+            {
+                "id": "event_2",
+                "kind": "review_response",
+                "from_agent": "reviewer",
+                "to_agent": "builder",
+                "subject": "Review response",
+                "body": "Needs more coverage",
+                "thread_id": run_id,
+                "status": "completed",
+                "metadata": {"completeness_score": 0.45},
+                "created_at": "2026-06-05T00:01:00Z",
+            },
+            {
+                "id": "event_3",
+                "kind": "trace",
+                "from_agent": "builder",
+                "to_agent": None,
+                "subject": "agent_failed",
+                "body": "builder failed",
+                "thread_id": run_id,
+                "status": "failed",
+                "metadata": {},
+                "created_at": "2026-06-05T00:02:00Z",
+            },
+        ]
+        artifacts = [{
+            "id": "artifact_1",
+            "producer": "builder",
+            "name": "patch",
+            "kind": "worktree_diff",
+            "content": "diff --git a/x b/x",
+            "content_type": "text/plain",
+            "thread_id": run_id,
+            "task_id": "",
+            "metadata": {},
+            "created_at": "2026-06-05T00:03:00Z",
+        }]
+        (broker / "events.jsonl").write_text("\n".join(json.dumps(item) for item in events) + "\n", encoding="utf-8")
+        (broker / "artifacts.jsonl").write_text("\n".join(json.dumps(item) for item in artifacts) + "\n", encoding="utf-8")
+        trace_dir = source / "dynamic_workflow" / run_id
+        trace_dir.mkdir(parents=True)
+        (trace_dir / "dynamic_trace.json").write_text(json.dumps({"run_id": run_id, "stop_reason": "ready_for_reducer"}), encoding="utf-8")
+        checkpoint_dir = source / "checkpoints"
+        checkpoint_dir.mkdir(parents=True)
+        (checkpoint_dir / f"{run_id}.json").write_text(json.dumps({
+            "run_id": run_id,
+            "completed_agent_ids": ["planner"],
+            "failed_agent_ids": ["builder"],
+            "stop_reason": "partial",
+        }), encoding="utf-8")
+
+        output = Path(d) / "dashboard.html"
+        rendered = render_observability_dashboard(run_id, source=str(source), output=str(output))
+        body = Path(rendered).read_text(encoding="utf-8")
+        assert "oh-my-Dynamic Observability" in body
+        assert "Needs more coverage" in body
+        assert "builder failed" in body
+        assert "diff --git" in body
+        assert "Low Scores" in body
+        assert "checkpoint" in body.lower()
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("CLI: dynamic workflow, swarm, and evidence help")
 def test_cli_help_entrypoints():
+    import contextlib
+    import io
     import subprocess
 
     commands = [
         [sys.executable, "-m", "dynamic_workflow", "--help"],
         [sys.executable, "-m", "codex_cli_swarm", "--help"],
+        [sys.executable, "-m", "codex_swarm_cli", "--help"],
         [sys.executable, "scripts/record_swarm_evidence.py", "--help"],
+        [sys.executable, "scripts/render_workflow_observability.py", "--help"],
         [sys.executable, "examples/real_repo_review.py", "--help"],
     ]
     for command in commands:
         result = subprocess.run(command, cwd=Path(__file__).resolve().parent, capture_output=True, text=True)
         assert result.returncode == 0, f"{command} failed: {result.stderr}"
         assert "usage:" in result.stdout.lower()
+
+    from codex_swarm_cli import main as swarm_cli_main
+
+    old_argv = sys.argv[:]
+    try:
+        sys.argv = ["codex_swarm_cli", "--help"]
+        with contextlib.redirect_stdout(io.StringIO()) as stdout:
+            try:
+                swarm_cli_main()
+            except SystemExit as exc:
+                assert exc.code == 0
+        assert "usage:" in stdout.getvalue().lower()
+    finally:
+        sys.argv = old_argv
 
 
 @test("Native Runtime: sandboxed fan-out")
@@ -2317,6 +2498,7 @@ if __name__ == "__main__":
     # 单元测试
     run_section("📦 单元测试", [
         test_dag_basic,
+        test_dag_status_normalization,
         test_dag_cycle,
         test_dag_executor,
         test_dag_dot,
@@ -2342,6 +2524,7 @@ if __name__ == "__main__":
         test_codex_app_bridge_dependency_validation,
         test_codex_cli_swarm_fake_exec,
         test_codex_worker_helpers,
+        test_codex_swarm_scheduler_and_import_compatibility,
         test_codex_cli_swarm_dependency_failure,
         test_codex_cli_swarm_failure_modes,
         test_codex_cli_swarm_worktree_mode_patch_artifacts,
@@ -2355,6 +2538,7 @@ if __name__ == "__main__":
         test_dynamic_workflow_resume_skips_completed_agents,
         test_dynamic_workflow_planner_timeout_records_evidence,
         test_real_repo_review_dry_run_evidence,
+        test_workflow_observer_static_dashboard,
         test_cli_help_entrypoints,
         test_native_runtime_fanout,
         test_native_runtime_dependency_scheduling,

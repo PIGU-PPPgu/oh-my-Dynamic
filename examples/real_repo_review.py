@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
 from agent_broker import AgentBroker
 from broker_reducer import reduce_broker_thread
 from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+from workflow_observer import render_observability_dashboard
 
 
 REVIEW_LANES = [
@@ -144,6 +145,7 @@ def main() -> None:
     parser.add_argument("--timeout-s", type=int, default=1800)
     parser.add_argument("--total-timeout-s", type=int, default=None)
     parser.add_argument("--dry-run", action="store_true", help="Write sample evidence without launching Codex CLI.")
+    parser.add_argument("--dashboard", action="store_true", help="Also render a static observability dashboard HTML file.")
     args = parser.parse_args()
     if args.agents < 1:
         raise SystemExit("--agents must be at least 1")
@@ -157,6 +159,13 @@ def main() -> None:
         for lane_id, _role, lane_goal in REVIEW_LANES[:args.agents]
     ] if args.dry_run else []
     _write_evidence(evidence_path, payload, samples)
+    if args.dashboard:
+        dashboard_path = Path(args.output_dir) / f"{payload['run_id']}-dashboard.html"
+        render_observability_dashboard(
+            str(payload["run_id"]),
+            source=".orchestry",
+            output=str(dashboard_path),
+        )
     print(str(evidence_path))
 
 

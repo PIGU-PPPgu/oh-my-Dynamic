@@ -32,7 +32,7 @@ transport surface is needed.
 prompts, structured JSON envelopes, and AgentBroker ingestion.
 `codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
 process-level fan-out.
-`dynamic_workflow.py` defines the v1.8 planner/replanner runtime: start with a
+`dynamic_workflow.py` defines the v1.9 planner/replanner runtime: start with a
 planner, fan out Codex CLI workers, let a replanner add follow-up agents, then
 run a broker-aware reducer over artifacts, failures, dependency graph, review
 responses, optional worktree diff artifacts, checkpoint/resume state, and
@@ -54,7 +54,7 @@ One-line App trigger:
 Current product status:
 
 - Stable: Codex CLI swarm, dynamic workflow planner/replanner, broker reducer,
-  and the real repo review demo.
+  the real repo review demo, and static observability dashboards.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
 - Experimental: Codex App bridge, A2A gateway, and TEA protocol.
@@ -82,9 +82,13 @@ In App fallback/zero-config mode:
   the user asks for a real read-only repo review demo with compact evidence.
 - Use `python examples/real_repo_review.py --dry-run --run-id five-minute-demo`
   for a zero-config demo shape check that must not launch real Codex CLI workers.
+- Use `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`
+  when the user asks to inspect broker trace, artifacts, failures, low-score
+  events, review responses, dependency traces, or checkpoint evidence.
 - Keep the runtime boundary clear: `dynamic_workflow.py` orchestrates planner,
-  replanner, checkpoint/resume, events, and reducer; `codex_cli_swarm.py`
-  executes Codex CLI workers and owns worker lifecycle details.
+  replanner, checkpoint/resume, events, and reducer; `codex_cli_swarm.py` and
+  the `codex_swarm_*` helper modules execute Codex CLI workers and own worker
+  lifecycle details.
 - Treat the modules in the installed oh-my-Dynamic repository as the reference implementation and mirror their workflow in-chat.
 - Be explicit if the user asks about native parallel sandboxed subagents and no
   Codex subagent runtime/tools are available in the current session: App-native

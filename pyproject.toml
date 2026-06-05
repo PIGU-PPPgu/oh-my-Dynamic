@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oh-my-dynamic"
-version = "1.8.1"
+version = "1.9.0"
 description = "Multi-agent orchestration engine with DAG execution, dynamic replan, TEA protocol, and model-provider routing."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -25,6 +25,7 @@ all = [
 ]
 dev = [
   "bandit>=1.7.10",
+  "coverage[toml]>=7.4.0",
 ]
 
 [project.scripts]
@@ -40,6 +41,11 @@ py-modules = [
   "capability_registry",
   "checkpoint",
   "codex_cli_swarm",
+  "codex_swarm_artifacts",
+  "codex_swarm_cli",
+  "codex_swarm_models",
+  "codex_swarm_process",
+  "codex_swarm_scheduler",
   "codex_worker",
   "codex_app_bridge",
   "agents",
@@ -63,8 +69,32 @@ py-modules = [
   "visualize",
   "workflow_events",
   "workflow_config",
+  "workflow_observer",
   "worktree",
 ]
 
 [tool.bandit]
 exclude_dirs = [".git", "__pycache__", ".venv", "venv"]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+  ".codegraph/*",
+  ".orchestry/*",
+  ".venv/*",
+  "venv/*",
+  "build/*",
+  "dist/*",
+  "*dashboard.html",
+  "agents.py",
+  "demo.py",
+  "message_bus.py",
+  "orchestrator.py",
+  "team_engine.py",
+  "validator.py",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+fail_under = 70

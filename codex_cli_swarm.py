@@ -11,134 +11,41 @@ workflow engine.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict, dataclass, field
-from datetime import datetime
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
-import argparse
-import json
 import shutil
-import subprocess
 import time
-import uuid
 
-from agent_broker import AgentBroker, validate_agent_id
-from codex_app_bridge import (
-    CodexSubagentEnvelope,
-    envelope_from_dict,
-    ingest_subagent_envelope,
-    parse_subagent_envelope,
+from agent_broker import AgentBroker
+from codex_swarm_artifacts import (
+    build_failed_process_result,
+    build_manifest,
+    write_json,
 )
-from codex_worker import build_codex_exec_command, build_worker_env, clamp_worker_timeout
+from codex_swarm_models import (
+    CodexCliAgentResult,
+    CodexCliAgentSpec,
+    CodexCliSwarmTrace,
+    new_run_id,
+    now_iso,
+)
+from codex_swarm_scheduler import (
+    agent_batches,
+    dependency_failure_message,
+    ready_batches,
+    topological_layers,
+)
+from codex_swarm_process import run_agent_process
 from worktree import WorktreeManager
 from workflow_events import WorkflowEvent
 
 
 def _now() -> str:
-    return datetime.now().isoformat()
+    return now_iso()
 
 
 def _run_id() -> str:
-    return f"codex_cli_run_{uuid.uuid4().hex[:10]}"
-
-
-@dataclass
-class CodexCliAgentSpec:
-    """One worker process launched through `codex exec`."""
-
-    id: str
-    role: str
-    goal: str
-    context: str = ""
-    dependencies: List[str] = field(default_factory=list)
-    sandbox: str = "workspace-write"
-    approval_policy: str = "never"
-    extra_args: List[str] = field(default_factory=list)
-    workspace_mode: str = "shared"
-    write_intent: str = "none"
-    base_ref: str = "HEAD"
-
-
-@dataclass
-class CodexCliAgentResult:
-    """Result from one `codex exec` worker process."""
-
-    agent_id: str
-    role: str
-    status: str
-    summary: str
-    started_at: str
-    completed_at: str
-    duration_s: float
-    returncode: int
-    work_dir: str
-    prompt_path: str
-    output_path: str
-    stdout_path: str
-    stderr_path: str
-    artifact_ids: Dict[str, str] = field(default_factory=dict)
-    event_ids: List[str] = field(default_factory=list)
-    workspace_mode: str = "shared"
-    agent_cwd: str = ""
-    worktree_branch: str = ""
-    worktree_path: str = ""
-    error: str = ""
-
-
-@dataclass
-class CodexCliSwarmTrace:
-    """Complete trace for a Codex CLI process swarm."""
-
-    run_id: str
-    goal: str
-    max_parallel: int
-    started_at: str
-    completed_at: str
-    duration_s: float
-    results: List[CodexCliAgentResult]
-    swarm_root: str
-    codex_cwd: str
-    topological_layers: List[List[str]]
-    ready_batches: List[List[str]]
-    broker_thread_id: str = ""
-    broker_event_count: int = 0
-    manifest_path: str = ""
-    trace_path: str = ""
-
-    def summary(self) -> Dict[str, object]:
-        completed = sum(1 for result in self.results if result.status == "completed")
-        failed = sum(1 for result in self.results if result.status == "failed")
-        return {
-            "run_id": self.run_id,
-            "goal": self.goal,
-            "agents": len(self.results),
-            "completed": completed,
-            "failed": failed,
-            "duration_s": self.duration_s,
-            "max_parallel": self.max_parallel,
-            "swarm_root": self.swarm_root,
-            "broker_thread_id": self.broker_thread_id,
-            "broker_event_count": self.broker_event_count,
-        }
-
-    def to_dict(self) -> Dict[str, object]:
-        return {
-            "run_id": self.run_id,
-            "goal": self.goal,
-            "max_parallel": self.max_parallel,
-            "started_at": self.started_at,
-            "completed_at": self.completed_at,
-            "duration_s": self.duration_s,
-            "results": [asdict(result) for result in self.results],
-            "swarm_root": self.swarm_root,
-            "codex_cwd": self.codex_cwd,
-            "topological_layers": self.topological_layers,
-            "ready_batches": self.ready_batches,
-            "broker_thread_id": self.broker_thread_id,
-            "broker_event_count": self.broker_event_count,
-            "manifest_path": self.manifest_path,
-            "trace_path": self.trace_path,
-        }
+    return new_run_id()
 
 
 class CodexCliSwarmRuntime:
@@ -189,9 +96,9 @@ class CodexCliSwarmRuntime:
             raise ValueError("goal is required")
         if not agents:
             raise ValueError("at least one CodexCliAgentSpec is required")
-        layers = self._topological_layers(agents)
+        layers = topological_layers(agents)
         layer_ids = [[spec.id for spec in layer] for layer in layers]
-        ready_batches = self._ready_batches(layer_ids, self.max_parallel)
+        batches = ready_batches(layer_ids, self.max_parallel)
 
         run_id = run_id or _run_id()
         started_at = _now()
@@ -200,9 +107,24 @@ class CodexCliSwarmRuntime:
         swarm_root.mkdir(parents=True, exist_ok=True)
         manifest_path = swarm_root / "manifest.json"
         trace_path = swarm_root / "trace.json"
-        self._write_json(
+        write_json(
             manifest_path,
-            self._build_manifest(run_id, goal, agents, started_at, swarm_root, layer_ids, ready_batches),
+            build_manifest(
+                run_id,
+                goal,
+                agents,
+                started_at,
+                swarm_root,
+                self.codex_bin,
+                self.codex_cwd,
+                self.workspace_root,
+                self.max_parallel,
+                self.timeout_s,
+                self.total_timeout_s,
+                self.keep_workdirs,
+                layer_ids,
+                batches,
+            ),
         )
 
         if self.broker:
@@ -259,7 +181,7 @@ class CodexCliSwarmRuntime:
                 else:
                     runnable.append(spec)
 
-            for batch in self._agent_batches(runnable, self.max_parallel):
+            for batch in agent_batches(runnable, self.max_parallel):
                 remaining_timeout = self._remaining_timeout_s(start)
                 if remaining_timeout is not None and remaining_timeout <= 0:
                     for spec in batch:
@@ -330,14 +252,14 @@ class CodexCliSwarmRuntime:
             swarm_root=str(swarm_root.resolve()),
             codex_cwd=str(self.codex_cwd),
             topological_layers=layer_ids,
-            ready_batches=ready_batches,
+            ready_batches=batches,
             broker_thread_id=run_id if self.broker else "",
             broker_event_count=broker_event_count,
             manifest_path=str(manifest_path.resolve()),
             trace_path=str(trace_path.resolve()),
         )
 
-        self._write_json(trace_path, trace.to_dict())
+        write_json(trace_path, trace.to_dict())
         if not self.keep_workdirs:
             durable_manifest_path = self.workspace_root / f"{run_id}.manifest.json"
             durable_trace_path = self.workspace_root / f"{run_id}.trace.json"
@@ -345,7 +267,7 @@ class CodexCliSwarmRuntime:
             shutil.copy2(trace_path, durable_trace_path)
             trace.manifest_path = str(durable_manifest_path.resolve())
             trace.trace_path = str(durable_trace_path.resolve())
-            self._write_json(durable_trace_path, trace.to_dict())
+            write_json(durable_trace_path, trace.to_dict())
             shutil.rmtree(swarm_root, ignore_errors=True)
         return trace
 
@@ -358,216 +280,7 @@ class CodexCliSwarmRuntime:
         run_id: str,
         timeout_s: Optional[int],
     ) -> CodexCliAgentResult:
-        work_dir.mkdir(parents=True, exist_ok=True)
-        prompt_path = work_dir / "prompt.md"
-        output_path = work_dir / "last_message.txt"
-        stdout_path = work_dir / "stdout.txt"
-        stderr_path = work_dir / "stderr.txt"
-        prompt = self._build_prompt(workflow_goal, spec, dependency_results)
-        prompt_path.write_text(prompt, encoding="utf-8")
-
-        started_at = _now()
-        start = time.time()
-
-        try:
-            agent_cwd, worktree_branch, worktree_path = self._prepare_agent_workspace(spec, run_id)
-            if self.broker:
-                self.broker.trace(
-                    spec.id,
-                    "codex_cli_agent_started",
-                    spec.goal,
-                    thread_id=run_id,
-                    metadata={
-                        "role": spec.role,
-                        "work_dir": str(work_dir.resolve()),
-                        "workspace_mode": spec.workspace_mode,
-                        "agent_cwd": str(agent_cwd),
-                        "worktree_branch": worktree_branch,
-                    },
-                )
-            self._emit_event(WorkflowEvent(
-                run_id=run_id,
-                kind="agent_started",
-                subject="agent_started",
-                body=spec.goal,
-                agent_id=spec.id,
-                status="running",
-                preview=spec.goal[:200],
-                metadata={"role": spec.role, "workspace_mode": spec.workspace_mode},
-            ))
-
-            command = build_codex_exec_command(
-                self.codex_bin,
-                agent_cwd,
-                spec.sandbox,
-                output_path,
-                spec.extra_args,
-            )
-            env = build_worker_env(self.inherited_env)
-            worker_timeout_s = clamp_worker_timeout(self.timeout_s, timeout_s)
-
-            with (
-                prompt_path.open("r", encoding="utf-8") as prompt_file,
-                stdout_path.open("w", encoding="utf-8") as stdout_file,
-                stderr_path.open("w", encoding="utf-8") as stderr_file,
-            ):
-                process = subprocess.Popen(
-                    command,
-                    cwd=str(agent_cwd),
-                    env=env,
-                    stdin=prompt_file,
-                    stdout=stdout_file,
-                    stderr=stderr_file,
-                    text=True,
-                )
-                try:
-                    returncode = process.wait(timeout=worker_timeout_s)
-                except subprocess.TimeoutExpired:
-                    process.kill()
-                    process.wait()
-                    return self._failed_process_result(
-                        spec,
-                        work_dir,
-                        prompt_path,
-                        output_path,
-                        stdout_path,
-                        stderr_path,
-                        started_at,
-                        start,
-                        -1,
-                        f"codex exec timed out after {worker_timeout_s}s",
-                        run_id,
-                        agent_cwd=agent_cwd,
-                        worktree_branch=worktree_branch,
-                        worktree_path=worktree_path,
-                    )
-
-            stdout_text = stdout_path.read_text(encoding="utf-8") if stdout_path.exists() else ""
-            stderr_text = stderr_path.read_text(encoding="utf-8") if stderr_path.exists() else ""
-            raw_output = output_path.read_text(encoding="utf-8") if output_path.exists() else stdout_text
-            if returncode != 0:
-                error = stderr_text.strip() or f"codex exec exited with {returncode}"
-                return self._failed_process_result(
-                    spec,
-                    work_dir,
-                    prompt_path,
-                    output_path,
-                    stdout_path,
-                    stderr_path,
-                    started_at,
-                    start,
-                    returncode,
-                    error,
-                    run_id,
-                    agent_cwd=agent_cwd,
-                    worktree_branch=worktree_branch,
-                    worktree_path=worktree_path,
-                )
-
-            envelope = parse_subagent_envelope(raw_output)
-            if envelope.agent_id != spec.id:
-                raise ValueError(f"envelope agent_id mismatch: expected {spec.id}, got {envelope.agent_id}")
-            ingested = self._ingest_envelope(envelope, spec, run_id)
-            artifact_ids = dict(ingested.get("artifact_ids", {}))
-            artifact_ids.update(self._publish_worktree_diff_artifacts(spec, run_id, agent_cwd))
-            result = CodexCliAgentResult(
-                agent_id=spec.id,
-                role=spec.role,
-                status=envelope.status,
-                summary=envelope.summary,
-                started_at=started_at,
-                completed_at=_now(),
-                duration_s=time.time() - start,
-                returncode=returncode,
-                work_dir=str(work_dir.resolve()),
-                prompt_path=str(prompt_path.resolve()),
-                output_path=str(output_path.resolve()),
-                stdout_path=str(stdout_path.resolve()),
-                stderr_path=str(stderr_path.resolve()),
-                artifact_ids=artifact_ids,
-                event_ids=list(ingested.get("event_ids", [])),
-                workspace_mode=spec.workspace_mode,
-                agent_cwd=str(agent_cwd.resolve()),
-                worktree_branch=worktree_branch,
-                worktree_path=str(Path(worktree_path).resolve()) if worktree_path else "",
-                error=envelope.error,
-            )
-            self._emit_event(WorkflowEvent(
-                run_id=run_id,
-                kind="agent_done" if result.status == "completed" else "agent_failed",
-                subject="agent_done" if result.status == "completed" else "agent_failed",
-                body=result.summary,
-                agent_id=spec.id,
-                status=result.status,
-                preview=result.summary[:200],
-                metadata={"returncode": returncode, "role": spec.role},
-            ))
-            return result
-        except Exception as exc:
-            return self._failed_process_result(
-                spec,
-                work_dir,
-                prompt_path,
-                output_path,
-                stdout_path,
-                stderr_path,
-                started_at,
-                start,
-                -1,
-                f"{type(exc).__name__}: {exc}",
-                run_id,
-                agent_cwd=agent_cwd if "agent_cwd" in locals() else None,
-                worktree_branch=worktree_branch if "worktree_branch" in locals() else "",
-                worktree_path=worktree_path if "worktree_path" in locals() else "",
-            )
-
-    def _build_prompt(
-        self,
-        workflow_goal: str,
-        spec: CodexCliAgentSpec,
-        dependency_results: Dict[str, CodexCliAgentResult],
-    ) -> str:
-        return (
-            "You are an independent Codex CLI worker in an oh-my-Dynamic swarm.\n"
-            "Return exactly one JSON object and no prose. The parent orchestrator "
-            "will ingest it into AgentBroker.\n\n"
-            f"Workflow goal:\n{workflow_goal}\n\n"
-            f"Agent id: {spec.id}\n"
-            f"Role: {spec.role}\n"
-            f"Agent goal:\n{spec.goal}\n"
-            f"Dependencies: {spec.dependencies}\n\n"
-            f"Context:\n{spec.context or '(none)'}\n\n"
-            f"Dependency outputs:\n{self._format_dependency_context(spec, dependency_results)}\n\n"
-            "Required JSON schema:\n"
-            "{\n"
-            f'  "agent_id": "{spec.id}",\n'
-            '  "status": "completed|failed",\n'
-            '  "summary": "<concise result for reducer>",\n'
-            '  "artifacts": [{"name":"result","kind":"analysis","content_type":"text/plain","content":"..."}],\n'
-            '  "messages": [{"to_agent":"orchestrator","subject":"...","body":"...","artifact_names":["result"]}],\n'
-            '  "handoffs": [],\n'
-            '  "review_requests": [],\n'
-            '  "review_responses": [],\n'
-            '  "metadata": {"backend": "codex_cli_swarm"},\n'
-            '  "error": ""\n'
-            "}\n"
-        )
-
-    def _ingest_envelope(
-        self,
-        envelope: CodexSubagentEnvelope,
-        spec: CodexCliAgentSpec,
-        run_id: str,
-    ) -> Dict[str, object]:
-        if not self.broker:
-            return {"artifact_ids": {}, "event_ids": []}
-        return ingest_subagent_envelope(
-            self.broker,
-            run_id,
-            envelope,
-            role=spec.role,
-            capabilities=["codex_cli_worker"],
-        )
+        return run_agent_process(self, workflow_goal, spec, work_dir, dependency_results, run_id, timeout_s)
 
     def _failed_process_result(
         self,
@@ -586,61 +299,25 @@ class CodexCliSwarmRuntime:
         worktree_branch: str = "",
         worktree_path: str = "",
     ) -> CodexCliAgentResult:
-        envelope = envelope_from_dict({
-            "agent_id": spec.id,
-            "status": "failed",
-            "summary": error,
-            "artifacts": [{
-                "name": "error",
-                "kind": "error",
-                "content_type": "text/plain",
-                "content": error,
-            }],
-            "messages": [{
-                "to_agent": "orchestrator",
-                "subject": f"Codex CLI worker failed: {spec.id}",
-                "body": error,
-                "artifact_names": ["error"],
-            }],
-            "metadata": {"backend": "codex_cli_swarm", "returncode": returncode},
-            "error": error,
-        })
-        ingested = self._ingest_envelope(envelope, spec, run_id)
-        artifact_ids = dict(ingested.get("artifact_ids", {}))
-        if agent_cwd is not None:
-            artifact_ids.update(self._publish_worktree_diff_artifacts(spec, run_id, agent_cwd))
-        result = CodexCliAgentResult(
-            agent_id=spec.id,
-            role=spec.role,
-            status="failed",
-            summary=error,
-            started_at=started_at,
-            completed_at=_now(),
-            duration_s=time.time() - start,
-            returncode=returncode,
-            work_dir=str(work_dir.resolve()),
-            prompt_path=str(prompt_path.resolve()),
-            output_path=str(output_path.resolve()),
-            stdout_path=str(stdout_path.resolve()),
-            stderr_path=str(stderr_path.resolve()),
-            artifact_ids=artifact_ids,
-            event_ids=list(ingested.get("event_ids", [])),
-            workspace_mode=spec.workspace_mode,
-            agent_cwd=str(agent_cwd.resolve()) if agent_cwd is not None else str(self.codex_cwd),
+        result, event = build_failed_process_result(
+            self.broker,
+            spec,
+            work_dir,
+            prompt_path,
+            output_path,
+            stdout_path,
+            stderr_path,
+            started_at,
+            start,
+            returncode,
+            error,
+            run_id,
+            self.codex_cwd,
+            agent_cwd=agent_cwd,
             worktree_branch=worktree_branch,
-            worktree_path=str(Path(worktree_path).resolve()) if worktree_path else "",
-            error=error,
+            worktree_path=worktree_path,
         )
-        self._emit_event(WorkflowEvent(
-            run_id=run_id,
-            kind="agent_failed",
-            subject="agent_failed",
-            body=error,
-            agent_id=spec.id,
-            status="failed",
-            preview=error[:200],
-            metadata={"returncode": returncode},
-        ))
+        self._emit_event(event)
         return result
 
     def _dependency_failed_result(
@@ -653,11 +330,7 @@ class CodexCliSwarmRuntime:
     ) -> CodexCliAgentResult:
         work_dir.mkdir(parents=True, exist_ok=True)
         started_at = _now()
-        details = []
-        for dep_id in failed_deps:
-            dep = results_by_id[dep_id]
-            details.append(f"{dep_id} ({dep.status}: {dep.error or dep.summary})")
-        error = f"Dependency failed for {spec.id}: " + "; ".join(details)
+        error = dependency_failure_message(spec, failed_deps, results_by_id)
         return self._failed_process_result(
             spec,
             work_dir,
@@ -694,102 +367,6 @@ class CodexCliSwarmRuntime:
         )
         return path.resolve(), branch, str(path.resolve())
 
-    def _publish_worktree_diff_artifacts(
-        self,
-        spec: CodexCliAgentSpec,
-        run_id: str,
-        agent_cwd: Path,
-    ) -> Dict[str, str]:
-        if not self.broker or spec.workspace_mode != "worktree":
-            return {}
-
-        def git(*args: str) -> str:
-            completed = subprocess.run(
-                ["git", *args],
-                cwd=str(agent_cwd),
-                capture_output=True,
-                text=True,
-                timeout=30,
-            )
-            if completed.returncode != 0:
-                return completed.stderr.strip()
-            return completed.stdout
-
-        artifacts = {
-            "diff_stat": git("diff", "--stat", spec.base_ref),
-            "patch": git("diff", spec.base_ref),
-            "changed_files": git("diff", "--name-only", spec.base_ref),
-        }
-        published: Dict[str, str] = {}
-        for name, content in artifacts.items():
-            artifact = self.broker.publish_artifact(
-                spec.id,
-                name,
-                content or "(no changes)",
-                kind="worktree_diff",
-                content_type="text/plain",
-                metadata={
-                    "thread_id": run_id,
-                    "workspace_mode": spec.workspace_mode,
-                    "write_intent": spec.write_intent,
-                    "worktree_path": str(agent_cwd),
-                    "base_ref": spec.base_ref,
-                },
-                thread_id=run_id,
-            )
-            published[name] = artifact.id
-        return published
-
-    def _format_dependency_context(
-        self,
-        spec: CodexCliAgentSpec,
-        dependency_results: Dict[str, CodexCliAgentResult],
-    ) -> str:
-        if not spec.dependencies:
-            return "(none)"
-        parts = []
-        for dep_id in spec.dependencies:
-            result = dependency_results.get(dep_id)
-            if result is None:
-                parts.append(f"## {dep_id}\n(status unavailable)")
-                continue
-            body = result.summary or result.error or "(no summary)"
-            artifact_context = self._dependency_artifact_context(result)
-            parts.append(
-                "\n".join([
-                    f"## {dep_id} ({result.role}, {result.status})",
-                    f"Summary: {body[:2000]}",
-                    f"Error: {result.error or '(none)'}",
-                    f"Output file: {result.output_path}",
-                    f"Artifacts:\n{artifact_context}",
-                ])
-            )
-        return "\n\n".join(parts)
-
-    def _dependency_artifact_context(self, result: CodexCliAgentResult) -> str:
-        output_path = Path(result.output_path)
-        if not output_path.exists():
-            return "(none; output file missing)"
-        try:
-            payload = json.loads(output_path.read_text(encoding="utf-8"))
-        except Exception:
-            return "(none; output file is not JSON)"
-        artifacts = payload.get("artifacts", [])
-        if not isinstance(artifacts, list) or not artifacts:
-            return "(none)"
-        lines = []
-        for artifact in artifacts[:5]:
-            if not isinstance(artifact, dict):
-                continue
-            name = str(artifact.get("name", "result"))
-            kind = str(artifact.get("kind", "text"))
-            content_type = str(artifact.get("content_type", "text/plain"))
-            content = str(artifact.get("content", ""))[:1200]
-            artifact_id = result.artifact_ids.get(name, "")
-            id_part = f", broker_id={artifact_id}" if artifact_id else ""
-            lines.append(f"- {name} ({kind}, {content_type}{id_part}): {content}")
-        return "\n".join(lines) if lines else "(none)"
-
     def _remaining_timeout_s(self, start: float) -> Optional[int]:
         if self.total_timeout_s is None:
             return None
@@ -816,154 +393,15 @@ class CodexCliSwarmRuntime:
             run_id,
         )
 
-    def _build_manifest(
-        self,
-        run_id: str,
-        goal: str,
-        agents: List[CodexCliAgentSpec],
-        started_at: str,
-        swarm_root: Path,
-        topological_layers: List[List[str]],
-        ready_batches: List[List[str]],
-    ) -> Dict[str, object]:
-        return {
-            "run_id": run_id,
-            "goal": goal,
-            "started_at": started_at,
-            "codex_bin": self.codex_bin,
-            "codex_cwd": str(self.codex_cwd),
-            "workspace_root": str(self.workspace_root),
-            "swarm_root": str(swarm_root.resolve()),
-            "max_parallel": self.max_parallel,
-            "timeout_s": self.timeout_s,
-            "total_timeout_s": self.total_timeout_s,
-            "keep_workdirs": self.keep_workdirs,
-            "topological_layers": topological_layers,
-            "ready_batches": ready_batches,
-            "agents": [asdict(agent) for agent in agents],
-        }
-
-    def _write_json(self, path: Path, payload: Dict[str, object]) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
-
     def _emit_event(self, event: WorkflowEvent) -> None:
         if self.event_callback is not None:
             self.event_callback(event)
 
-    def _topological_layers(self, agents: List[CodexCliAgentSpec]) -> List[List[CodexCliAgentSpec]]:
-        specs_by_id: Dict[str, CodexCliAgentSpec] = {}
-        for spec in agents:
-            spec.id = validate_agent_id(spec.id)
-            if spec.id in specs_by_id:
-                raise ValueError(f"duplicate agent id: {spec.id}")
-            specs_by_id[spec.id] = spec
-
-        order = {spec.id: index for index, spec in enumerate(agents)}
-        dependents: Dict[str, List[str]] = {spec.id: [] for spec in agents}
-        indegree: Dict[str, int] = {spec.id: 0 for spec in agents}
-        for spec in agents:
-            seen_deps = set()
-            for dep_id in spec.dependencies:
-                dep_id = validate_agent_id(dep_id, "dependency")
-                if dep_id in seen_deps:
-                    raise ValueError(f"agent {spec.id} has duplicate dependency: {dep_id}")
-                if dep_id not in specs_by_id:
-                    raise ValueError(f"agent {spec.id} depends on unknown agent id: {dep_id}")
-                if dep_id == spec.id:
-                    raise ValueError(f"agent {spec.id} cannot depend on itself")
-                seen_deps.add(dep_id)
-                dependents[dep_id].append(spec.id)
-                indegree[spec.id] += 1
-
-        ready = [spec.id for spec in agents if indegree[spec.id] == 0]
-        layers: List[List[CodexCliAgentSpec]] = []
-        processed: List[str] = []
-        while ready:
-            layer_ids = ready
-            layers.append([specs_by_id[agent_id] for agent_id in layer_ids])
-            next_ready: List[str] = []
-            for agent_id in layer_ids:
-                processed.append(agent_id)
-                for child_id in dependents[agent_id]:
-                    indegree[child_id] -= 1
-                    if indegree[child_id] == 0:
-                        next_ready.append(child_id)
-            ready = sorted(next_ready, key=lambda agent_id: order[agent_id])
-
-        if len(processed) != len(agents):
-            cycle_ids = [agent_id for agent_id, degree in indegree.items() if degree > 0]
-            raise ValueError("cycle detected in CodexCliAgentSpec.dependencies: " + ", ".join(cycle_ids))
-        return layers
-
-    def _ready_batches(self, layers: List[List[str]], max_parallel: int) -> List[List[str]]:
-        batches: List[List[str]] = []
-        for layer in layers:
-            for index in range(0, len(layer), max_parallel):
-                batches.append(layer[index:index + max_parallel])
-        return batches
-
-    def _agent_batches(
-        self,
-        agents: List[CodexCliAgentSpec],
-        max_parallel: int,
-    ) -> List[List[CodexCliAgentSpec]]:
-        return [agents[index:index + max_parallel] for index in range(0, len(agents), max_parallel)]
-
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run an oh-my-Dynamic Codex CLI process swarm.")
-    parser.add_argument("goal", help="Workflow goal to distribute across Codex CLI workers.")
-    parser.add_argument("--agents", type=int, default=8, help="Number of Codex CLI workers to launch.")
-    parser.add_argument("--max-parallel", type=int, default=4, help="Maximum concurrent codex exec processes.")
-    parser.add_argument("--codex-bin", default="codex", help="Path to the codex CLI binary.")
-    parser.add_argument("--cd", default=".", help="Working directory passed to codex exec --cd.")
-    parser.add_argument("--workspace-root", default=".orchestry/codex_cli_swarm")
-    parser.add_argument("--worktree-root", default=".orchestry/worktrees")
-    parser.add_argument("--workspace-mode", choices=["shared", "worktree"], default="shared")
-    parser.add_argument("--write-intent", choices=["none", "patch"], default="none")
-    parser.add_argument("--base-ref", default="HEAD")
-    parser.add_argument("--broker-dir", default=".orchestry/agent_broker")
-    parser.add_argument("--timeout-s", type=int, default=1800)
-    parser.add_argument("--total-timeout-s", type=int, default=None)
-    parser.add_argument("--discard-workdirs", action="store_true", help="Delete per-agent workdirs after writing durable trace files.")
-    parser.add_argument("--keep-workdirs", action="store_true", help="Deprecated no-op; workdirs are kept by default.")
-    args = parser.parse_args()
+    from codex_swarm_cli import main as cli_main
 
-    if args.agents < 1:
-        raise SystemExit("--agents must be at least 1")
-
-    broker = AgentBroker(args.broker_dir)
-    runtime = CodexCliSwarmRuntime(
-        codex_bin=args.codex_bin,
-        codex_cwd=args.cd,
-        workspace_root=args.workspace_root,
-        max_parallel=args.max_parallel,
-        timeout_s=args.timeout_s,
-        total_timeout_s=args.total_timeout_s,
-        keep_workdirs=not args.discard_workdirs,
-        broker=broker,
-        worktree_root=args.worktree_root,
-    )
-    specs = [
-        CodexCliAgentSpec(
-            id=f"agent_{index:03d}",
-            role="codex_cli_worker",
-            goal=f"Shard {index + 1}/{args.agents}: {args.goal}",
-            context=(
-                "Work independently. Return evidence-oriented findings for this shard. "
-                "Do not edit files unless the prompt explicitly asks for implementation."
-            ),
-            workspace_mode=args.workspace_mode,
-            write_intent=args.write_intent,
-            base_ref=args.base_ref,
-        )
-        for index in range(args.agents)
-    ]
-    trace = runtime.run(args.goal, specs)
-    print(trace.summary())
-    print(f"broker_thread_id={trace.broker_thread_id}")
-    print(f"swarm_root={trace.swarm_root}")
+    cli_main()
 
 
 if __name__ == "__main__":

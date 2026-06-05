@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.0 - 2026-06-05
+
+- Split the Codex CLI swarm backend into model, scheduler, artifact, process, CLI, and worker helper modules while preserving `codex_cli_swarm.py` public imports and CLI behavior.
+- Unified DAG internals around `TaskStatus` with legacy string input/output compatibility for existing JSON, events, and tests.
+- Added static workflow observability dashboards via `workflow_observer.py` and `scripts/render_workflow_observability.py`.
+- Added coverage configuration and CI coverage gate for the active v1.9 runtime surface.
+- Updated README, skills, release checklist, and hygiene rules for `.codegraph/`, coverage, and v1.9 runtime boundaries.
+
 ## 1.8.1 - 2026-06-05
 
 - Added `call_llm()` as the primary multi-provider LLM entrypoint while keeping `call_glm()` as a backward-compatible alias.

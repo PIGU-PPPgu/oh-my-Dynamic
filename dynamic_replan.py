@@ -24,7 +24,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Callable, Optional
 
-from dag import DAG, DAGNode
+from dag import DAG, DAGNode, normalize_status, status_value
+from task import TaskStatus
 from workflow_config import REPLAN_COMPLETENESS_THRESHOLD
 from token_tracker import TokenTracker
 
@@ -228,7 +229,7 @@ class ResultPreservingReplanner:
             返回 ``"无差距"``。
         """
         completed_nodes = [
-            n for n in dag.nodes.values() if n.status == "completed"
+            n for n in dag.nodes.values() if normalize_status(n.status) == TaskStatus.DONE
         ]
 
         if not completed_nodes:
@@ -304,19 +305,20 @@ class ResultPreservingReplanner:
         completed_results_parts: list[str] = []
 
         for node in dag.nodes.values():
+            public_status = status_value(node.status)
             status_icon = {
                 "completed": "✅",
                 "failed": "❌",
                 "running": "⏳",
                 "pending": "⬜",
-            }.get(node.status, "❓")
+            }.get(public_status, "❓")
             node_list_parts.append(
-                f"- [{node.id}] ({status_icon} {node.status}) "
+                f"- [{node.id}] ({status_icon} {public_status}) "
                 f"agent={node.agent_type}, priority={node.priority}\n"
                 f"  任务: {node.question}\n"
                 f"  依赖: {node.dependencies or '无'}"
             )
-            if node.status == "completed" and node.result:
+            if normalize_status(node.status) == TaskStatus.DONE and node.result:
                 completed_results_parts.append(
                     f"- [{node.id}] {node.question}\n"
                     f"  结果: {node.result[:800]}"
@@ -442,7 +444,7 @@ class ResultPreservingReplanner:
                 node = dag.nodes[nid]
                 # Only drop nodes that are not already completed with valuable results
                 # unless explicitly requested
-                node.status = "cancelled"
+                node.status = TaskStatus.CANCELLED
                 dropped_ids.append(nid)
                 self._log(f"  丢弃节点 {nid}: {node.question[:40]}")
 
@@ -453,7 +455,7 @@ class ResultPreservingReplanner:
                 node = dag.nodes[nid]
                 # CRITICAL: kept nodes retain their result, completeness_score,
                 # and status='completed'
-                if node.status == "completed":
+                if normalize_status(node.status) == TaskStatus.DONE:
                     # Ensure status stays completed — this is the key invariant
                     kept_ids.append(nid)
                 else:
@@ -464,7 +466,7 @@ class ResultPreservingReplanner:
         if not raw_keep_ids:
             for nid, node in dag.nodes.items():
                 if (
-                    node.status == "completed"
+                    normalize_status(node.status) == TaskStatus.DONE
                     and nid not in dropped_ids
                 ):
                     kept_ids.append(nid)
@@ -537,8 +539,8 @@ class ResultPreservingReplanner:
             # If the node was pending, reset it so it gets re-executed with the new question
             # If it was completed, we keep the old result but update the question
             # (the caller can decide whether to re-execute)
-            if node.status == "pending":
-                node.status = "pending"  # stays pending, will execute with new question
+            if normalize_status(node.status) == TaskStatus.TODO:
+                node.status = TaskStatus.TODO
             modified_nodes.append(node)
             self._log(f"  修改节点 {nid}: '{old_question[:30]}' → '{new_question[:30]}'")
 
@@ -585,7 +587,7 @@ def should_trigger_replan(
 
     low_score_nodes = [
         node for node in dag.nodes.values()
-        if node.status == "completed" and node.completeness_score < REPLAN_COMPLETENESS_THRESHOLD
+        if normalize_status(node.status) == TaskStatus.DONE and node.completeness_score < REPLAN_COMPLETENESS_THRESHOLD
     ]
     if low_score_nodes:
         return True

@@ -18,7 +18,8 @@ import time
 from datetime import datetime
 from typing import Optional
 
-from dag import DAG, DAGNode, DAGExecutor
+from dag import DAG, DAGNode, DAGExecutor, normalize_status
+from task import TaskStatus
 from stop_conditions import StopConditionManager, IterationState
 from token_tracker import TokenTracker
 from synthesis import Synthesizer
@@ -238,7 +239,7 @@ class DynamicPipeline:
         """汇总所有节点结果"""
         results = []
         for node in dag.nodes.values():
-            if node.status == "completed" and node.result:
+            if normalize_status(node.status) == TaskStatus.DONE and node.result:
                 results.append({
                     "source": node.question,
                     "output": node.result,        # synthesis.py 期望 "output" 键

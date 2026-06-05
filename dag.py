@@ -21,7 +21,7 @@ from collections import deque
 from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from typing import Callable, Optional, Any
+from typing import Callable, Optional, Any, Union
 
 # 统一状态模型：复用 task.py 的 TaskStatus 枚举
 from task import TaskStatus
@@ -29,13 +29,49 @@ from capability_registry import CapabilityRouter
 from workflow_events import WorkflowEvent
 from workflow_config import DEFAULT_COMPLETENESS_SCORE
 
-# 向后兼容映射：dag.py 历史用词 → TaskStatus
-_LEGACY_STATUS_MAP = {
+StatusLike = Union[TaskStatus, str]
+
+_LEGACY_TO_TASK_STATUS = {
     "pending": TaskStatus.TODO,
     "running": TaskStatus.IN_PROGRESS,
     "completed": TaskStatus.DONE,
     "failed": TaskStatus.FAILED,
+    "cancelled": TaskStatus.CANCELLED,
+    "retrying": TaskStatus.RETRYING,
+    "reviewing": TaskStatus.REVIEWING,
+    "review": TaskStatus.REVIEWING,
+    "todo": TaskStatus.TODO,
+    "in_progress": TaskStatus.IN_PROGRESS,
+    "done": TaskStatus.DONE,
 }
+
+_TASK_STATUS_TO_LEGACY = {
+    TaskStatus.TODO: "pending",
+    TaskStatus.IN_PROGRESS: "running",
+    TaskStatus.REVIEWING: "running",
+    TaskStatus.DONE: "completed",
+    TaskStatus.FAILED: "failed",
+    TaskStatus.RETRYING: "pending",
+    TaskStatus.CANCELLED: "failed",
+}
+
+
+def normalize_status(status: StatusLike) -> TaskStatus:
+    """Normalize TaskStatus or legacy DAG status strings to TaskStatus."""
+    if isinstance(status, TaskStatus):
+        return status
+    text = str(status).strip()
+    if text in _LEGACY_TO_TASK_STATUS:
+        return _LEGACY_TO_TASK_STATUS[text]
+    try:
+        return TaskStatus(text)
+    except ValueError as exc:
+        raise ValueError(f"unknown DAG node status: {status}") from exc
+
+
+def status_value(status: StatusLike) -> str:
+    """Return the public legacy DAG status string for JSON and events."""
+    return _TASK_STATUS_TO_LEGACY[normalize_status(status)]
 
 
 @dataclass
@@ -62,7 +98,7 @@ class DAGNode:
     required_capabilities: list[str] = field(default_factory=list)
     
     # 运行时状态
-    status: str = "pending"                # pending / running / completed / failed（兼容旧代码）
+    status: StatusLike = TaskStatus.TODO
     result: str = ""                       # 执行结果
     completeness_score: float = 0.0        # 0.0-1.0
     owner: str = ""                        # 执行者 agent 名
@@ -72,6 +108,9 @@ class DAGNode:
     tokens_used: int = 0
     attempt: int = 0                       # 重试次数
     max_attempts: int = 2                  # 最大重试
+
+    def __post_init__(self) -> None:
+        self.status = normalize_status(self.status)
     
     @classmethod
     def create(cls, question: str, **kwargs) -> "DAGNode":
@@ -138,11 +177,11 @@ class DAG:
         """
         ready = []
         for node in self.nodes.values():
-            if node.status != "pending":
+            if normalize_status(node.status) != TaskStatus.TODO:
                 continue
             # 检查依赖是否全部完成
             deps_ok = all(
-                self.nodes[dep_id].status == "completed"
+                normalize_status(self.nodes[dep_id].status) == TaskStatus.DONE
                 for dep_id in node.dependencies
                 if dep_id in self.nodes
             )
@@ -172,7 +211,7 @@ class DAG:
     def is_complete(self) -> bool:
         """所有节点是否都已完成"""
         return all(
-            n.status in ("completed", "failed")
+            normalize_status(n.status) in (TaskStatus.DONE, TaskStatus.FAILED, TaskStatus.CANCELLED)
             for n in self.nodes.values()
         )
     
@@ -180,10 +219,10 @@ class DAG:
         """统计信息"""
         nodes = list(self.nodes.values())
         total = len(nodes)
-        completed = sum(1 for n in nodes if n.status == "completed")
-        failed = sum(1 for n in nodes if n.status == "failed")
-        running = sum(1 for n in nodes if n.status == "running")
-        pending = sum(1 for n in nodes if n.status == "pending")
+        completed = sum(1 for n in nodes if normalize_status(n.status) == TaskStatus.DONE)
+        failed = sum(1 for n in nodes if normalize_status(n.status) in (TaskStatus.FAILED, TaskStatus.CANCELLED))
+        running = sum(1 for n in nodes if normalize_status(n.status) in (TaskStatus.IN_PROGRESS, TaskStatus.REVIEWING))
+        pending = sum(1 for n in nodes if normalize_status(n.status) in (TaskStatus.TODO, TaskStatus.RETRYING))
         
         return {
             "total": total,
@@ -192,7 +231,7 @@ class DAG:
             "running": running,
             "pending": pending,
             "completeness": completed / total if total > 0 else 0.0,
-            "avg_score": sum(n.completeness_score for n in nodes if n.status == "completed") / max(completed, 1),
+            "avg_score": sum(n.completeness_score for n in nodes if normalize_status(n.status) == TaskStatus.DONE) / max(completed, 1),
             "total_tokens": sum(n.tokens_used for n in nodes),
         }
     
@@ -242,7 +281,7 @@ class DAG:
                 "running": "lightyellow",
                 "completed": "lightgreen",
                 "failed": "lightcoral",
-            }.get(node.status, "white")
+            }.get(status_value(node.status), "white")
             label = node.question[:30].replace('"', '\\"')
             lines.append(f'  "{node.id}" [label="{label}", fillcolor="{color}", style="filled,rounded"];')
         
@@ -277,8 +316,13 @@ class DAG:
     
     def to_dict(self) -> dict:
         """序列化"""
+        nodes = {}
+        for nid, node in self.nodes.items():
+            payload = asdict(node)
+            payload["status"] = status_value(node.status)
+            nodes[nid] = payload
         return {
-            "nodes": {nid: asdict(n) for nid, n in self.nodes.items()},
+            "nodes": nodes,
             "edges": {nid: children for nid, children in self._adj.items()},
         }
 
@@ -342,13 +386,13 @@ class DAGExecutor:
             
             if not ready:
                 # 没有 ready 节点但还没完成 → 说明有失败的依赖导致死锁
-                failed = [n for n in self.dag.nodes.values() if n.status == "failed"]
-                pending = [n for n in self.dag.nodes.values() if n.status == "pending"]
+                failed = [n for n in self.dag.nodes.values() if normalize_status(n.status) == TaskStatus.FAILED]
+                pending = [n for n in self.dag.nodes.values() if normalize_status(n.status) == TaskStatus.TODO]
                 if pending and failed:
                     self._log(f"⚠️ {len(pending)} 个任务因依赖失败而阻塞")
                     # 标记为 failed
                     for n in pending:
-                        n.status = "failed"
+                        n.status = TaskStatus.FAILED
                         n.result = "依赖任务失败"
                     break
                 else:
@@ -373,7 +417,7 @@ class DAGExecutor:
                 futures: dict[Future, DAGNode] = {}
                 
                 for node in batch:
-                    node.status = "running"
+                    node.status = TaskStatus.IN_PROGRESS
                     node.started_at = datetime.now().isoformat()
                     node.owner = router.pick_agent(
                         node.required_capabilities,
@@ -391,7 +435,7 @@ class DAGExecutor:
                             body=node.question,
                             node_id=node.id,
                             agent_id=node.owner,
-                            status=node.status,
+                            status=status_value(node.status),
                             preview=node.question[:200],
                             metadata={
                                 "agent_type": node.agent_type,
@@ -409,7 +453,7 @@ class DAGExecutor:
                     try:
                         result = future.result(timeout=self.timeout_per_task)
                         node.result = result
-                        node.status = "completed"
+                        node.status = TaskStatus.DONE
                         node.completeness_score = self._extract_completeness_score(result, default=DEFAULT_COMPLETENESS_SCORE)
                         node.completed_at = datetime.now().isoformat()
                         node.duration_s = time.time() - (
@@ -426,7 +470,7 @@ class DAGExecutor:
                                 body=node.result,
                                 node_id=node.id,
                                 agent_id=node.owner,
-                                status=node.status,
+                                status=status_value(node.status),
                                 preview=node.result[:200],
                                 metadata={
                                     "duration_s": node.duration_s,
@@ -437,10 +481,10 @@ class DAGExecutor:
                     except Exception as e:
                         node.attempt += 1
                         if node.attempt < node.max_attempts:
-                            node.status = "pending"  # 重试
+                            node.status = TaskStatus.TODO
                             self._log(f"  🔄 {node.id}: 重试 ({node.attempt}/{node.max_attempts})")
                         else:
-                            node.status = "failed"
+                            node.status = TaskStatus.FAILED
                             node.result = f"ERROR: {e}"
                             node.completeness_score = 0.0
                             self._log(f"  ❌ {node.id}: {e}")
@@ -453,7 +497,7 @@ class DAGExecutor:
                                     body=node.result,
                                     node_id=node.id,
                                     agent_id=node.owner,
-                                    status=node.status,
+                                    status=status_value(node.status),
                                     preview=node.result[:200],
                                     metadata={"attempt": node.attempt, "max_attempts": node.max_attempts},
                                 ),

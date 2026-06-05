@@ -6,13 +6,18 @@ Use this checklist before tagging or pushing a public release.
 
 ```bash
 git status --short
+python3 -m pip install -e ".[dev]"
 bash -n install_plugin.sh
 python3 -m json.tool .agents/plugins/marketplace.json >/dev/null
 python3 -m py_compile *.py examples/*.py scripts/*.py
 python3 test_suite.py
+python3 -m coverage run test_suite.py
+python3 -m coverage report --fail-under=70
 python3 -m dynamic_workflow --help >/dev/null
 python3 -m codex_cli_swarm --help >/dev/null
+python3 -m codex_swarm_cli --help >/dev/null
 python3 scripts/record_swarm_evidence.py --help >/dev/null
+python3 scripts/render_workflow_observability.py --help >/dev/null
 python3 examples/codex_cli_swarm_review.py --help >/dev/null
 python3 examples/real_repo_review.py --help >/dev/null
 ```
@@ -36,7 +41,7 @@ python3 scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 4. Tag the exact commit:
 
 ```bash
-git tag v1.8.0
+git tag v1.9.0
 git push origin main --tags
 ```
 

@@ -13,7 +13,7 @@
 - 🎯 **明确目标**：不是只做 prompt 技巧，而是为 Codex Native Dynamic Workflows 提供可验证原型和接口提案
 - 🧠 **Codex App internal subagent backend**：在 Codex App 暴露 subagent tools/runtime 时，默认使用真实 Codex subagents，并继承当前 App 内部 LLM；无需 API key
 - 📨 **A2A / Agent Broker**：受控 message、artifact、handoff、review request/response 和 audit trace，让 subagents 不只是并行跑，还能有证据链地协作
-- 🧭 **Dynamic Workflow v1.8**：Codex CLI planner/replanner 先拆任务、运行后继续派生 agents，并由 broker-aware reducer 汇总 evidence；支持流式事件、checkpoint/resume 和真实 repo review evidence
+- 🧭 **Dynamic Workflow v1.9**：Codex CLI planner/replanner 先拆任务、运行后继续派生 agents，并由 broker-aware reducer 汇总 evidence；支持流式事件、checkpoint/resume、coverage gate 和静态 observability dashboard
 - 🌿 **Worktree 写入隔离**：显式开启写代码并发时，每个 Codex CLI worker 使用独立 git worktree，默认只产出 patch/diff artifacts，不自动 merge
 - 🤖 **多模型支持**：GLM、OpenAI GPT、Claude、Gemini、DeepSeek、通义千问/Qwen、Moonshot/Kimi、硅基流动…… 自动识别模型名选择对应 provider
 - 🔗 **串行编排**（Orchestrator）：Planner → Builder → Reviewer 流水线，含自动重试和 review 打回
@@ -29,11 +29,31 @@
 
 | 状态 | 能力 |
 |------|------|
-| Stable | Codex CLI swarm、dynamic workflow、broker reducer、真实 repo review demo |
+| Stable | Codex CLI swarm、dynamic workflow、broker reducer、真实 repo review demo、静态 observability dashboard |
 | Beta | worktree patch mode、checkpoint/resume、streaming progress events、capability routing |
 | Experimental | Codex App bridge、A2A gateway、TEA protocol |
 
 主线产品路径是 **Codex CLI dynamic workflow**。Codex App bridge、A2A gateway 和 TEA protocol 保留为 experimental contract / research track，不作为当前默认落地路径。
+
+## v1.9 结构边界
+
+```text
+dynamic_workflow.py
+  planner / replanner / checkpoint / reducer / stream events
+        │
+        ▼
+codex_cli_swarm.py
+  public facade + runtime coordinator
+        │
+        ├─ codex_swarm_cli.py         CLI parsing / default shard specs
+        ├─ codex_swarm_models.py      dataclasses / public trace shape
+        ├─ codex_swarm_process.py     single codex exec worker lifecycle
+        ├─ codex_swarm_scheduler.py   dependency validation / layers / batches
+        ├─ codex_swarm_artifacts.py   prompts / manifests / traces / broker artifacts
+        └─ codex_worker.py            codex exec argv / env / timeout
+```
+
+新增调度策略优先进入 `dynamic_workflow.py`；新增 worker 生命周期、trace、artifact 或 process 细节优先进入 swarm 执行层 helper。
 
 ## 架构
 
@@ -68,10 +88,16 @@
 | `broker_gateway.py` | 本地 HTTP/SSE gateway：Agent Card、agents/inbox、task snapshot、events、messages、artifacts、handoffs、review requests/responses |
 | `broker_reducer.py` | Broker-aware reducer：读取 artifacts、失败、依赖图、review responses 和 worktree diff artifacts |
 | `codex_app_bridge.py` | Codex App subagent bridge：dispatch plan、subagent prompt、JSON envelope、broker ingestion |
-| `codex_cli_swarm.py` | Codex CLI swarm backend：并发启动多个 `codex exec` 进程，回收 JSON envelope，并写入 AgentBroker |
+| `codex_cli_swarm.py` | Codex CLI swarm façade：保留 public imports 和 runtime coordinator |
+| `codex_swarm_cli.py` | Codex CLI swarm 命令行解析与默认 shard spec 生成；`python -m codex_cli_swarm` 仍兼容 |
+| `codex_swarm_models.py` | Codex CLI swarm dataclasses：agent spec、worker result、trace |
+| `codex_swarm_process.py` | 单个 `codex exec` worker 生命周期：prompt、process、envelope、result event |
+| `codex_swarm_scheduler.py` | Codex CLI swarm 依赖校验、拓扑层和 batch helper |
+| `codex_swarm_artifacts.py` | Codex CLI swarm prompt、manifest、trace、broker/worktree artifact helper |
 | `codex_worker.py` | Codex CLI worker 命令、环境和 timeout helper，隔离执行层细节 |
 | `dynamic_workflow.py` | Planner/replanner dynamic workflow runtime：多轮派生 Codex CLI agents 并最终 reducer |
 | `workflow_config.py` | Dynamic workflow 质量阈值与默认评分配置 |
+| `workflow_observer.py` | 从 broker/trace/checkpoint 生成静态 observability dashboard |
 | `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
 | `pipeline.py` | 端到端 Pipeline（组合所有组件） |
 | `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
@@ -157,7 +183,7 @@ python examples/real_repo_review.py --agents 5 --max-parallel 3
 
 也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 但这不表示本地 Python 进程可以直接调用 Codex App 内部 LLM。本地 `native_runtime.py` 只能调用传入的 `llm_fn`：demo 默认 mock，真实模型需要你配置外部 provider。若你明确要求几十/几百个真实 Codex agents，可切到 `codex_cli_swarm.py`：它通过本机 `codex exec` 批量启动独立 Codex CLI worker，并把 JSON envelope 写入 `AgentBroker`。App-native isolated sandboxes、tool permissions、scheduler 和 trace 仍由 Codex runtime 提供，不由本地 Python 原型伪造。
 
-Dynamic Workflow v1.8 可直接运行：
+Dynamic Workflow v1.9 可直接运行：
 
 ```bash
 python -m dynamic_workflow "review and improve this repo" \
@@ -173,6 +199,12 @@ python -m dynamic_workflow --resume RUN_ID
 
 # 真实 5-agent repo review demo，输出 compact evidence 到 docs/evidence/
 python examples/real_repo_review.py --agents 5 --max-parallel 3
+
+# 渲染静态 observability dashboard
+python scripts/render_workflow_observability.py \
+  --run-id RUN_ID \
+  --source .orchestry \
+  --output docs/evidence/RUN_ID-dashboard.html
 ```
 
 Runtime 边界：`dynamic_workflow.py` 是编排层，负责 planner/replanner 轮次、checkpoint/resume、streaming events 和 reducer；`codex_cli_swarm.py` 是执行层，负责 worker 生命周期、`codex exec` 子进程、worktree patch artifacts、stdout/stderr/trace。新增调度策略应优先进入编排层，新增 worker 启动/回收能力应优先进入执行层。
@@ -399,6 +431,12 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 ## 验证体系
 
 三层验证，从简到难：
+
+```bash
+python3 test_suite.py
+python3 -m coverage run test_suite.py
+python3 -m coverage report --fail-under=70
+```
 
 ### Layer 1: 单元测试
 - 状态机转换是否合法
