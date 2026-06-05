@@ -32,7 +32,7 @@ class DynamicPipeline:
     
     用法：
         pipeline = DynamicPipeline(
-            llm_fn=call_glm,
+            llm_fn=call_llm,
             max_iterations=3,
             max_tokens=100000,
         )
@@ -339,8 +339,8 @@ def run_pipeline(query: str, llm_fn=None, **kwargs) -> dict:
     """
     if llm_fn is None:
         # 默认使用 llm_client
-        from llm_client import call_glm
-        llm_fn = lambda sys, user: call_glm(system_prompt=sys, user_prompt=user)
+        from llm_client import call_llm
+        llm_fn = lambda sys, user: call_llm(system_prompt=sys, user_prompt=user)
     
     pipeline = DynamicPipeline(llm_fn=llm_fn, **kwargs)
     return pipeline.run(query)

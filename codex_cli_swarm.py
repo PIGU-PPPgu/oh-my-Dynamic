@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional
 import argparse
 import json
-import os
 import shutil
 import subprocess
 import time
@@ -30,6 +29,7 @@ from codex_app_bridge import (
     ingest_subagent_envelope,
     parse_subagent_envelope,
 )
+from codex_worker import build_codex_exec_command, build_worker_env, clamp_worker_timeout
 from worktree import WorktreeManager
 from workflow_events import WorkflowEvent
 
@@ -396,24 +396,15 @@ class CodexCliSwarmRuntime:
                 metadata={"role": spec.role, "workspace_mode": spec.workspace_mode},
             ))
 
-            command = [
+            command = build_codex_exec_command(
                 self.codex_bin,
-                "exec",
-                "--cd",
-                str(agent_cwd),
-                "--sandbox",
+                agent_cwd,
                 spec.sandbox,
-                "--skip-git-repo-check",
-                "--ephemeral",
-                "--output-last-message",
-                str(output_path),
-                *spec.extra_args,
-                "-",
-            ]
-            env = os.environ.copy()
-            env.update(self.inherited_env)
-            worker_timeout_s = timeout_s if timeout_s is not None else self.timeout_s
-            worker_timeout_s = max(1, min(self.timeout_s, worker_timeout_s))
+                output_path,
+                spec.extra_args,
+            )
+            env = build_worker_env(self.inherited_env)
+            worker_timeout_s = clamp_worker_timeout(self.timeout_s, timeout_s)
 
             with (
                 prompt_path.open("r", encoding="utf-8") as prompt_file,

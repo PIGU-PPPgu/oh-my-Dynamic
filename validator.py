@@ -182,9 +182,9 @@ def test_single_agent_call():
     print("="*50)
     
     try:
-        from llm_client import call_glm
-        
-        response = call_glm(
+        from llm_client import call_llm
+
+        response = call_llm(
             system_prompt="你是一个数学老师。",
             user_prompt="请计算 17 × 23，直接给出答案。",
             model="glm-5.1",

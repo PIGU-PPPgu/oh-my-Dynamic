@@ -80,6 +80,11 @@ In App fallback/zero-config mode:
 - Do run `codex_cli_swarm.py` when the user explicitly asks for large-scale Codex CLI worker fan-out.
 - Use `python examples/real_repo_review.py --agents 5 --max-parallel 3` when
   the user asks for a real read-only repo review demo with compact evidence.
+- Use `python examples/real_repo_review.py --dry-run --run-id five-minute-demo`
+  for a zero-config demo shape check that must not launch real Codex CLI workers.
+- Keep the runtime boundary clear: `dynamic_workflow.py` orchestrates planner,
+  replanner, checkpoint/resume, events, and reducer; `codex_cli_swarm.py`
+  executes Codex CLI workers and owns worker lifecycle details.
 - Treat the modules in the installed oh-my-Dynamic repository as the reference implementation and mirror their workflow in-chat.
 - Be explicit if the user asks about native parallel sandboxed subagents and no
   Codex subagent runtime/tools are available in the current session: App-native
@@ -180,10 +185,10 @@ setting a model override. If not, produce the same workflow directly in-chat.
 
 ```python
 from pipeline import DynamicPipeline
-from llm_client import call_glm
+from llm_client import call_llm
 
 def llm_fn(system_prompt, user_prompt):
-    return call_glm(system_prompt=system_prompt, user_prompt=user_prompt)
+    return call_llm(system_prompt=system_prompt, user_prompt=user_prompt)
 
 pipeline = DynamicPipeline(
     llm_fn=llm_fn,

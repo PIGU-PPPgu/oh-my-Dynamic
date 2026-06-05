@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oh-my-dynamic"
-version = "1.8.0"
+version = "1.8.1"
 description = "Multi-agent orchestration engine with DAG execution, dynamic replan, TEA protocol, and model-provider routing."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -40,6 +40,7 @@ py-modules = [
   "capability_registry",
   "checkpoint",
   "codex_cli_swarm",
+  "codex_worker",
   "codex_app_bridge",
   "agents",
   "dag",
@@ -61,6 +62,7 @@ py-modules = [
   "validator",
   "visualize",
   "workflow_events",
+  "workflow_config",
   "worktree",
 ]
 

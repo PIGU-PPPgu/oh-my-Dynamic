@@ -93,9 +93,9 @@ def open_dashboard(html_path: str):
 def run_and_visualize(query: str, output_path: str = "dashboard.html", **kwargs):
     """运行 Pipeline 并生成可视化"""
     from pipeline import DynamicPipeline
-    from llm_client import call_glm
-    
-    llm_fn = lambda sys, user: call_glm(system_prompt=sys, user_prompt=user)
+    from llm_client import call_llm
+
+    llm_fn = lambda sys, user: call_llm(system_prompt=sys, user_prompt=user)
     pipeline = DynamicPipeline(llm_fn=llm_fn, **kwargs)
     result = pipeline.run(query)
     

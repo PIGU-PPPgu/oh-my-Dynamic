@@ -27,6 +27,7 @@ from typing import Callable, Optional, Any
 from task import TaskStatus
 from capability_registry import CapabilityRouter
 from workflow_events import WorkflowEvent
+from workflow_config import DEFAULT_COMPLETENESS_SCORE
 
 # 向后兼容映射：dag.py 历史用词 → TaskStatus
 _LEGACY_STATUS_MAP = {
@@ -299,7 +300,7 @@ class DAGExecutor:
     用法：
         def my_executor(node: DAGNode, context: str) -> str:
             # 调用 LLM
-            return call_glm(system_prompt=..., user_prompt=node.question + context)
+            return call_llm(system_prompt=..., user_prompt=node.question + context)
         
         executor = DAGExecutor(dag, my_executor, max_parallel=3)
         completed_dag = executor.execute()
@@ -409,7 +410,7 @@ class DAGExecutor:
                         result = future.result(timeout=self.timeout_per_task)
                         node.result = result
                         node.status = "completed"
-                        node.completeness_score = self._extract_completeness_score(result, default=0.75)
+                        node.completeness_score = self._extract_completeness_score(result, default=DEFAULT_COMPLETENESS_SCORE)
                         node.completed_at = datetime.now().isoformat()
                         node.duration_s = time.time() - (
                             datetime.fromisoformat(node.started_at).timestamp()
@@ -478,7 +479,7 @@ class DAGExecutor:
         if callback is not None:
             callback(event)
 
-    def _extract_completeness_score(self, result: str, default: float = 0.75) -> float:
+    def _extract_completeness_score(self, result: str, default: float = DEFAULT_COMPLETENESS_SCORE) -> float:
         try:
             data = json.loads(result)
             raw = data.get("completeness_score", data.get("score", default))

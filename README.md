@@ -57,7 +57,7 @@
 |------|------|
 | `task.py` | Task 状态机（TaskStatus 枚举 + 合法转换表） |
 | `agents.py` | 三种角色定义（planner/builder/reviewer） |
-| `llm_client.py` | **通用 LLM 客户端**（自动识别模型选择 provider） |
+| `llm_client.py` | **通用 LLM 客户端**（`call_llm()` 自动识别模型选择 provider，`call_glm()` 保留兼容） |
 | `orchestrator.py` | 串行编排引擎（核心调度器） |
 | `team_engine.py` | 并行团队引擎（多 agent 协作） |
 | `dag.py` | DAG 任务图 + 并行执行器 |
@@ -69,7 +69,9 @@
 | `broker_reducer.py` | Broker-aware reducer：读取 artifacts、失败、依赖图、review responses 和 worktree diff artifacts |
 | `codex_app_bridge.py` | Codex App subagent bridge：dispatch plan、subagent prompt、JSON envelope、broker ingestion |
 | `codex_cli_swarm.py` | Codex CLI swarm backend：并发启动多个 `codex exec` 进程，回收 JSON envelope，并写入 AgentBroker |
+| `codex_worker.py` | Codex CLI worker 命令、环境和 timeout helper，隔离执行层细节 |
 | `dynamic_workflow.py` | Planner/replanner dynamic workflow runtime：多轮派生 Codex CLI agents 并最终 reducer |
+| `workflow_config.py` | Dynamic workflow 质量阈值与默认评分配置 |
 | `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
 | `pipeline.py` | 端到端 Pipeline（组合所有组件） |
 | `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
@@ -126,6 +128,23 @@ python -m json.tool ~/.agents/plugins/marketplace.json >/dev/null
 
 只有当你明确要运行本地 Python engine、接外部模型、生成 dashboard 文件时，才需要下面的可选配置。
 
+#### 5 分钟零配置 demo
+
+不配置任何模型 API key，也不启动真实 Codex CLI worker 时，可以先跑 deterministic demo 验证安装和输出形状：
+
+```bash
+python examples/research_analysis.py
+python examples/code_review.py
+python examples/data_processing.py
+python examples/real_repo_review.py --dry-run --run-id five-minute-demo
+```
+
+如果你已经登录 Codex CLI，再跑真实 5-agent repo review：
+
+```bash
+python examples/real_repo_review.py --agents 5 --max-parallel 3
+```
+
 #### LLM 执行模式说明
 
 | 模式 | 默认 LLM | 是否需要外部 API Key | 是否是真 isolated workers |
@@ -155,6 +174,8 @@ python -m dynamic_workflow --resume RUN_ID
 # 真实 5-agent repo review demo，输出 compact evidence 到 docs/evidence/
 python examples/real_repo_review.py --agents 5 --max-parallel 3
 ```
+
+Runtime 边界：`dynamic_workflow.py` 是编排层，负责 planner/replanner 轮次、checkpoint/resume、streaming events 和 reducer；`codex_cli_swarm.py` 是执行层，负责 worker 生命周期、`codex exec` 子进程、worktree patch artifacts、stdout/stderr/trace。新增调度策略应优先进入编排层，新增 worker 启动/回收能力应优先进入执行层。
 
 Codex CLI swarm 可直接运行：
 
@@ -367,7 +388,7 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 - A2A-style：`a2a_agent_card()` 返回 Agent Card；`A2ATaskStore` 提供轻量 Task submit/get 结构，可用于后续 HTTP、SSE 或网关封装。
 - AgentBroker：`AgentBroker` 可注册 agents，发送 direct/broadcast message，发布 artifacts，创建 task handoff，发起 review request/response，并导出 A2A-style task snapshot。
 - BrokerPolicy：默认要求 agent 注册，校验 sender/receiver、artifact 引用、消息/工件大小和 content type，避免无约束上下文串流。
-- Gateway auth：启用 `--auth-token` 后，非系统 agent 通过 `/agents` 注册会获得 `agent_token`；之后以该 agent 身份执行 task actions 或读取 inbox 时需要同时发送 `X-Agent-Id` 和 `X-Agent-Token`，避免共享 gateway token 被用来冒充任意 worker。
+- Gateway auth：启用 `--auth-token` 后，非系统 agent 通过 `/agents` 注册会获得 `agent_token`；之后以该 agent 身份执行 task actions 或读取 inbox 时需要同时发送 `X-Agent-Id` 和 `X-Agent-Token`，避免共享 gateway token 被用来冒充任意 worker。未设置 token 时只允许 loopback 绑定，CLI 会打印 WARNING；不要把无 token gateway 暴露到 localhost 之外。共享或远程访问必须设置 `--auth-token` 或 `OH_MY_DYNAMIC_GATEWAY_TOKEN`。
 - Codex App bridge：`codex_app_bridge.py` 生成 App-native subagent dispatch plan 和 prompt，要求真实 Codex subagents 返回 JSON envelope，再把 envelope ingest 到 `AgentBroker`。下游 prompt 可注入 dependency outputs；envelope 会先预校验 artifact refs、target agents、大小和 content type，再写入 broker，避免半成功状态。parent orchestrator 可调用 `complete_dispatch_plan()` 写入 canonical `workflow_completed/workflow_failed`，让 A2A-style task snapshot 进入 terminal state。
 - Codex CLI swarm：`CodexCliSwarmRuntime` 生成每个 worker 的 prompt，经 stdin 调用 `codex exec --output-last-message`，把 stdout/stderr 流式写入文件，解析 JSON envelope，并把 artifacts/messages/review trace ingest 到同一个 `AgentBroker`。每次 run 会写 `manifest.json` 和 `trace.json` 方便复盘。
 - Native runtime 集成：`SandboxedFanoutRuntime(..., broker=AgentBroker(...))` 会把 worker started/completed、worker artifacts、final answer 和 workflow completion 写入 broker trace。

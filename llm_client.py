@@ -305,14 +305,14 @@ def _retry_fn(fn, max_retries: int = 3, retry_delay: float = 5.0) -> str:
 
 
 # --------------------------------------------------------------------------- #
-# 主入口（向后兼容 call_glm）
+# 主入口
 # --------------------------------------------------------------------------- #
 
-# Provider 调用分发在 call_glm() 中通过 if/elif 实现
+# Provider 调用分发在 call_llm() 中通过 if/elif 实现
 # （因为 _call_openai_compatible 需要 base_url 参数，不适合 dict dispatch）
 
 
-def call_glm(
+def call_llm(
     system_prompt: str,
     user_prompt: str,
     model: str = "",
@@ -321,7 +321,7 @@ def call_glm(
     retry_delay: float = 5.0,
 ) -> str:
     """
-    统一的 LLM 调用入口（向后兼容 call_glm）。
+    统一的 LLM 调用入口。
 
     根据 model 名称自动选择 provider 和 API Key。
 
@@ -368,6 +368,25 @@ def call_glm(
         base_url = os.environ.get("LLM_BASE_URL", "https://api.openai.com/v1")
         return _call_openai_compatible(api_key, base_url, model, system_prompt,
                                        user_prompt, temperature, max_retries, retry_delay)
+
+
+def call_glm(
+    system_prompt: str,
+    user_prompt: str,
+    model: str = "",
+    temperature: float = 0.3,
+    max_retries: int = 3,
+    retry_delay: float = 5.0,
+) -> str:
+    """Backward-compatible alias for call_llm()."""
+    return call_llm(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        model=model,
+        temperature=temperature,
+        max_retries=max_retries,
+        retry_delay=retry_delay,
+    )
 
 
 # --------------------------------------------------------------------------- #

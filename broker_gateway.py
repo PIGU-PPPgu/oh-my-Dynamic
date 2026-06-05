@@ -16,6 +16,7 @@ from urllib.parse import parse_qs, urlparse
 import ipaddress
 import json
 import os
+import sys
 import uuid
 
 from agent_broker import AgentBroker, validate_agent_id
@@ -23,6 +24,11 @@ from protocol_adapters import a2a_agent_card
 
 
 DEFAULT_MAX_BODY_BYTES = 1_048_576
+UNAUTHENTICATED_LOOPBACK_WARNING = (
+    "WARNING: BrokerGateway is running without auth token on loopback only. "
+    "Do not expose this port outside localhost; set --auth-token or "
+    "OH_MY_DYNAMIC_GATEWAY_TOKEN for shared or remote access."
+)
 
 
 def _new_thread_id() -> str:
@@ -472,6 +478,8 @@ def main() -> None:
         max_body_bytes=args.max_body_bytes,
     )
     print(f"oh-my-Dynamic AgentBroker gateway listening on http://{args.host}:{args.port}")
+    if not args.auth_token:
+        print(UNAUTHENTICATED_LOOPBACK_WARNING, file=sys.stderr)
     server.serve_forever()
 
 

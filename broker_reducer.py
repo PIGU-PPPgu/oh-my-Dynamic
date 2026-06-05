@@ -12,6 +12,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 
 from agent_broker import AgentBroker, BrokerArtifact, BrokerEvent
+from workflow_config import REPLAN_COMPLETENESS_THRESHOLD
 
 
 @dataclass
@@ -82,7 +83,7 @@ def _collect_evidence(events: List[BrokerEvent], artifacts: List[BrokerArtifact]
         if event.kind == "trace" and event.subject == "agent_registered"
     }
     worktree_diffs = [artifact for artifact in artifacts if artifact.kind == "worktree_diff"]
-    low_score_events = [event for event in events if _event_score(event) < 0.6]
+    low_score_events = [event for event in events if _event_score(event) < REPLAN_COMPLETENESS_THRESHOLD]
     return {
         "completed": completed,
         "failed": failed,

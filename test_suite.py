@@ -629,7 +629,10 @@ def test_broker_gateway_http_lifecycle():
 def test_broker_gateway_auth_and_limits():
     import shutil, tempfile, threading, urllib.error, urllib.request
     from agent_broker import AgentBroker
-    from broker_gateway import create_server
+    from broker_gateway import UNAUTHENTICATED_LOOPBACK_WARNING, create_server
+
+    assert "WARNING" in UNAUTHENTICATED_LOOPBACK_WARNING
+    assert "OH_MY_DYNAMIC_GATEWAY_TOKEN" in UNAUTHENTICATED_LOOPBACK_WARNING
 
     d = tempfile.mkdtemp()
     server = None
@@ -1123,6 +1126,28 @@ sys.exit(0)
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("CodexWorker: command, env, and timeout helpers")
+def test_codex_worker_helpers():
+    from codex_worker import build_codex_exec_command, build_worker_env, clamp_worker_timeout
+
+    command = build_codex_exec_command(
+        "codex",
+        Path("/tmp/repo"),
+        "workspace-write",
+        Path("/tmp/last.txt"),
+        ["--foo", "bar"],
+    )
+    assert command[:4] == ["codex", "exec", "--cd", "/tmp/repo"]
+    assert "--output-last-message" in command
+    assert command[-3:] == ["--foo", "bar", "-"]
+
+    env = build_worker_env({"OH_MY_DYNAMIC_TEST": "1"})
+    assert env["OH_MY_DYNAMIC_TEST"] == "1"
+    assert clamp_worker_timeout(120, None) == 120
+    assert clamp_worker_timeout(120, 999) == 120
+    assert clamp_worker_timeout(120, 0) == 1
+
+
 @test("CodexCliSwarm: dependency failure blocks downstream")
 def test_codex_cli_swarm_dependency_failure():
     import shutil, tempfile
@@ -1587,6 +1612,7 @@ sys.exit(0)
 def test_workflow_event_and_dag_streaming_capability_routing():
     from dag import DAG, DAGNode, DAGExecutor
     from workflow_events import WorkflowEvent
+    from workflow_config import DEFAULT_COMPLETENESS_SCORE
 
     event = WorkflowEvent(run_id="run-1", kind="demo", subject="Demo", preview="ok")
     assert event.to_dict()["kind"] == "demo"
@@ -1617,24 +1643,25 @@ def test_workflow_event_and_dag_streaming_capability_routing():
     assert dag.nodes[security.id].owner == "security_reviewer"
     assert dag.nodes[unmatched.id].owner == "general_reviewer"
     assert abs(dag.nodes[security.id].completeness_score - 0.55) < 0.001
-    assert abs(dag.nodes[unmatched.id].completeness_score - 0.75) < 0.001
+    assert abs(dag.nodes[unmatched.id].completeness_score - DEFAULT_COMPLETENESS_SCORE) < 0.001
 
 
 @test("DynamicReplan: low completeness score triggers replan")
 def test_dynamic_replan_low_score_trigger():
     from dag import DAG, DAGNode
     from dynamic_replan import should_trigger_replan
+    from workflow_config import REPLAN_COMPLETENESS_THRESHOLD
 
     dag = DAG()
     low = dag.add_node(DAGNode.create("Low quality"))
     low.status = "completed"
-    low.completeness_score = 0.4
+    low.completeness_score = REPLAN_COMPLETENESS_THRESHOLD - 0.1
     assert should_trigger_replan(dag)
 
     high_dag = DAG()
     high = high_dag.add_node(DAGNode.create("High quality"))
     high.status = "completed"
-    high.completeness_score = 0.9
+    high.completeness_score = REPLAN_COMPLETENESS_THRESHOLD + 0.1
     assert not should_trigger_replan(high_dag)
 
 
@@ -2265,10 +2292,11 @@ def test_stress_token_tracker():
 @test("E2E: GLM-5.1 真实 Pipeline")
 def test_e2e_real():
     from pipeline import DynamicPipeline
-    from llm_client import call_glm
-    
+    from llm_client import call_glm, call_llm
+
     def llm_fn(sys, user):
-        return call_glm(system_prompt=sys, user_prompt=user)
+        assert call_glm is not call_llm
+        return call_llm(system_prompt=sys, user_prompt=user)
     
     pipeline = DynamicPipeline(llm_fn, max_iterations=1, max_tokens=30000, verbose=False)
     result = pipeline.run("什么是勾股定理？用一句话回答")
@@ -2313,6 +2341,7 @@ if __name__ == "__main__":
         test_codex_app_bridge_ingestion,
         test_codex_app_bridge_dependency_validation,
         test_codex_cli_swarm_fake_exec,
+        test_codex_worker_helpers,
         test_codex_cli_swarm_dependency_failure,
         test_codex_cli_swarm_failure_modes,
         test_codex_cli_swarm_worktree_mode_patch_artifacts,

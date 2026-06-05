@@ -13,7 +13,7 @@ One-line trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
 ```
 
-Current v1.8 status:
+Current v1.8.1 status:
 
 - Stable: Codex CLI swarm, dynamic workflow planner/replanner, broker reducer,
   and `examples/real_repo_review.py`.
@@ -34,6 +34,7 @@ When triggered inside Codex App, this skill must work immediately after installa
 - Exception: if the user explicitly asks for dozens/hundreds of real Codex agents, maximum fan-out, CLI swarm, or equivalent large-scale execution, use the local `codex_cli_swarm.py` backend instead of the ordinary in-chat fallback. This backend launches many `codex exec` processes, feeds each worker prompt through stdin, streams stdout/stderr to per-agent files, keeps a run manifest/trace, and ingests JSON envelopes into AgentBroker.
 - If the user asks for a real repo review demo or evidence run, use `python examples/real_repo_review.py --agents 5 --max-parallel 3`; add `--dry-run` only for CI/demo shape checks that must not launch Codex CLI.
 - If the user asks for streaming progress or resume, use `python -m dynamic_workflow "goal" --stream-events --checkpoint-dir .orchestry/checkpoints` and resume with `python -m dynamic_workflow --resume RUN_ID`.
+- Treat `dynamic_workflow.py` as the planner/replanner/reducer orchestration layer and `codex_cli_swarm.py` as the Codex CLI worker execution layer.
 - If the user explicitly asks for concurrent code writing, use worktree mode: `workspace_mode="worktree"` and `write_intent="patch"`. Do not auto-merge agent worktrees.
 - If the user has not clearly granted write intent, stay read-only review by default.
 - Use the Codex App bridge contract for real subagents: dispatch plan, per-subagent prompt, structured JSON envelope, and AgentBroker ingestion.
@@ -110,10 +111,10 @@ if not (project_root / "pipeline.py").exists():
 sys.path.insert(0, str(project_root))
 
 from pipeline import DynamicPipeline
-from llm_client import call_glm
+from llm_client import call_llm
 
 def llm_fn(sys, user):
-    return call_glm(system_prompt=sys, user_prompt=user)
+    return call_llm(system_prompt=sys, user_prompt=user)
 
 pipeline = DynamicPipeline(
     llm_fn=llm_fn,

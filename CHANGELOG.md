@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.8.1 - 2026-06-05
+
+- Added `call_llm()` as the primary multi-provider LLM entrypoint while keeping `call_glm()` as a backward-compatible alias.
+- Centralized quality scoring constants in `workflow_config.py` so replan and reducer thresholds no longer duplicate magic numbers.
+- Added a visible BrokerGateway warning for unauthenticated loopback mode and documented the gateway auth boundary.
+- Clarified the dynamic workflow runtime boundary: `dynamic_workflow.py` orchestrates planner/replanner/reducer rounds, while `codex_cli_swarm.py` executes Codex CLI workers.
+- Added a clearer five-minute zero-config demo path in README and refreshed skill examples.
+
 ## 1.8.0 - 2026-06-05
 
 - Added unified `WorkflowEvent` streaming for DAG execution, Codex CLI swarm batches, and dynamic workflow planner/replanner/reducer phases.

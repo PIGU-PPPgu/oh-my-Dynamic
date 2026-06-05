@@ -25,7 +25,7 @@ from typing import Optional
 
 from task import Task, TaskStatus, can_transition, is_blocked, is_dispatchable
 from agents import AgentRole, PLANNER, BUILDER, REVIEWER, ROLE_MAP
-from llm_client import call_glm
+from llm_client import call_llm
 
 
 # ============================================================
@@ -168,7 +168,7 @@ class Orchestrator:
         )
         
         self._log(f"→ 调用 {role.name} 处理: {task.title[:40]}...")
-        response = call_glm(
+        response = call_llm(
             system_prompt=role.system_prompt,
             user_prompt=prompt,
             model=self.model,

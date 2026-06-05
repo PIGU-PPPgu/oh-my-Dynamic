@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 
 from task import Task, TaskStatus
 from agents import AgentRole, PLANNER, BUILDER, REVIEWER, ROLE_MAP
-from llm_client import call_glm
+from llm_client import call_llm
 from message_bus import MessageBus, Message
 
 
@@ -327,7 +327,7 @@ class TeamEngine:
             )
             
             try:
-                result = call_glm(
+                result = call_llm(
                     system_prompt=role.system_prompt,
                     user_prompt=prompt,
                     model=self.config.model,
@@ -341,7 +341,7 @@ class TeamEngine:
                         context=dep_context,
                         result=result,
                     )
-                    review_result = call_glm(
+                    review_result = call_llm(
                         system_prompt=REVIEWER.system_prompt,
                         user_prompt=review_prompt,
                         model=self.config.model,
@@ -407,7 +407,7 @@ class TeamEngine:
                 task_description=context or "",
                 context="",
             )
-            plan_text = call_glm(
+            plan_text = call_llm(
                 system_prompt=PLANNER.system_prompt,
                 user_prompt=plan_prompt,
                 model=self.config.model,

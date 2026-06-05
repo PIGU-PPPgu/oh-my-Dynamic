@@ -12,7 +12,7 @@ Result-Preserving Dynamic Replanner —— 基于 VMAO 论文的结果保留重�
 与旧版 DynamicReplanner 的区别：
   - 旧版：基于扁平任务列表，replan 时可能丢弃已完成的结果
   - 新版：基于 DAG，明确区分 keep/drop/new/modify，已完成的节点结果始终保留
-  - 旧版：直接调用 call_glm
+  - 旧版：直接调用 call_llm/call_glm
   - 新版：接受 llm_fn 回调，更灵活地集成不同的 LLM 后端
 """
 
@@ -25,6 +25,7 @@ from datetime import datetime
 from typing import Callable, Optional
 
 from dag import DAG, DAGNode
+from workflow_config import REPLAN_COMPLETENESS_THRESHOLD
 from token_tracker import TokenTracker
 
 
@@ -584,7 +585,7 @@ def should_trigger_replan(
 
     low_score_nodes = [
         node for node in dag.nodes.values()
-        if node.status == "completed" and node.completeness_score < 0.6
+        if node.status == "completed" and node.completeness_score < REPLAN_COMPLETENESS_THRESHOLD
     ]
     if low_score_nodes:
         return True
