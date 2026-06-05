@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.8.0 - 2026-06-05
+
+- Added unified `WorkflowEvent` streaming for DAG execution, Codex CLI swarm batches, and dynamic workflow planner/replanner/reducer phases.
+- Added checkpoint/resume support for `dynamic_workflow.py` with `--run-id`, `--resume`, `--checkpoint-dir`, and automatic batch checkpoint writes.
+- Added quality-driven replan support via `completeness_score`, low-score evidence, and reducer recommendations for follow-up quality agents.
+- Added lightweight capability routing for DAG nodes through `required_capabilities` and a built-in reviewer capability registry.
+- Added `examples/real_repo_review.py` for a real read-only Codex CLI repo review demo, plus compact evidence docs under `docs/evidence/`.
+- Updated README, skills, CI, and release gates to present Stable/Beta/Experimental product paths and the v1.8 CLI/App usage flow.
+
 ## 1.7.1 - 2026-06-04
 
 - Added planner/replanner observability for `dynamic_workflow.py`: durable worker dirs, prompt/stdout/stderr capture, broker start/complete/failure traces, and failure artifacts.

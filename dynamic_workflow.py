@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
 import argparse
 import json
 import os
@@ -20,7 +20,9 @@ import uuid
 
 from agent_broker import AgentBroker, validate_agent_id
 from broker_reducer import BrokerReductionResult, reduce_broker_thread
+from checkpoint import checkpoint_path, load_checkpoint, save_checkpoint
 from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime, CodexCliSwarmTrace
+from workflow_events import WorkflowEvent
 
 
 def _run_id() -> str:
@@ -134,9 +136,11 @@ class DynamicWorkflowRuntime:
         timeout_s: int = 1800,
         total_timeout_s: Optional[int] = None,
         planner_timeout_s: Optional[int] = None,
+        checkpoint_dir: str = ".orchestry/checkpoints",
         planner_fn: Optional[PlannerFn] = None,
         replanner_fn: Optional[ReplannerFn] = None,
         broker: Optional[AgentBroker] = None,
+        event_callback: Optional[Callable[[WorkflowEvent], None]] = None,
     ) -> None:
         if max_rounds < 1:
             raise ValueError("max_rounds must be at least 1")
@@ -155,15 +159,38 @@ class DynamicWorkflowRuntime:
         self.timeout_s = timeout_s
         self.total_timeout_s = total_timeout_s
         self.planner_timeout_s = planner_timeout_s if planner_timeout_s is not None else min(timeout_s, 120)
+        self.checkpoint_dir = str((self.codex_cwd / checkpoint_dir).resolve()) if not Path(checkpoint_dir).is_absolute() else checkpoint_dir
         self.planner_fn = planner_fn
         self.replanner_fn = replanner_fn
+        self.event_callback = event_callback
 
-    def run(self, goal: str) -> DynamicWorkflowTrace:
+    def run(
+        self,
+        goal: str = "",
+        run_id: Optional[str] = None,
+        resume_run_id: str = "",
+        event_callback: Optional[Callable[[WorkflowEvent], None]] = None,
+    ) -> DynamicWorkflowTrace:
+        callback = event_callback or self.event_callback
+        checkpoint_payload: Optional[Dict[str, Any]] = None
+        if resume_run_id:
+            checkpoint_payload = load_checkpoint(str(checkpoint_path(self.checkpoint_dir, resume_run_id)))
+            run_id = str(checkpoint_payload.get("run_id", resume_run_id))
+            goal = str(checkpoint_payload.get("goal", goal))
         if not goal.strip():
             raise ValueError("goal is required")
-        run_id = _run_id()
+        run_id = run_id or _run_id()
         started_at = time.time()
         self.broker.register_agent("orchestrator", "orchestrator", ["plan", "replan", "reduce"])
+        self._emit_event(callback, WorkflowEvent(
+            run_id=run_id,
+            kind="dynamic_workflow_started",
+            subject="dynamic_workflow_started",
+            body=goal,
+            status="working",
+            preview=goal[:200],
+            metadata={"resume": bool(resume_run_id)},
+        ))
         self.broker.trace(
             "orchestrator",
             "dynamic_workflow_started",
@@ -176,15 +203,30 @@ class DynamicWorkflowRuntime:
             },
         )
 
-        planner = self._planner_decision(goal, run_id)
-        planned: Dict[str, DynamicAgentPlan] = {agent.id: agent for agent in planner.agents}
-        pending = list(planner.agents[: self.max_agents])
-        completed_ids: Set[str] = set()
-        failed_ids: Set[str] = set()
-        rounds: List[DynamicWorkflowRound] = []
-        stop_reason = planner.stop_reason or "planner_ready"
+        if checkpoint_payload is not None:
+            planned = {
+                agent.id: agent
+                for agent in _plans_from_payload(checkpoint_payload.get("planned_agents", []))
+            }
+            pending = _plans_from_payload(checkpoint_payload.get("pending_agents", []))
+            completed_ids = set(checkpoint_payload.get("completed_agent_ids", []))
+            failed_ids = set()
+            if not pending:
+                pending = [planned[agent_id] for agent_id in checkpoint_payload.get("failed_agent_ids", []) if agent_id in planned]
+            rounds = [DynamicWorkflowRound(**item) for item in checkpoint_payload.get("rounds", [])]
+            stop_reason = str(checkpoint_payload.get("stop_reason", "resumed"))
+            planner = PlannerDecision(agents=list(planned.values()), max_parallel=self.max_parallel)
+        else:
+            planner = self._planner_decision(goal, run_id)
+            planned = {agent.id: agent for agent in planner.agents}
+            pending = list(planner.agents[: self.max_agents])
+            completed_ids = set()
+            failed_ids = set()
+            rounds = []
+            stop_reason = planner.stop_reason or "planner_ready"
+            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason)
 
-        for round_index in range(self.max_rounds):
+        for round_index in range(len(rounds), self.max_rounds):
             if not pending:
                 stop_reason = "no_new_agents"
                 break
@@ -208,11 +250,29 @@ class DynamicWorkflowRuntime:
                 timeout_s=self.timeout_s,
                 total_timeout_s=self.total_timeout_s,
                 broker=self.broker,
+                event_callback=callback,
             )
+            self._emit_event(callback, WorkflowEvent(
+                run_id=run_id,
+                kind="round_started",
+                subject="round_started",
+                body=f"Starting dynamic workflow round {round_index}.",
+                status="running",
+                metadata={"round_index": round_index, "agent_ids": [agent.id for agent in round_agents]},
+            ))
             swarm_trace = swarm.run(goal, specs, run_id=run_id, terminal_trace=False)
             completed_ids.update(result.agent_id for result in swarm_trace.results if result.status == "completed")
             failed_ids.update(result.agent_id for result in swarm_trace.results if result.status == "failed")
             rounds.append(_round_from_swarm(round_index, swarm_trace))
+            self._emit_event(callback, WorkflowEvent(
+                run_id=run_id,
+                kind="round_done",
+                subject="round_done",
+                body=f"Finished dynamic workflow round {round_index}.",
+                status="completed",
+                metadata={"round_index": round_index, "completed_agent_ids": sorted(completed_ids), "failed_agent_ids": sorted(failed_ids)},
+            ))
+            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason)
 
             if round_index >= self.max_rounds - 1:
                 stop_reason = "max_rounds"
@@ -234,8 +294,18 @@ class DynamicWorkflowRuntime:
                 planned[agent.id] = agent
             pending.extend(new_agents)
             stop_reason = replanner.stop_reason or "replanned"
+            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason)
 
         reducer_result = reduce_broker_thread(self.broker, run_id, goal)
+        self._emit_event(callback, WorkflowEvent(
+            run_id=run_id,
+            kind="reducer_done",
+            subject="reducer_done",
+            body=reducer_result.final_answer,
+            status=reducer_result.terminal_state,
+            preview=reducer_result.final_answer[:200],
+            metadata={"artifact_ids": reducer_result.artifact_ids, "stop_reason": stop_reason},
+        ))
         final_artifact = self.broker.publish_artifact(
             "orchestrator",
             "final_answer",
@@ -275,6 +345,7 @@ class DynamicWorkflowRuntime:
         trace_path = self.workspace_root / run_id / "dynamic_trace.json"
         trace_path.parent.mkdir(parents=True, exist_ok=True)
         trace_path.write_text(json.dumps(trace.to_dict(), ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+        self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason)
         return trace
 
     def _planner_decision(self, goal: str, run_id: str) -> PlannerDecision:
@@ -398,6 +469,38 @@ class DynamicWorkflowRuntime:
             metadata={"worker_dir": str(worker_dir), "output_path": str(output_path)},
         )
         return _load_json_object(raw)
+
+    def _emit_event(
+        self,
+        callback: Optional[Callable[[WorkflowEvent], None]],
+        event: WorkflowEvent,
+    ) -> None:
+        if callback is not None:
+            callback(event)
+
+    def _save_checkpoint(
+        self,
+        run_id: str,
+        goal: str,
+        planned: Dict[str, DynamicAgentPlan],
+        pending: List[DynamicAgentPlan],
+        completed_ids: Set[str],
+        failed_ids: Set[str],
+        rounds: List[DynamicWorkflowRound],
+        stop_reason: str,
+    ) -> str:
+        payload = {
+            "goal": goal,
+            "run_id": run_id,
+            "rounds": [asdict(item) for item in rounds],
+            "planned_agents": [asdict(agent) for agent in planned.values()],
+            "pending_agents": [asdict(agent) for agent in pending],
+            "completed_agent_ids": sorted(completed_ids),
+            "failed_agent_ids": sorted(failed_ids),
+            "broker_thread_id": run_id,
+            "stop_reason": stop_reason,
+        }
+        return save_checkpoint(str(checkpoint_path(self.checkpoint_dir, run_id)), payload)
 
     def _round_spec(
         self,
@@ -555,6 +658,26 @@ def _round_from_swarm(round_index: int, trace: CodexCliSwarmTrace) -> DynamicWor
     )
 
 
+def _plans_from_payload(payload: Any) -> List[DynamicAgentPlan]:
+    if not isinstance(payload, list):
+        return []
+    plans = []
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        plans.append(DynamicAgentPlan(
+            id=str(item.get("id", "")),
+            role=str(item.get("role", "worker")),
+            goal=str(item.get("goal", "")),
+            context=str(item.get("context", "")),
+            dependencies=list(item.get("dependencies", [])),
+            workspace_mode=str(item.get("workspace_mode", "shared")),
+            write_intent=str(item.get("write_intent", "none")),
+            base_ref=str(item.get("base_ref", "HEAD")),
+        ))
+    return plans
+
+
 def _planner_prompt(goal: str) -> str:
     return (
         "You are the oh-my-Dynamic planner. Return exactly one JSON object.\n"
@@ -588,10 +711,18 @@ def main() -> None:
     parser.add_argument("--timeout-s", type=int, default=1800)
     parser.add_argument("--total-timeout-s", type=int, default=None)
     parser.add_argument("--planner-timeout-s", type=int, default=None, help="Timeout for planner/replanner codex exec JSON workers.")
+    parser.add_argument("--checkpoint-dir", default=".orchestry/checkpoints")
+    parser.add_argument("--run-id", default="")
+    parser.add_argument("--resume", default="", help="Resume from .orchestry/checkpoints/{RUN_ID}.json.")
+    parser.add_argument("--stream-events", action="store_true", help="Print WorkflowEvent JSONL progress events.")
     args = parser.parse_args()
-    if not args.goal:
+    if not args.goal and not args.resume:
         parser.print_help()
         return
+
+    def stream_event(event: WorkflowEvent) -> None:
+        print(json.dumps(event.to_dict(), ensure_ascii=False), flush=True)
+
     runtime = DynamicWorkflowRuntime(
         codex_bin=args.codex_bin,
         codex_cwd=args.cd,
@@ -603,8 +734,10 @@ def main() -> None:
         timeout_s=args.timeout_s,
         total_timeout_s=args.total_timeout_s,
         planner_timeout_s=args.planner_timeout_s,
+        checkpoint_dir=args.checkpoint_dir,
+        event_callback=stream_event if args.stream_events else None,
     )
-    trace = runtime.run(args.goal)
+    trace = runtime.run(args.goal or "", run_id=args.run_id or None, resume_run_id=args.resume)
     print(json.dumps(trace.summary(), ensure_ascii=False, indent=2))
 
 

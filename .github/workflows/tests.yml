@@ -29,3 +29,4 @@ jobs:
           python -m dynamic_workflow --help >/dev/null
           python scripts/record_swarm_evidence.py --help >/dev/null
           python examples/codex_cli_swarm_review.py --help >/dev/null
+          python examples/real_repo_review.py --help >/dev/null

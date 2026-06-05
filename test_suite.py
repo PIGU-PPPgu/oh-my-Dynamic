@@ -1583,6 +1583,158 @@ sys.exit(0)
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("WorkflowEvent + DAGExecutor: streaming, score, capability routing")
+def test_workflow_event_and_dag_streaming_capability_routing():
+    from dag import DAG, DAGNode, DAGExecutor
+    from workflow_events import WorkflowEvent
+
+    event = WorkflowEvent(run_id="run-1", kind="demo", subject="Demo", preview="ok")
+    assert event.to_dict()["kind"] == "demo"
+    assert event.to_dict()["id"].startswith("event_")
+
+    dag = DAG()
+    security = dag.add_node(DAGNode.create(
+        "Review security",
+        required_capabilities=["security", "review"],
+    ))
+    unmatched = dag.add_node(DAGNode.create(
+        "Review unknown capability",
+        required_capabilities=["quantum-review"],
+    ))
+    events = []
+
+    def executor(node, ctx):
+        if node.id == security.id:
+            return json.dumps({"summary": "ok", "completeness_score": 0.55})
+        return "plain result"
+
+    DAGExecutor(dag, executor, max_parallel=2, verbose=False).execute(events.append, run_id="dag-run")
+    kinds = [event.kind for event in events]
+    assert "batch_started" in kinds
+    assert "node_started" in kinds
+    assert "node_done" in kinds
+    assert "capability_route_miss" in kinds
+    assert dag.nodes[security.id].owner == "security_reviewer"
+    assert dag.nodes[unmatched.id].owner == "general_reviewer"
+    assert abs(dag.nodes[security.id].completeness_score - 0.55) < 0.001
+    assert abs(dag.nodes[unmatched.id].completeness_score - 0.75) < 0.001
+
+
+@test("DynamicReplan: low completeness score triggers replan")
+def test_dynamic_replan_low_score_trigger():
+    from dag import DAG, DAGNode
+    from dynamic_replan import should_trigger_replan
+
+    dag = DAG()
+    low = dag.add_node(DAGNode.create("Low quality"))
+    low.status = "completed"
+    low.completeness_score = 0.4
+    assert should_trigger_replan(dag)
+
+    high_dag = DAG()
+    high = high_dag.add_node(DAGNode.create("High quality"))
+    high.status = "completed"
+    high.completeness_score = 0.9
+    assert not should_trigger_replan(high_dag)
+
+
+@test("Checkpoint: save, load, and corrupted file handling")
+def test_checkpoint_save_load_corrupt():
+    import shutil, tempfile
+    from checkpoint import checkpoint_path, load_checkpoint, save_checkpoint
+
+    d = tempfile.mkdtemp()
+    try:
+        path = checkpoint_path(d, "run-1")
+        save_checkpoint(str(path), {"run_id": "run-1", "goal": "demo"})
+        assert load_checkpoint(str(path))["goal"] == "demo"
+        corrupt = Path(d) / "corrupt.json"
+        corrupt.write_text("{bad-json", encoding="utf-8")
+        try:
+            load_checkpoint(str(corrupt))
+        except ValueError as exc:
+            assert "not valid JSON" in str(exc)
+        else:
+            raise AssertionError("corrupted checkpoint should fail clearly")
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("DynamicWorkflow: resume skips completed checkpoint agents")
+def test_dynamic_workflow_resume_skips_completed_agents():
+    import shutil, tempfile
+    from checkpoint import checkpoint_path, save_checkpoint
+    from dynamic_workflow import DynamicWorkflowRuntime
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+agent_id = re.search(r"Agent id: ([^\\n]+)", sys.stdin.read()).group(1).strip()
+out.write_text(json.dumps({
+    "agent_id": agent_id,
+    "status": "completed",
+    "summary": f"completed {agent_id}",
+    "artifacts": [],
+    "messages": [],
+    "handoffs": [],
+    "review_requests": [],
+    "review_responses": [],
+    "metadata": {},
+    "error": ""
+}), encoding="utf-8")
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+        checkpoint_dir = str(Path(d) / "checkpoints")
+        run_id = "resume_demo"
+        save_checkpoint(str(checkpoint_path(checkpoint_dir, run_id)), {
+            "goal": "resume goal",
+            "run_id": run_id,
+            "rounds": [],
+            "planned_agents": [
+                {"id": "a", "role": "worker", "goal": "Already done"},
+                {"id": "b", "role": "worker", "goal": "Still pending"},
+            ],
+            "pending_agents": [{"id": "b", "role": "worker", "goal": "Still pending"}],
+            "completed_agent_ids": ["a"],
+            "failed_agent_ids": [],
+            "broker_thread_id": run_id,
+            "stop_reason": "checkpointed",
+        })
+        events = []
+        runtime = DynamicWorkflowRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "dynamic"),
+            broker_dir=str(Path(d) / "broker"),
+            checkpoint_dir=checkpoint_dir,
+            max_rounds=1,
+            max_agents=5,
+            max_parallel=2,
+            timeout_s=5,
+            event_callback=events.append,
+        )
+        trace = runtime.run(resume_run_id=run_id)
+        assert trace.run_id == run_id
+        assert trace.rounds[-1].agent_ids == ["b"]
+        assert "a" not in trace.rounds[-1].agent_ids
+        assert any(event.kind == "dynamic_workflow_started" for event in events)
+        assert any(event.kind == "reducer_done" for event in events)
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("DynamicWorkflow: planner timeout records broker evidence")
 def test_dynamic_workflow_planner_timeout_records_evidence():
     import shutil, tempfile
@@ -1632,6 +1784,45 @@ time.sleep(10)
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("RealRepoReview demo: dry run writes compact evidence")
+def test_real_repo_review_dry_run_evidence():
+    import shutil, tempfile, subprocess
+
+    d = tempfile.mkdtemp()
+    try:
+        output_dir = Path(d) / "evidence"
+        result = subprocess.run(
+            [
+                sys.executable,
+                "examples/real_repo_review.py",
+                "--dry-run",
+                "--run-id",
+                "dry-evidence",
+                "--output-dir",
+                str(output_dir),
+                "--agents",
+                "5",
+                "--max-parallel",
+                "3",
+            ],
+            cwd=Path(__file__).resolve().parent,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        evidence_path = output_dir / "dry-evidence.md"
+        json_path = output_dir / "dry-evidence.json"
+        assert evidence_path.exists()
+        assert json_path.exists()
+        body = evidence_path.read_text(encoding="utf-8")
+        summary = json.loads(json_path.read_text(encoding="utf-8"))
+        assert '"dry_run": true' in body
+        assert summary["broker_thread_id"] == "dry-evidence"
+        assert "dynamic workflow alignment" in body
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("CLI: dynamic workflow, swarm, and evidence help")
 def test_cli_help_entrypoints():
     import subprocess
@@ -1640,6 +1831,7 @@ def test_cli_help_entrypoints():
         [sys.executable, "-m", "dynamic_workflow", "--help"],
         [sys.executable, "-m", "codex_cli_swarm", "--help"],
         [sys.executable, "scripts/record_swarm_evidence.py", "--help"],
+        [sys.executable, "examples/real_repo_review.py", "--help"],
     ]
     for command in commands:
         result = subprocess.run(command, cwd=Path(__file__).resolve().parent, capture_output=True, text=True)
@@ -2128,7 +2320,12 @@ if __name__ == "__main__":
         test_dynamic_workflow_planner_json_validation,
         test_dynamic_workflow_fake_planner_replanner_reducer,
         test_dynamic_workflow_limits,
+        test_workflow_event_and_dag_streaming_capability_routing,
+        test_dynamic_replan_low_score_trigger,
+        test_checkpoint_save_load_corrupt,
+        test_dynamic_workflow_resume_skips_completed_agents,
         test_dynamic_workflow_planner_timeout_records_evidence,
+        test_real_repo_review_dry_run_evidence,
         test_cli_help_entrypoints,
         test_native_runtime_fanout,
         test_native_runtime_dependency_scheduling,

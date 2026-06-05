@@ -32,10 +32,11 @@ transport surface is needed.
 prompts, structured JSON envelopes, and AgentBroker ingestion.
 `codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
 process-level fan-out.
-`dynamic_workflow.py` defines the v1.7 planner/replanner runtime: start with a
+`dynamic_workflow.py` defines the v1.8 planner/replanner runtime: start with a
 planner, fan out Codex CLI workers, let a replanner add follow-up agents, then
 run a broker-aware reducer over artifacts, failures, dependency graph, review
-responses, and optional worktree diff artifacts.
+responses, optional worktree diff artifacts, checkpoint/resume state, and
+streaming workflow events.
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -49,6 +50,14 @@ One-line App trigger:
 ```text
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
 ```
+
+Current product status:
+
+- Stable: Codex CLI swarm, dynamic workflow planner/replanner, broker reducer,
+  and the real repo review demo.
+- Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
+  capability routing.
+- Experimental: Codex App bridge, A2A gateway, and TEA protocol.
 
 When this skill is triggered inside Codex App, the default App-mode priority is:
 
@@ -69,6 +78,8 @@ In App fallback/zero-config mode:
 - Do **not** run `llm_client.py` or the Python `DynamicPipeline` unless the user explicitly asks to use the local Python engine, a real provider, or a dashboard artifact.
 - Do run `dynamic_workflow.py` when the user explicitly asks for the local planner/replanner CLI backend.
 - Do run `codex_cli_swarm.py` when the user explicitly asks for large-scale Codex CLI worker fan-out.
+- Use `python examples/real_repo_review.py --agents 5 --max-parallel 3` when
+  the user asks for a real read-only repo review demo with compact evidence.
 - Treat the modules in the installed oh-my-Dynamic repository as the reference implementation and mirror their workflow in-chat.
 - Be explicit if the user asks about native parallel sandboxed subagents and no
   Codex subagent runtime/tools are available in the current session: App-native
@@ -122,6 +133,11 @@ Pipeline: Query → Decompose → DAG Build → Execute → Stop Check → Repla
 | `agent_broker.py` | A2A-style policy, messages, artifacts, task handoff, review requests/responses, inboxes, audit trace |
 | `broker_gateway.py` | Local HTTP/SSE gateway for AgentBroker task snapshots and events |
 | `codex_app_bridge.py` | Codex App dispatch plans, subagent prompts, JSON envelopes, broker ingestion |
+| `codex_cli_swarm.py` | Codex CLI swarm backend for large-scale process-level fan-out |
+| `dynamic_workflow.py` | Codex CLI planner/replanner runtime with streaming events and checkpoint/resume |
+| `workflow_events.py` | Unified JSONL-friendly workflow event schema |
+| `checkpoint.py` | Atomic checkpoint save/load helpers for dynamic workflow resume |
+| `capability_registry.py` | Lightweight capability routing metadata for reviewer roles |
 | `visualize.py` | Generate interactive HTML dashboard |
 | `test_suite.py` | Unit, integration, security, provider-routing, and stress tests |
 

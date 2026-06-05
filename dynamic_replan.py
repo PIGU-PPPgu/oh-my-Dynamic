@@ -582,6 +582,13 @@ def should_trigger_replan(
     if stats["total"] == 0:
         return False
 
+    low_score_nodes = [
+        node for node in dag.nodes.values()
+        if node.status == "completed" and node.completeness_score < 0.6
+    ]
+    if low_score_nodes:
+        return True
+
     completed_ratio = stats["completed"] / stats["total"]
 
     # Must have some progress and still have work to do

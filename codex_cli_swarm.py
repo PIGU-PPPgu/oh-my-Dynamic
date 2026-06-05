@@ -14,7 +14,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 import argparse
 import json
 import os
@@ -31,6 +31,7 @@ from codex_app_bridge import (
     parse_subagent_envelope,
 )
 from worktree import WorktreeManager
+from workflow_events import WorkflowEvent
 
 
 def _now() -> str:
@@ -155,6 +156,7 @@ class CodexCliSwarmRuntime:
         broker: Optional[AgentBroker] = None,
         inherited_env: Optional[Dict[str, str]] = None,
         worktree_root: str = ".orchestry/worktrees",
+        event_callback: Optional[Callable[[WorkflowEvent], None]] = None,
     ) -> None:
         if max_parallel < 1:
             raise ValueError("max_parallel must be at least 1")
@@ -174,6 +176,7 @@ class CodexCliSwarmRuntime:
         self.inherited_env = inherited_env or {}
         root = Path(worktree_root).expanduser()
         self.worktree_root = root.resolve() if root.is_absolute() else (self.codex_cwd / root).resolve()
+        self.event_callback = event_callback
 
     def run(
         self,
@@ -227,6 +230,14 @@ class CodexCliSwarmRuntime:
                         "write_intent": spec.write_intent,
                     },
                 )
+        self._emit_event(WorkflowEvent(
+            run_id=run_id,
+            kind="codex_cli_swarm_started",
+            subject="codex_cli_swarm_started",
+            body=goal,
+            status="running",
+            metadata={"agents": len(agents), "max_parallel": self.max_parallel},
+        ))
 
         results_by_id: Dict[str, CodexCliAgentResult] = {}
         for layer in layers:
@@ -270,6 +281,14 @@ class CodexCliSwarmRuntime:
                     for future in as_completed(futures):
                         result = future.result()
                         results_by_id[result.agent_id] = result
+                self._emit_event(WorkflowEvent(
+                    run_id=run_id,
+                    kind="batch_done",
+                    subject="batch_done",
+                    body="Codex CLI swarm batch finished.",
+                    status="completed",
+                    metadata={"agent_ids": [spec.id for spec in batch]},
+                ))
 
         order = {spec.id: index for index, spec in enumerate(spec for layer in layers for spec in layer)}
         results = sorted(results_by_id.values(), key=lambda result: order[result.agent_id])
@@ -289,6 +308,14 @@ class CodexCliSwarmRuntime:
                     "failed": failed_count,
                 },
             )
+        self._emit_event(WorkflowEvent(
+            run_id=run_id,
+            kind="codex_cli_swarm_done",
+            subject="codex_cli_swarm_done",
+            body="Codex CLI swarm finished.",
+            status="completed" if all(result.status == "completed" for result in results) else "failed",
+            metadata={"completed": sum(1 for result in results if result.status == "completed"), "failed": sum(1 for result in results if result.status == "failed")},
+        ))
 
         completed_at = _now()
         broker_event_count = len(self.broker.list_events(thread_id=run_id)) if self.broker else 0
@@ -358,6 +385,16 @@ class CodexCliSwarmRuntime:
                         "worktree_branch": worktree_branch,
                     },
                 )
+            self._emit_event(WorkflowEvent(
+                run_id=run_id,
+                kind="agent_started",
+                subject="agent_started",
+                body=spec.goal,
+                agent_id=spec.id,
+                status="running",
+                preview=spec.goal[:200],
+                metadata={"role": spec.role, "workspace_mode": spec.workspace_mode},
+            ))
 
             command = [
                 self.codex_bin,
@@ -442,7 +479,7 @@ class CodexCliSwarmRuntime:
             ingested = self._ingest_envelope(envelope, spec, run_id)
             artifact_ids = dict(ingested.get("artifact_ids", {}))
             artifact_ids.update(self._publish_worktree_diff_artifacts(spec, run_id, agent_cwd))
-            return CodexCliAgentResult(
+            result = CodexCliAgentResult(
                 agent_id=spec.id,
                 role=spec.role,
                 status=envelope.status,
@@ -464,6 +501,17 @@ class CodexCliSwarmRuntime:
                 worktree_path=str(Path(worktree_path).resolve()) if worktree_path else "",
                 error=envelope.error,
             )
+            self._emit_event(WorkflowEvent(
+                run_id=run_id,
+                kind="agent_done" if result.status == "completed" else "agent_failed",
+                subject="agent_done" if result.status == "completed" else "agent_failed",
+                body=result.summary,
+                agent_id=spec.id,
+                status=result.status,
+                preview=result.summary[:200],
+                metadata={"returncode": returncode, "role": spec.role},
+            ))
+            return result
         except Exception as exc:
             return self._failed_process_result(
                 spec,
@@ -570,7 +618,7 @@ class CodexCliSwarmRuntime:
         artifact_ids = dict(ingested.get("artifact_ids", {}))
         if agent_cwd is not None:
             artifact_ids.update(self._publish_worktree_diff_artifacts(spec, run_id, agent_cwd))
-        return CodexCliAgentResult(
+        result = CodexCliAgentResult(
             agent_id=spec.id,
             role=spec.role,
             status="failed",
@@ -592,6 +640,17 @@ class CodexCliSwarmRuntime:
             worktree_path=str(Path(worktree_path).resolve()) if worktree_path else "",
             error=error,
         )
+        self._emit_event(WorkflowEvent(
+            run_id=run_id,
+            kind="agent_failed",
+            subject="agent_failed",
+            body=error,
+            agent_id=spec.id,
+            status="failed",
+            preview=error[:200],
+            metadata={"returncode": returncode},
+        ))
+        return result
 
     def _dependency_failed_result(
         self,
@@ -796,6 +855,10 @@ class CodexCliSwarmRuntime:
     def _write_json(self, path: Path, payload: Dict[str, object]) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(payload, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
+
+    def _emit_event(self, event: WorkflowEvent) -> None:
+        if self.event_callback is not None:
+            self.event_callback(event)
 
     def _topological_layers(self, agents: List[CodexCliAgentSpec]) -> List[List[CodexCliAgentSpec]]:
         specs_by_id: Dict[str, CodexCliAgentSpec] = {}

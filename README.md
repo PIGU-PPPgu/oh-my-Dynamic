@@ -13,7 +13,7 @@
 - 🎯 **明确目标**：不是只做 prompt 技巧，而是为 Codex Native Dynamic Workflows 提供可验证原型和接口提案
 - 🧠 **Codex App internal subagent backend**：在 Codex App 暴露 subagent tools/runtime 时，默认使用真实 Codex subagents，并继承当前 App 内部 LLM；无需 API key
 - 📨 **A2A / Agent Broker**：受控 message、artifact、handoff、review request/response 和 audit trace，让 subagents 不只是并行跑，还能有证据链地协作
-- 🧭 **Dynamic Workflow v1.7**：Codex CLI planner/replanner 先拆任务、运行后继续派生 agents，并由 broker-aware reducer 汇总 evidence
+- 🧭 **Dynamic Workflow v1.8**：Codex CLI planner/replanner 先拆任务、运行后继续派生 agents，并由 broker-aware reducer 汇总 evidence；支持流式事件、checkpoint/resume 和真实 repo review evidence
 - 🌿 **Worktree 写入隔离**：显式开启写代码并发时，每个 Codex CLI worker 使用独立 git worktree，默认只产出 patch/diff artifacts，不自动 merge
 - 🤖 **多模型支持**：GLM、OpenAI GPT、Claude、Gemini、DeepSeek、通义千问/Qwen、Moonshot/Kimi、硅基流动…… 自动识别模型名选择对应 provider
 - 🔗 **串行编排**（Orchestrator）：Planner → Builder → Reviewer 流水线，含自动重试和 review 打回
@@ -24,6 +24,16 @@
 - 🧬 **TEA 工具进化**：LLM 驱动的工具自动分析、改进和回滚
 - 📊 **可视化**：自动生成 DAG 的 DOT/SVG 图
 - 🛡️ **安全**：TEA 工具 AST 校验 + 子进程隔离、线程安全消息总线、循环超时保护
+
+## 能力状态
+
+| 状态 | 能力 |
+|------|------|
+| Stable | Codex CLI swarm、dynamic workflow、broker reducer、真实 repo review demo |
+| Beta | worktree patch mode、checkpoint/resume、streaming progress events、capability routing |
+| Experimental | Codex App bridge、A2A gateway、TEA protocol |
+
+主线产品路径是 **Codex CLI dynamic workflow**。Codex App bridge、A2A gateway 和 TEA protocol 保留为 experimental contract / research track，不作为当前默认落地路径。
 
 ## 架构
 
@@ -128,14 +138,22 @@ python -m json.tool ~/.agents/plugins/marketplace.json >/dev/null
 
 也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 但这不表示本地 Python 进程可以直接调用 Codex App 内部 LLM。本地 `native_runtime.py` 只能调用传入的 `llm_fn`：demo 默认 mock，真实模型需要你配置外部 provider。若你明确要求几十/几百个真实 Codex agents，可切到 `codex_cli_swarm.py`：它通过本机 `codex exec` 批量启动独立 Codex CLI worker，并把 JSON envelope 写入 `AgentBroker`。App-native isolated sandboxes、tool permissions、scheduler 和 trace 仍由 Codex runtime 提供，不由本地 Python 原型伪造。
 
-Dynamic Workflow v1.7 可直接运行：
+Dynamic Workflow v1.8 可直接运行：
 
 ```bash
 python -m dynamic_workflow "review and improve this repo" \
   --max-rounds 3 \
   --max-agents 50 \
   --max-parallel 5 \
-  --planner-timeout-s 120
+  --planner-timeout-s 120 \
+  --stream-events \
+  --checkpoint-dir .orchestry/checkpoints
+
+# 从 checkpoint 续跑
+python -m dynamic_workflow --resume RUN_ID
+
+# 真实 5-agent repo review demo，输出 compact evidence 到 docs/evidence/
+python examples/real_repo_review.py --agents 5 --max-parallel 3
 ```
 
 Codex CLI swarm 可直接运行：

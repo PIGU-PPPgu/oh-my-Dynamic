@@ -82,6 +82,7 @@ def _collect_evidence(events: List[BrokerEvent], artifacts: List[BrokerArtifact]
         if event.kind == "trace" and event.subject == "agent_registered"
     }
     worktree_diffs = [artifact for artifact in artifacts if artifact.kind == "worktree_diff"]
+    low_score_events = [event for event in events if _event_score(event) < 0.6]
     return {
         "completed": completed,
         "failed": failed,
@@ -90,6 +91,7 @@ def _collect_evidence(events: List[BrokerEvent], artifacts: List[BrokerArtifact]
         "dependencies": dependencies,
         "artifacts": artifacts,
         "worktree_diffs": worktree_diffs,
+        "low_score_events": low_score_events,
     }
 
 
@@ -99,6 +101,13 @@ def _terminal_state(evidence: Dict[str, Any]) -> str:
     if evidence["failed"]:
         return "failed"
     return "completed"
+
+
+def _event_score(event: BrokerEvent) -> float:
+    try:
+        return float(event.metadata.get("completeness_score", 1.0) or 1.0)
+    except (TypeError, ValueError):
+        return 1.0
 
 
 def _deterministic_answer(goal: str, evidence: Dict[str, Any], terminal_state: str) -> str:
@@ -112,6 +121,7 @@ def _deterministic_answer(goal: str, evidence: Dict[str, Any], terminal_state: s
         f"Artifacts: {len(evidence['artifacts'])}",
         f"Review responses: {len(evidence['review_responses'])}",
         f"Worktree diff artifacts: {len(evidence['worktree_diffs'])}",
+        f"Low-score events: {len(evidence['low_score_events'])}",
         "",
         "## Agent Findings",
     ]
@@ -151,6 +161,15 @@ def _open_questions(evidence: Dict[str, Any]) -> List[str]:
 
 
 def _recommended_next_agents(evidence: Dict[str, Any]) -> List[Dict[str, Any]]:
+    if evidence["low_score_events"]:
+        return [
+            {
+                "id": "low_score_reviewer",
+                "role": "quality_reviewer",
+                "goal": "Inspect low-completeness outputs and propose targeted follow-up agents.",
+                "dependencies": [event.from_agent for event in evidence["low_score_events"]],
+            }
+        ]
     if not evidence["failed"]:
         return []
     return [

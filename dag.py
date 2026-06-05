@@ -14,6 +14,7 @@ DAG 任务图 —— Dynamic Workflows 的核心执行引擎。
 """
 
 from __future__ import annotations
+import json
 import time
 import uuid
 from collections import deque
@@ -24,6 +25,8 @@ from typing import Callable, Optional, Any
 
 # 统一状态模型：复用 task.py 的 TaskStatus 枚举
 from task import TaskStatus
+from capability_registry import CapabilityRouter
+from workflow_events import WorkflowEvent
 
 # 向后兼容映射：dag.py 历史用词 → TaskStatus
 _LEGACY_STATUS_MAP = {
@@ -55,6 +58,7 @@ class DAGNode:
     priority: int = 5                      # 1-10, 10 最高
     context_from_deps: bool = True         # 是否注入依赖结果
     verification_criteria: str = ""        # 验证标准
+    required_capabilities: list[str] = field(default_factory=list)
     
     # 运行时状态
     status: str = "pending"                # pending / running / completed / failed（兼容旧代码）
@@ -321,11 +325,16 @@ class DAGExecutor:
             ts = datetime.now().strftime("%H:%M:%S")
             print(f"  [{ts}] 🗺️ DAG: {msg}")
     
-    def execute(self) -> DAG:
+    def execute(
+        self,
+        event_callback: Optional[Callable[[WorkflowEvent], None]] = None,
+        run_id: str = "",
+    ) -> DAG:
         """
         执行 DAG —— 反复取 ready 节点并行执行，直到全部完成。
         """
         self._log(f"开始执行 (max_parallel={self.max_parallel})")
+        router = CapabilityRouter()
         
         while not self.dag.is_complete():
             ready = self.dag.get_ready_nodes()
@@ -348,6 +357,16 @@ class DAGExecutor:
             batch = ready[:self.max_parallel]
             self._iteration += 1
             self._log(f"迭代 {self._iteration}: {len(batch)} 个节点并行")
+            self._emit_event(
+                event_callback,
+                WorkflowEvent(
+                    run_id=run_id,
+                    kind="batch_started",
+                    subject="batch_started",
+                    body=f"Starting DAG batch {self._iteration}.",
+                    metadata={"iteration": self._iteration, "node_ids": [node.id for node in batch]},
+                ),
+            )
             
             with ThreadPoolExecutor(max_workers=len(batch)) as pool:
                 futures: dict[Future, DAGNode] = {}
@@ -355,7 +374,31 @@ class DAGExecutor:
                 for node in batch:
                     node.status = "running"
                     node.started_at = datetime.now().isoformat()
+                    node.owner = router.pick_agent(
+                        node.required_capabilities,
+                        run_id=run_id,
+                        node_id=node.id,
+                        event_callback=event_callback,
+                    )
                     context = self.dag.get_dependency_context(node.id)
+                    self._emit_event(
+                        event_callback,
+                        WorkflowEvent(
+                            run_id=run_id,
+                            kind="node_started",
+                            subject="node_started",
+                            body=node.question,
+                            node_id=node.id,
+                            agent_id=node.owner,
+                            status=node.status,
+                            preview=node.question[:200],
+                            metadata={
+                                "agent_type": node.agent_type,
+                                "required_capabilities": node.required_capabilities,
+                                "dependencies": node.dependencies,
+                            },
+                        ),
+                    )
                     
                     future = pool.submit(self._run_single, node, context)
                     futures[future] = node
@@ -366,13 +409,30 @@ class DAGExecutor:
                         result = future.result(timeout=self.timeout_per_task)
                         node.result = result
                         node.status = "completed"
-                        node.completeness_score = 1.0  # 默认满分，由 verifier 调整
+                        node.completeness_score = self._extract_completeness_score(result, default=0.75)
                         node.completed_at = datetime.now().isoformat()
                         node.duration_s = time.time() - (
                             datetime.fromisoformat(node.started_at).timestamp()
                             if node.started_at else time.time()
                         )
                         self._log(f"  ✅ {node.id}: {node.question[:35]}")
+                        self._emit_event(
+                            event_callback,
+                            WorkflowEvent(
+                                run_id=run_id,
+                                kind="node_done",
+                                subject="node_done",
+                                body=node.result,
+                                node_id=node.id,
+                                agent_id=node.owner,
+                                status=node.status,
+                                preview=node.result[:200],
+                                metadata={
+                                    "duration_s": node.duration_s,
+                                    "completeness_score": node.completeness_score,
+                                },
+                            ),
+                        )
                     except Exception as e:
                         node.attempt += 1
                         if node.attempt < node.max_attempts:
@@ -381,13 +441,51 @@ class DAGExecutor:
                         else:
                             node.status = "failed"
                             node.result = f"ERROR: {e}"
+                            node.completeness_score = 0.0
                             self._log(f"  ❌ {node.id}: {e}")
+                            self._emit_event(
+                                event_callback,
+                                WorkflowEvent(
+                                    run_id=run_id,
+                                    kind="node_failed",
+                                    subject="node_failed",
+                                    body=node.result,
+                                    node_id=node.id,
+                                    agent_id=node.owner,
+                                    status=node.status,
+                                    preview=node.result[:200],
+                                    metadata={"attempt": node.attempt, "max_attempts": node.max_attempts},
+                                ),
+                            )
+            self._emit_event(
+                event_callback,
+                WorkflowEvent(
+                    run_id=run_id,
+                    kind="batch_done",
+                    subject="batch_done",
+                    body=f"Finished DAG batch {self._iteration}.",
+                    metadata={"iteration": self._iteration, "node_ids": [node.id for node in batch]},
+                ),
+            )
         
         stats = self.dag.completion_stats()
         self._log(f"完成: {stats['completed']}/{stats['total']}, "
                    f"失败: {stats['failed']}, Token: {stats['total_tokens']}")
         
         return self.dag
+
+    def _emit_event(self, callback: Optional[Callable[[WorkflowEvent], None]], event: WorkflowEvent) -> None:
+        if callback is not None:
+            callback(event)
+
+    def _extract_completeness_score(self, result: str, default: float = 0.75) -> float:
+        try:
+            data = json.loads(result)
+            raw = data.get("completeness_score", data.get("score", default))
+            score = float(raw)
+        except Exception:
+            score = default
+        return max(0.0, min(1.0, score))
     
     def _run_single(self, node: DAGNode, context: str) -> str:
         """执行单个节点"""
