@@ -13,11 +13,11 @@ One-line trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
 ```
 
-Current v2.0.0 status:
+Current v2.1.0 status:
 
-- Stable: Codex CLI swarm, dynamic workflow planner/replanner, broker reducer,
-  `examples/real_repo_review.py`, static observability dashboards, and
-  deterministic quality evals.
+- Stable: Codex CLI swarm, adaptive dynamic workflow planner/replanner,
+  broker reducer, `examples/real_repo_review.py`, static observability
+  dashboards, round-aware compact evidence, and deterministic quality evals.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
 - Experimental: Codex App bridge, A2A gateway, and TEA protocol.
@@ -31,8 +31,9 @@ When triggered inside Codex App, this skill must work immediately after installa
 - Do **not** require provider API keys or `.env` configuration for App-native subagent execution.
 - Do **not** tell the user to use Codex CLI for ordinary App usage.
 - Do **not** run the Python pipeline unless the user explicitly asks for the local Python engine, real provider calls, or dashboard files.
-- If the user asks for dynamic workflow but not huge scale, use the planner/replanner flow conceptually in App mode; outside App-native subagents, the local `dynamic_workflow.py` runtime is the matching CLI backend.
+- If the user asks for dynamic workflow or adaptive workflow but not huge scale, use the planner/replanner flow conceptually in App mode; outside App-native subagents, the local `dynamic_workflow.py` runtime and `scripts/record_adaptive_workflow_evidence.py` are the matching CLI backends.
 - Exception: if the user explicitly asks for dozens/hundreds of real Codex agents, maximum fan-out, CLI swarm, or equivalent large-scale execution, use the local `codex_cli_swarm.py` backend instead of the ordinary in-chat fallback. This backend launches many `codex exec` processes, feeds each worker prompt through stdin, streams stdout/stderr to per-agent files, keeps a run manifest/trace, and ingests JSON envelopes into AgentBroker.
+- If the user asks for a release-quality adaptive evidence run, use `python scripts/record_adaptive_workflow_evidence.py --goal "..." --max-agents 50 --max-parallel 5 --dashboard`; use `--dry-run` only for shape checks.
 - If the user asks for a real repo review demo or evidence run, use `python examples/real_repo_review.py --agents 5 --max-parallel 3`; add `--dry-run` only for CI/demo shape checks that must not launch Codex CLI.
 - If the user asks to inspect progress/evidence after a run, use `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`.
 - If the user asks whether agent output quality is good enough, or asks for an eval, use `python scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md` for deterministic CI-safe shape checks, or pass a redacted responses JSON with `--responses`.

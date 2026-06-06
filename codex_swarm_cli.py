@@ -20,6 +20,7 @@ def main() -> None:
     parser.add_argument("--worktree-root", default=".orchestry/worktrees")
     parser.add_argument("--workspace-mode", choices=["shared", "worktree"], default="shared")
     parser.add_argument("--write-intent", choices=["none", "patch"], default="none")
+    parser.add_argument("--sandbox", default="read-only", help="Sandbox passed to each codex exec worker.")
     parser.add_argument("--base-ref", default="HEAD")
     parser.add_argument("--broker-dir", default=".orchestry/agent_broker")
     parser.add_argument("--timeout-s", type=int, default=1800)
@@ -58,6 +59,7 @@ def main() -> None:
             ),
             workspace_mode=args.workspace_mode,
             write_intent=args.write_intent,
+            sandbox=args.sandbox,
             base_ref=args.base_ref,
         )
         for index in range(args.agents)

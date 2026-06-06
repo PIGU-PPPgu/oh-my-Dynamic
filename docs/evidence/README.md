@@ -33,6 +33,8 @@ generated from sample or redacted responses. They should include:
 Recommended manual smoke commands:
 
 ```bash
+python scripts/record_adaptive_workflow_evidence.py --dry-run --run-id adaptive-demo
+python scripts/record_adaptive_workflow_evidence.py --max-agents 50 --max-parallel 5 --dashboard
 python examples/real_repo_review.py --agents 5 --max-parallel 3
 python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10

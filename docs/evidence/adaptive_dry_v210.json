@@ -1,0 +1,67 @@
+{
+  "run_id": "adaptive_dry_v210",
+  "goal": "Use adaptive planner/replanner agents to review this repo and identify productization gaps.",
+  "commit_sha": "84f50c9cbb4808abd615c5a13553013abac272da",
+  "dry_run": true,
+  "workflow_kind": "adaptive_dynamic_workflow",
+  "agents_requested": 50,
+  "agents_completed": 7,
+  "agents_failed": 0,
+  "agents_total": 7,
+  "rounds": [
+    {
+      "round_index": 0,
+      "source": "planner",
+      "agent_ids": [
+        "planner_agent_00",
+        "planner_agent_01",
+        "planner_agent_02",
+        "planner_agent_03",
+        "planner_agent_04"
+      ],
+      "agent_count": 5,
+      "completed": 5,
+      "failed": 0,
+      "duration_s": 0.0,
+      "trace_path": ""
+    },
+    {
+      "round_index": 1,
+      "source": "replanner",
+      "agent_ids": [
+        "replanner_agent_00",
+        "replanner_agent_01"
+      ],
+      "agent_count": 2,
+      "completed": 2,
+      "failed": 0,
+      "duration_s": 0.0,
+      "trace_path": ""
+    }
+  ],
+  "planner_generated_agents": 5,
+  "replanner_generated_agents": 2,
+  "duration_s": 0.0,
+  "max_rounds": 3,
+  "max_agents": 50,
+  "max_parallel": 5,
+  "sandbox": "read-only",
+  "planner_sandbox": "read-only",
+  "codex_extra_args": [],
+  "broker_thread_id": "adaptive_dry_v210",
+  "stop_reason": "dry_run",
+  "terminal_state": "completed",
+  "reducer_recommended_next_agents": [
+    {
+      "id": "quality_followup",
+      "role": "quality_reviewer",
+      "goal": "Inspect low-confidence or missing evidence."
+    }
+  ],
+  "reducer_artifact_ids": [],
+  "dynamic_trace_path": "",
+  "known_limitations": [
+    "Dry run only; no Codex CLI workers were launched.",
+    "Use a real run for release evidence."
+  ]
+}

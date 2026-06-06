@@ -25,7 +25,7 @@ class CodexCliAgentSpec:
     goal: str
     context: str = ""
     dependencies: List[str] = field(default_factory=list)
-    sandbox: str = "workspace-write"
+    sandbox: str = "read-only"
     approval_policy: str = "never"
     extra_args: List[str] = field(default_factory=list)
     workspace_mode: str = "shared"

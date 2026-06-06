@@ -32,12 +32,15 @@ transport surface is needed.
 prompts, structured JSON envelopes, and AgentBroker ingestion.
 `codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
 process-level fan-out.
-`dynamic_workflow.py` defines the v2.0 planner/replanner runtime: start with a
+`dynamic_workflow.py` defines the v2.1 planner/replanner runtime: start with a
 planner, fan out Codex CLI workers, let a replanner add follow-up agents, then
 run a broker-aware reducer over artifacts, failures, dependency graph, review
 responses, optional worktree diff artifacts, checkpoint/resume state, and
-streaming workflow events. `eval_runner.py` adds deterministic quality evals so
-agent outputs can be scored without model credentials.
+streaming workflow events. `scripts/record_adaptive_workflow_evidence.py`
+records round-aware compact evidence that separates planner-generated agents,
+replanner-generated agents, and reducer recommendations. `eval_runner.py` adds
+deterministic quality evals so agent outputs can be scored without model
+credentials.
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -54,9 +57,9 @@ One-line App trigger:
 
 Current product status:
 
-- Stable: Codex CLI swarm, dynamic workflow planner/replanner, broker reducer,
-  the real repo review demo, static observability dashboards, and deterministic
-  quality evals.
+- Stable: Codex CLI swarm, adaptive dynamic workflow planner/replanner, broker
+  reducer, the real repo review demo, static observability dashboards,
+  round-aware compact evidence, and deterministic quality evals.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
 - Experimental: Codex App bridge, A2A gateway, and TEA protocol.
@@ -79,6 +82,7 @@ In App fallback/zero-config mode:
 - Do **not** require `OPENAI_API_KEY`, `DEEPSEEK_API_KEY`, `ZHIPUAI_API_KEY`, or any external provider key.
 - Do **not** run `llm_client.py` or the Python `DynamicPipeline` unless the user explicitly asks to use the local Python engine, a real provider, or a dashboard artifact.
 - Do run `dynamic_workflow.py` when the user explicitly asks for the local planner/replanner CLI backend.
+- Do run `scripts/record_adaptive_workflow_evidence.py` when the user asks for adaptive workflow evidence or release-quality planner/replanner smoke records.
 - Do run `codex_cli_swarm.py` when the user explicitly asks for large-scale Codex CLI worker fan-out.
 - Use `python examples/real_repo_review.py --agents 5 --max-parallel 3` when
   the user asks for a real read-only repo review demo with compact evidence.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1.0 - 2026-06-06
+
+- Added adaptive dynamic workflow evidence recording via `scripts/record_adaptive_workflow_evidence.py`, with dry-run and real Codex CLI modes.
+- Made `dynamic_workflow.py` default to read-only sandboxing for planner, replanner, and worker agents while supporting reproducible `--codex-extra-arg` overrides.
+- Changed the lower-level Codex CLI swarm agent default sandbox to read-only and exposed `--sandbox` on the swarm CLI.
+- Added round-aware evidence fields that distinguish planner-generated agents, replanner-generated agents, reducer recommendations, stop reason, and terminal state.
+- Enhanced static observability dashboards with a round timeline for dynamic workflow traces and checkpoints.
+- Updated README, skills, evidence docs, and release checklist for the v2.1 adaptive workflow path and GitHub Release requirements.
+
 ## 2.0.1 - 2026-06-06
 
 - Recorded real Codex CLI smoke evidence for 5-agent repo review plus 20/50/100-agent read-only swarms, including compact JSON summaries and a static dashboard for the 5-agent run.

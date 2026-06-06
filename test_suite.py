@@ -1614,6 +1614,93 @@ sys.exit(0)
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("DynamicWorkflow: adaptive fake planner 5 agents plus replanner 2 agents")
+def test_dynamic_workflow_adaptive_fake_planner_replanner():
+    import shutil, tempfile
+    from dynamic_workflow import DynamicWorkflowRuntime
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+if args[args.index("--sandbox") + 1] != "read-only":
+    sys.exit(3)
+if "service_tier=\\"fast\\"" not in args:
+    sys.exit(4)
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+agent_id = re.search(r"Agent id: ([^\\n]+)", sys.stdin.read()).group(1).strip()
+out.write_text(json.dumps({
+    "agent_id": agent_id,
+    "status": "completed",
+    "summary": f"adaptive completed {agent_id}",
+    "artifacts": [],
+    "messages": [],
+    "handoffs": [],
+    "review_requests": [],
+    "review_responses": [],
+    "metadata": {"completeness_score": 0.8},
+    "error": ""
+}), encoding="utf-8")
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+
+        def planner(goal):
+            return {
+                "agents": [
+                    {"id": f"planner_{index}", "role": "reviewer", "goal": f"Planner agent {index}"}
+                    for index in range(5)
+                ],
+                "max_parallel": 5,
+            }
+
+        replan_calls = {"count": 0}
+
+        def replanner(goal, snapshot):
+            replan_calls["count"] += 1
+            if replan_calls["count"] == 1:
+                return {
+                    "agents": [
+                        {"id": "replanner_0", "role": "followup", "goal": "Follow up 0"},
+                        {"id": "replanner_1", "role": "followup", "goal": "Follow up 1"},
+                    ],
+                    "stop_reason": "added_followups",
+                }
+            return {"agents": [], "stop_reason": "ready_for_reducer"}
+
+        runtime = DynamicWorkflowRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "dynamic"),
+            broker_dir=str(Path(d) / "broker"),
+            max_rounds=3,
+            max_agents=10,
+            max_parallel=5,
+            timeout_s=5,
+            planner_fn=planner,
+            replanner_fn=replanner,
+            codex_extra_args=["-c", 'service_tier="fast"'],
+        )
+        trace = runtime.run("adaptive fake")
+        assert trace.summary()["completed"] == 7
+        assert trace.summary()["failed"] == 0
+        assert len(trace.rounds) == 2
+        assert trace.rounds[0].agent_ids == [f"planner_{index}" for index in range(5)]
+        assert trace.rounds[1].agent_ids == ["replanner_0", "replanner_1"]
+        assert trace.reducer_result.terminal_state == "completed"
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("DynamicWorkflow: limits stop rounds and agents")
 def test_dynamic_workflow_limits():
     import shutil, tempfile
@@ -1925,6 +2012,48 @@ def test_real_repo_review_dry_run_evidence():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("AdaptiveWorkflow evidence: dry run writes round-aware compact evidence")
+def test_adaptive_workflow_dry_run_evidence():
+    import shutil, tempfile, subprocess
+
+    d = tempfile.mkdtemp()
+    try:
+        output_dir = Path(d) / "evidence"
+        result = subprocess.run(
+            [
+                sys.executable,
+                "scripts/record_adaptive_workflow_evidence.py",
+                "--dry-run",
+                "--run-id",
+                "adaptive-dry",
+                "--output-dir",
+                str(output_dir),
+                "--max-agents",
+                "20",
+                "--max-parallel",
+                "5",
+            ],
+            cwd=Path(__file__).resolve().parent,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        evidence_path = output_dir / "adaptive-dry.md"
+        json_path = output_dir / "adaptive-dry.json"
+        assert evidence_path.exists()
+        assert json_path.exists()
+        body = evidence_path.read_text(encoding="utf-8")
+        summary = json.loads(json_path.read_text(encoding="utf-8"))
+        assert "Round Timeline" in body
+        assert summary["dry_run"] is True
+        assert summary["planner_generated_agents"] == 5
+        assert summary["replanner_generated_agents"] == 2
+        assert summary["rounds"][0]["source"] == "planner"
+        assert summary["rounds"][1]["source"] == "replanner"
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("Evidence scripts: Codex extra args and marketplace policy are documented")
 def test_evidence_cli_extra_args_and_marketplace_policy():
     import subprocess
@@ -1933,6 +2062,7 @@ def test_evidence_cli_extra_args_and_marketplace_policy():
     for command in [
         [sys.executable, "examples/real_repo_review.py", "--help"],
         [sys.executable, "scripts/record_swarm_evidence.py", "--help"],
+        [sys.executable, "scripts/record_adaptive_workflow_evidence.py", "--help"],
     ]:
         result = subprocess.run(command, cwd=root, capture_output=True, text=True)
         assert result.returncode == 0, result.stderr
@@ -2009,7 +2139,28 @@ def test_workflow_observer_static_dashboard():
         (broker / "artifacts.jsonl").write_text("\n".join(json.dumps(item) for item in artifacts) + "\n", encoding="utf-8")
         trace_dir = source / "dynamic_workflow" / run_id
         trace_dir.mkdir(parents=True)
-        (trace_dir / "dynamic_trace.json").write_text(json.dumps({"run_id": run_id, "stop_reason": "ready_for_reducer"}), encoding="utf-8")
+        (trace_dir / "dynamic_trace.json").write_text(json.dumps({
+            "run_id": run_id,
+            "stop_reason": "ready_for_reducer",
+            "rounds": [
+                {
+                    "round_index": 0,
+                    "agent_ids": ["planner"],
+                    "completed": 1,
+                    "failed": 0,
+                    "duration_s": 1.2,
+                    "trace_path": "round-0/trace.json",
+                },
+                {
+                    "round_index": 1,
+                    "agent_ids": ["builder"],
+                    "completed": 0,
+                    "failed": 1,
+                    "duration_s": 2.4,
+                    "trace_path": "round-1/trace.json",
+                },
+            ],
+        }), encoding="utf-8")
         checkpoint_dir = source / "checkpoints"
         checkpoint_dir.mkdir(parents=True)
         (checkpoint_dir / f"{run_id}.json").write_text(json.dumps({
@@ -2027,6 +2178,8 @@ def test_workflow_observer_static_dashboard():
         assert "builder failed" in body
         assert "diff --git" in body
         assert "Low Scores" in body
+        assert "Round Timeline" in body
+        assert "round 1" in body
         assert "checkpoint" in body.lower()
     finally:
         shutil.rmtree(d, ignore_errors=True)
@@ -2079,6 +2232,7 @@ def test_cli_help_entrypoints():
         [sys.executable, "-m", "codex_cli_swarm", "--help"],
         [sys.executable, "-m", "codex_swarm_cli", "--help"],
         [sys.executable, "scripts/record_swarm_evidence.py", "--help"],
+        [sys.executable, "scripts/record_adaptive_workflow_evidence.py", "--help"],
         [sys.executable, "scripts/render_workflow_observability.py", "--help"],
         [sys.executable, "scripts/run_quality_eval.py", "--help"],
         [sys.executable, "examples/real_repo_review.py", "--help"],
@@ -2587,6 +2741,7 @@ if __name__ == "__main__":
         test_codex_cli_swarm_worktree_failure_preserves_diff,
         test_dynamic_workflow_planner_json_validation,
         test_dynamic_workflow_fake_planner_replanner_reducer,
+        test_dynamic_workflow_adaptive_fake_planner_replanner,
         test_dynamic_workflow_limits,
         test_workflow_event_and_dag_streaming_capability_routing,
         test_dynamic_replan_low_score_trigger,
@@ -2594,6 +2749,7 @@ if __name__ == "__main__":
         test_dynamic_workflow_resume_skips_completed_agents,
         test_dynamic_workflow_planner_timeout_records_evidence,
         test_real_repo_review_dry_run_evidence,
+        test_adaptive_workflow_dry_run_evidence,
         test_evidence_cli_extra_args_and_marketplace_policy,
         test_workflow_observer_static_dashboard,
         test_quality_eval_runner,

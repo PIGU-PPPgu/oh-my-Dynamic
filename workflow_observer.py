@@ -31,6 +31,7 @@ def collect_observability_data(run_id: str, source: Path) -> Dict[str, Any]:
     artifacts = _collect_jsonl(source, "artifacts.jsonl", run_id)
     traces = _collect_traces(source, run_id)
     checkpoint = _load_checkpoint(source, run_id)
+    rounds = _collect_rounds(traces, checkpoint)
     return {
         "run_id": run_id,
         "source": str(source),
@@ -38,7 +39,34 @@ def collect_observability_data(run_id: str, source: Path) -> Dict[str, Any]:
         "artifacts": artifacts,
         "traces": traces,
         "checkpoint": checkpoint,
+        "rounds": rounds,
         "summary": _summary(events, artifacts, traces, checkpoint),
+    }
+
+
+def _collect_rounds(traces: List[Dict[str, Any]], checkpoint: Dict[str, Any]) -> List[Dict[str, Any]]:
+    for trace in traces:
+        raw_rounds = trace.get("rounds")
+        if isinstance(raw_rounds, list):
+            return [_round_record(item) for item in raw_rounds if isinstance(item, dict)]
+    raw_rounds = checkpoint.get("rounds") if isinstance(checkpoint, dict) else []
+    if isinstance(raw_rounds, list):
+        return [_round_record(item) for item in raw_rounds if isinstance(item, dict)]
+    return []
+
+
+def _round_record(item: Dict[str, Any]) -> Dict[str, Any]:
+    round_index = int(item.get("round_index", 0) or 0)
+    agent_ids = [str(agent_id) for agent_id in item.get("agent_ids", [])]
+    return {
+        "round_index": round_index,
+        "source": "planner" if round_index == 0 else "replanner",
+        "agent_ids": agent_ids,
+        "agent_count": len(agent_ids),
+        "completed": int(item.get("completed", 0) or 0),
+        "failed": int(item.get("failed", 0) or 0),
+        "duration_s": float(item.get("duration_s", 0.0) or 0.0),
+        "trace_path": str(item.get("trace_path", "")),
     }
 
 
@@ -110,6 +138,8 @@ def _summary(
         "event_count": len(events),
         "artifact_count": len(artifacts),
         "trace_count": len(traces),
+        "round_count": sum(1 for trace in traces if isinstance(trace.get("rounds"), list)),
+        "workflow_round_count": len(_collect_rounds(traces, checkpoint)),
         "agent_count": len(agent_ids),
         "failed_count": len(failed_events),
         "low_score_count": len(low_score_events),
@@ -141,6 +171,7 @@ def _render_html(data: Dict[str, Any]) -> str:
         ("Events", summary["event_count"]),
         ("Artifacts", summary["artifact_count"]),
         ("Agents", summary["agent_count"]),
+        ("Rounds", summary["workflow_round_count"]),
         ("Failures", summary["failed_count"]),
         ("Low Scores", summary["low_score_count"]),
         ("Reviews", summary["review_response_count"]),
@@ -150,6 +181,7 @@ def _render_html(data: Dict[str, Any]) -> str:
         for label, value in cards
     )
     timeline = "\n".join(_event_row(event) for event in data["events"][:300])
+    rounds = "\n".join(_round_row(round_item) for round_item in data["rounds"])
     artifacts = "\n".join(_artifact_row(artifact) for artifact in data["artifacts"][:100])
     traces = "\n".join(_trace_row(trace) for trace in data["traces"])
     checkpoint = _checkpoint_block(data["checkpoint"])
@@ -188,6 +220,9 @@ small {{ color:#667085; }}
 <div class="cards">{card_html}</div>
 <div class="grid">
 <section class="panel"><h2>Timeline</h2>{timeline or '<p>No events found.</p>'}</section>
+<aside class="panel"><h2>Round Timeline</h2>{rounds or '<p>No dynamic rounds found.</p>'}</aside>
+</div>
+<div class="grid" style="margin-top:16px">
 <aside class="panel"><h2>Checkpoint</h2>{checkpoint}<h2>Traces</h2>{traces or '<p>No traces found.</p>'}</aside>
 </div>
 <section class="panel" style="margin-top:16px"><h2>Artifacts</h2>{artifacts or '<p>No artifacts found.</p>'}</section>
@@ -225,6 +260,20 @@ def _artifact_row(artifact: Dict[str, Any]) -> str:
         f'<div class="row"><strong>{escape(str(artifact.get("name", "")))}</strong> '
         f'<small>{escape(str(artifact.get("kind", "")))} · {escape(str(artifact.get("producer", "")))}</small>'
         f'<div>{escape(content)}</div></div>'
+    )
+
+
+def _round_row(round_item: Dict[str, Any]) -> str:
+    agents = ", ".join(round_item.get("agent_ids", [])[:16])
+    if len(round_item.get("agent_ids", [])) > 16:
+        agents += ", ..."
+    return (
+        f'<div class="row"><span class="kind">round {round_item.get("round_index", "")}</span>'
+        f'{escape(str(round_item.get("source", "")))} · '
+        f'{escape(str(round_item.get("completed", 0)))}/{escape(str(round_item.get("agent_count", 0)))} completed · '
+        f'{escape(str(round_item.get("failed", 0)))} failed<br>'
+        f'<small>{escape(str(round_item.get("duration_s", 0.0)))}s · {escape(str(round_item.get("trace_path", "")))}</small>'
+        f'<div>{escape(agents)}</div></div>'
     )
 
 

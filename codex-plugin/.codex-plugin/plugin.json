@@ -1,7 +1,7 @@
 {
   "name": "oh-my-dynamic",
-  "version": "1.5.0",
-  "description": "Multi-agent orchestration engine with DAG execution, stop conditions, TEA protocol, and hierarchical synthesis. Replicates Claude Dynamic Workflows for any LLM.",
+  "version": "2.1.0",
+  "description": "Adaptive multi-agent dynamic workflow orchestration for Codex App skills, Codex CLI swarms, broker evidence, and quality evaluation.",
   "skills": "./skills/",
   "author": {
     "name": "PIGU-PPPgu"

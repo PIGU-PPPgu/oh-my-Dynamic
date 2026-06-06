@@ -39,6 +39,8 @@ class DynamicAgentPlan:
     workspace_mode: str = "shared"
     write_intent: str = "none"
     base_ref: str = "HEAD"
+    sandbox: str = "read-only"
+    extra_args: List[str] = field(default_factory=list)
 
     def to_spec(self) -> CodexCliAgentSpec:
         return CodexCliAgentSpec(
@@ -50,6 +52,8 @@ class DynamicAgentPlan:
             workspace_mode=self.workspace_mode,
             write_intent=self.write_intent,
             base_ref=self.base_ref,
+            sandbox=self.sandbox,
+            extra_args=list(self.extra_args),
         )
 
 
@@ -141,6 +145,9 @@ class DynamicWorkflowRuntime:
         replanner_fn: Optional[ReplannerFn] = None,
         broker: Optional[AgentBroker] = None,
         event_callback: Optional[Callable[[WorkflowEvent], None]] = None,
+        sandbox: str = "read-only",
+        codex_extra_args: Optional[List[str]] = None,
+        planner_sandbox: str = "read-only",
     ) -> None:
         if max_rounds < 1:
             raise ValueError("max_rounds must be at least 1")
@@ -163,6 +170,9 @@ class DynamicWorkflowRuntime:
         self.planner_fn = planner_fn
         self.replanner_fn = replanner_fn
         self.event_callback = event_callback
+        self.sandbox = sandbox
+        self.codex_extra_args = list(codex_extra_args or [])
+        self.planner_sandbox = planner_sandbox
 
     def run(
         self,
@@ -386,11 +396,12 @@ class DynamicWorkflowRuntime:
             "--cd",
             str(self.codex_cwd),
             "--sandbox",
-            "workspace-write",
+            self.planner_sandbox,
             "--skip-git-repo-check",
             "--ephemeral",
             "--output-last-message",
             str(output_path),
+            *self.codex_extra_args,
             "-",
         ]
         command_path.write_text(json.dumps(command, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
@@ -404,6 +415,7 @@ class DynamicWorkflowRuntime:
                 "prompt_path": str(prompt_path),
                 "output_path": str(output_path),
                 "timeout_s": self.planner_timeout_s,
+                "sandbox": self.planner_sandbox,
             },
         )
         try:
@@ -513,6 +525,8 @@ class DynamicWorkflowRuntime:
         else:
             context = agent.context
         spec = agent.to_spec()
+        spec.sandbox = agent.sandbox or self.sandbox
+        spec.extra_args = list(agent.extra_args or self.codex_extra_args)
         spec.dependencies = [dep_id for dep_id in agent.dependencies if dep_id not in completed_ids and dep_id not in failed_ids]
         spec.context = context
         return spec
@@ -571,6 +585,8 @@ def _parse_agents(raw_agents: Any, existing_agent_ids: Set[str]) -> List[Dynamic
                 workspace_mode=str(raw.get("workspace_mode", "shared")),
                 write_intent=str(raw.get("write_intent", "none")),
                 base_ref=str(raw.get("base_ref", "HEAD")),
+                sandbox=str(raw.get("sandbox", "read-only")),
+                extra_args=[str(item) for item in raw.get("extra_args", [])],
             )
         )
     known = ids | existing_agent_ids
@@ -674,6 +690,8 @@ def _plans_from_payload(payload: Any) -> List[DynamicAgentPlan]:
             workspace_mode=str(item.get("workspace_mode", "shared")),
             write_intent=str(item.get("write_intent", "none")),
             base_ref=str(item.get("base_ref", "HEAD")),
+            sandbox=str(item.get("sandbox", "read-only")),
+            extra_args=[str(value) for value in item.get("extra_args", [])],
         ))
     return plans
 
@@ -715,6 +733,14 @@ def main() -> None:
     parser.add_argument("--run-id", default="")
     parser.add_argument("--resume", default="", help="Resume from .orchestry/checkpoints/{RUN_ID}.json.")
     parser.add_argument("--stream-events", action="store_true", help="Print WorkflowEvent JSONL progress events.")
+    parser.add_argument("--sandbox", default="read-only", help="Sandbox passed to dynamic workflow Codex CLI worker agents.")
+    parser.add_argument("--planner-sandbox", default="read-only", help="Sandbox passed to planner/replanner JSON Codex CLI workers.")
+    parser.add_argument(
+        "--codex-extra-arg",
+        action="append",
+        default=[],
+        help="Extra argument passed to planner/replanner and every worker. Repeat for multiple args.",
+    )
     args = parser.parse_args()
     if not args.goal and not args.resume:
         parser.print_help()
@@ -736,6 +762,9 @@ def main() -> None:
         planner_timeout_s=args.planner_timeout_s,
         checkpoint_dir=args.checkpoint_dir,
         event_callback=stream_event if args.stream_events else None,
+        sandbox=args.sandbox,
+        planner_sandbox=args.planner_sandbox,
+        codex_extra_args=args.codex_extra_arg,
     )
     trace = runtime.run(args.goal or "", run_id=args.run_id or None, resume_run_id=args.resume)
     print(json.dumps(trace.summary(), ensure_ascii=False, indent=2))
