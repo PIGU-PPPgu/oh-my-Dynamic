@@ -2302,10 +2302,14 @@ def test_benchmark_dry_run():
         payload = json.loads(output_path.read_text(encoding="utf-8"))
         assert payload["dry_run"] is True
         assert payload["sanitized"] is True
-        assert payload["task_count"] >= 12
-        assert payload["mode_summaries"]["single"]["agent_count"] == 1
-        assert payload["mode_summaries"]["fixed"]["agent_count"] == 5
-        assert payload["mode_summaries"]["adaptive"]["replanner_count"] == 2
+        assert payload["fixture_count"] >= 12
+        assert payload["mode_summaries"]["single"]["agents_completed"] >= 1
+        assert payload["mode_summaries"]["fixed"]["agent_count"] >= 5
+        assert payload["mode_summaries"]["adaptive"]["replanner_count"] >= 2
+        first = payload["task_results"][0]
+        assert "quality_score" in first
+        assert "evidence_completeness" in first
+        assert "risk_hits" in first
         assert output_path.with_suffix(".md").exists()
     finally:
         shutil.rmtree(d, ignore_errors=True)

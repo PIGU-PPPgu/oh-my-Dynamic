@@ -43,8 +43,9 @@ records round-aware compact evidence that separates planner-generated agents,
 replanner-generated agents, trigger reasons, and reducer recommendations.
 `src/oh_my_dynamic/evals/eval_runner.py` adds deterministic quality evals so agent outputs can be
 scored without model credentials. `src/oh_my_dynamic/evals/doctor.py`, `src/oh_my_dynamic/evals/evidence_sanitizer.py`, and
-`scripts/run_benchmark.py` add adoption checks, public evidence redaction, and
-single/fixed/adaptive benchmark shape checks.
+`scripts/run_benchmark.py` add adoption checks, public evidence redaction,
+single/fixed/adaptive benchmark shape checks, and v3.1 real Codex CLI compact
+benchmark evidence.
 
 Use It Now:
 
@@ -54,7 +55,9 @@ Use It Now:
 - CLI fixed swarm: `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20`
 - Observability: `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`
 - Doctor: `python -m doctor --json`
-- Benchmark: `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v240.json`
+- Benchmark dry-run: `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v310_dry.json`
+- Benchmark real evidence: add `--real --fixtures security_command_surface,install_five_minute,tests_dynamic_workflow,evidence_redaction,docs_boundary_claims --output docs/evidence/benchmark_v310.json`
+- Migration guide: `docs/V3_MIGRATION_GUIDE.md`
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -73,7 +76,8 @@ Current product status:
 
 - Stable: Codex CLI swarm, adaptive dynamic workflow planner/replanner, broker
   reducer, the real repo review demo, static observability dashboards,
-  round-aware compact evidence, and deterministic quality evals.
+  round-aware compact evidence, deterministic quality evals, v3.1 benchmark
+  evidence, and pytest coverage fail-under 80.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
 - Experimental: Codex App bridge, A2A gateway, and TEA protocol.

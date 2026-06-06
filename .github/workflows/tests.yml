@@ -30,8 +30,8 @@ jobs:
         run: python -m pytest tests -q
       - name: Coverage
         run: |
-          python -m coverage run test_suite.py
-          python -m coverage report --fail-under=70
+          python -m coverage run -m pytest tests -q
+          python -m coverage report --fail-under=80
       - name: Security scan
         run: python -m bandit -r . -c pyproject.toml
       - name: CLI help
@@ -60,7 +60,7 @@ jobs:
       - name: Quality eval smoke
         run: python scripts/run_quality_eval.py --sample --output /tmp/quality_eval.md
       - name: Benchmark dry-run smoke
-        run: python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark_v240.json
+        run: python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark_v310.json
       - name: Evidence redaction scan
         run: |
           ! grep -R "/Users/" docs/evidence

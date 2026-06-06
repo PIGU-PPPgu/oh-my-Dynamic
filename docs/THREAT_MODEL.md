@@ -41,7 +41,7 @@ Before publishing release evidence:
 ```bash
 python -m bandit -r . -c pyproject.toml
 python -m doctor --json
-python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark_v240.json
+python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark_v310.json
 ! grep -R "/Users/" docs/evidence
 ```
 

@@ -1,0 +1,48 @@
+{
+  "benchmark": "repo_review_productization_v2",
+  "run_id": "benchmark_v310_real_20260607c_adaptive_security_command_surface",
+  "dry_run": false,
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT",
+  "fixture": "security_command_surface",
+  "mode": "adaptive",
+  "source_raw_trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607c/adaptive/benchmark_v310_real_20260607c_adaptive_security_command_surface/dynamic_trace.json",
+  "raw_trace_committed": false,
+  "planner_generated_agents": 3,
+  "replanner_generated_agents": 2,
+  "rounds": [
+    {
+      "round_index": 0,
+      "source": "planner",
+      "agents": 3,
+      "completed": 2,
+      "failed": 1
+    },
+    {
+      "round_index": 1,
+      "source": "replanner",
+      "agents": 2,
+      "completed": 1,
+      "failed": 1
+    }
+  ],
+  "agents_completed": 3,
+  "agents_failed": 2,
+  "replan_triggers": [
+    {
+      "kind": "missing_coverage",
+      "lanes": ["benchmark_followup"]
+    },
+    {
+      "kind": "failed_agents",
+      "agents": ["process_lifecycle_reviewer"]
+    }
+  ],
+  "missing_coverage": ["benchmark_followup"],
+  "terminal_state": "partial",
+  "known_limitations": [
+    "This is a compact manual sample derived from local raw trace files; raw prompts/stdout/stderr are not committed.",
+    "Two agents timed out under the 180 second worker bound, so this proves real planner/replanner fan-out but not a fully passing quality benchmark.",
+    "The 5-fixture bounded smoke is recorded separately in benchmark_v310.json."
+  ]
+}

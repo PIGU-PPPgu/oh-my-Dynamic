@@ -67,8 +67,12 @@ def test_benchmark_dry_run_writes_compact_json(tmp_path):
     assert result.returncode == 0, result.stderr
     payload = json.loads(output.read_text(encoding="utf-8"))
     assert payload["dry_run"] is True
-    assert payload["mode_summaries"]["adaptive"]["replanner_count"] == 2
-    assert payload["task_count"] >= 12
+    assert payload["mode_summaries"]["adaptive"]["replanner_count"] >= 2
+    assert payload["fixture_count"] >= 12
+    first = payload["task_results"][0]
+    assert "quality_score" in first
+    assert "evidence_completeness" in first
+    assert "risk_hits" in first
 
 
 def test_v3_package_imports_match_compatibility_facades():

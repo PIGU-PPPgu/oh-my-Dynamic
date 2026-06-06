@@ -623,8 +623,12 @@ def _repair_replanner_agents(raw_agents: Any) -> Any:
         item = dict(raw)
         if not str(item.get("goal", "")).strip() and str(item.get("prompt", "")).strip():
             item["goal"] = str(item["prompt"])
+        if not str(item.get("goal", "")).strip() and str(item.get("task", "")).strip():
+            item["goal"] = str(item["task"])
         if not str(item.get("role", "")).strip() and str(item.get("lane", "")).strip():
             item["role"] = str(item["lane"])
+        if not str(item.get("role", "")).strip() and str(item.get("type", "")).strip():
+            item["role"] = str(item["type"])
         repaired.append(item)
     return repaired
 
@@ -782,7 +786,8 @@ def _replanner_prompt(goal: str, snapshot: Dict[str, Any]) -> str:
         "You are the oh-my-Dynamic replanner. Return exactly one JSON object.\n"
         "Return new agents only, or stop_reason=\"ready_for_reducer\" when the broker evidence is enough.\n"
         "If replan_trigger_policy.replan_triggers is non-empty, do not return ready_for_reducer; add targeted follow-up agents for those triggers. Respect followup_agent_budget when present.\n"
-        "Schema: {\"agents\":[],\"dependencies\":{},\"stop_reason\":\"ready_for_reducer\",\"confidence\":0.0}\n\n"
+        "Schema: {\"agents\":[{\"id\":\"agent_id\",\"role\":\"role\",\"goal\":\"goal\",\"context\":\"optional context\",\"dependencies\":[\"existing_agent_id\"]}],\"dependencies\":{},\"stop_reason\":\"ready_for_reducer\",\"confidence\":0.0}\n"
+        "Each returned agent must include id, role, and goal. Do not use task/type/lane instead of goal/role.\n\n"
         f"Goal:\n{goal}\n\n"
         f"Broker snapshot:\n{json.dumps(snapshot, ensure_ascii=False, indent=2)}\n"
     )

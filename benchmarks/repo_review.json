@@ -1,101 +1,162 @@
 {
-  "name": "repo_review_productization_v1",
+  "name": "repo_review_productization_v2",
+  "version": "3.1.0",
   "tasks": [
     {
       "id": "security_command_surface",
       "goal": "Review command execution and subprocess security surfaces.",
       "expected_keywords": ["subprocess", "sandbox", "secret", "auth"],
+      "expected_signals": ["codex exec", "sandbox", "environment", "stderr"],
+      "risk_categories": ["security", "secrets", "process"],
       "required_evidence": ["file", "line", "risk"],
+      "evidence_requirements": ["file", "line", "command", "recommendation"],
       "min_score": 0.65,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.72,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "security_broker_poisoning",
       "goal": "Review broker artifact poisoning and malformed envelope risks.",
       "expected_keywords": ["broker", "artifact", "envelope", "validation"],
+      "expected_signals": ["artifact", "envelope", "thread_id", "validation"],
+      "risk_categories": ["security", "protocol", "data-integrity"],
       "required_evidence": ["file", "line", "recommendation"],
+      "evidence_requirements": ["file", "line", "risk", "recommendation"],
       "min_score": 0.65,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.72,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "install_five_minute",
       "goal": "Review the five-minute install and dry-run path.",
       "expected_keywords": ["install", "README", "dry-run", "command"],
+      "expected_signals": ["Use It Now", "doctor", "dry-run", "plugin"],
+      "risk_categories": ["adoption", "docs", "install"],
       "required_evidence": ["command", "expected", "gap"],
+      "evidence_requirements": ["README", "command", "expected", "gap"],
       "min_score": 0.65,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.72,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "docs_boundary_claims",
       "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
       "expected_keywords": ["App-native", "Codex CLI", "process swarm", "boundary"],
+      "expected_signals": ["App-native", "Codex CLI", "runtime", "read-only"],
+      "risk_categories": ["docs", "positioning", "adoption"],
       "required_evidence": ["README", "risk", "recommendation"],
+      "evidence_requirements": ["README", "boundary", "risk", "recommendation"],
       "min_score": 0.65,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.72,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "tests_dynamic_workflow",
       "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
       "expected_keywords": ["planner", "replanner", "trigger", "reducer"],
+      "expected_signals": ["DynamicWorkflowRuntime", "ReplanTriggerPolicy", "broker reducer", "checkpoint"],
+      "risk_categories": ["tests", "coverage", "workflow"],
       "required_evidence": ["test", "coverage", "gap"],
+      "evidence_requirements": ["test", "coverage", "gap", "recommendation"],
       "min_score": 0.70,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.75,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "tests_failure_modes",
       "goal": "Review failure-mode coverage for worker timeout, malformed JSON, and dependency failure.",
       "expected_keywords": ["timeout", "malformed", "dependency", "failed"],
+      "expected_signals": ["timeout", "dependency", "malformed JSON", "failed envelope"],
+      "risk_categories": ["tests", "resilience", "workflow"],
       "required_evidence": ["test", "risk", "recommendation"],
+      "evidence_requirements": ["test", "risk", "failure", "recommendation"],
       "min_score": 0.65,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.72,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "evidence_redaction",
       "goal": "Review public evidence for local path and secret leakage.",
       "expected_keywords": ["evidence", "sanitize", "secret", "path"],
+      "expected_signals": ["$REPO_ROOT", "sensitive scan", "raw output", "dashboard"],
+      "risk_categories": ["evidence", "privacy", "security"],
       "required_evidence": ["file", "scan", "recommendation"],
+      "evidence_requirements": ["file", "scan", "path", "recommendation"],
       "min_score": 0.70,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.75,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "dashboard_observability",
       "goal": "Review dashboard observability for timeline, rounds, triggers, and artifacts.",
       "expected_keywords": ["dashboard", "timeline", "round", "artifact"],
+      "expected_signals": ["timeline", "round", "trigger", "checkpoint"],
+      "risk_categories": ["observability", "evidence", "workflow"],
       "required_evidence": ["trace", "agent", "gap"],
+      "evidence_requirements": ["trace", "agent", "artifact", "gap"],
       "min_score": 0.65,
-      "allowed_modes": ["fixed", "adaptive"]
+      "minimum_score": 0.72,
+      "allowed_modes": ["fixed", "adaptive"],
+      "allowed_runtime_modes": ["fixed", "adaptive"]
     },
     {
       "id": "release_gates",
       "goal": "Review release gates, CI, coverage, security scans, and checklist completeness.",
       "expected_keywords": ["CI", "coverage", "bandit", "release"],
+      "expected_signals": ["coverage", "bandit", "doctor", "benchmark"],
+      "risk_categories": ["release", "quality", "security"],
       "required_evidence": ["command", "expected", "gap"],
+      "evidence_requirements": ["command", "CI", "coverage", "gap"],
       "min_score": 0.70,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.75,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "benchmark_claims",
       "goal": "Review whether benchmark evidence proves quality improvement over a single agent.",
       "expected_keywords": ["benchmark", "single", "fixed", "adaptive"],
+      "expected_signals": ["quality_score", "evidence_completeness", "duration", "replanner"],
+      "risk_categories": ["benchmark", "evidence", "quality"],
       "required_evidence": ["score", "comparison", "recommendation"],
+      "evidence_requirements": ["score", "comparison", "mode", "recommendation"],
       "min_score": 0.70,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.75,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     },
     {
       "id": "worktree_write_isolation",
       "goal": "Review write-capable swarm isolation and no-auto-merge behavior.",
       "expected_keywords": ["worktree", "patch", "merge", "isolation"],
+      "expected_signals": ["worktree", "patch", "diff", "no auto-merge"],
+      "risk_categories": ["write-isolation", "git", "safety"],
       "required_evidence": ["file", "risk", "recommendation"],
+      "evidence_requirements": ["file", "risk", "patch", "recommendation"],
       "min_score": 0.65,
-      "allowed_modes": ["fixed", "adaptive"]
+      "minimum_score": 0.72,
+      "allowed_modes": ["fixed", "adaptive"],
+      "allowed_runtime_modes": ["fixed", "adaptive"]
     },
     {
       "id": "llm_provider_docs",
       "goal": "Review model-provider routing docs and Chinese model support clarity.",
       "expected_keywords": ["GLM", "Qwen", "DeepSeek", "provider"],
+      "expected_signals": ["GLM", "Qwen", "DeepSeek", "OpenAI compatible"],
+      "risk_categories": ["docs", "model-routing", "adoption"],
       "required_evidence": ["README", "command", "gap"],
+      "evidence_requirements": ["README", "provider", "command", "gap"],
       "min_score": 0.65,
-      "allowed_modes": ["single", "fixed", "adaptive"]
+      "minimum_score": 0.72,
+      "allowed_modes": ["single", "fixed", "adaptive"],
+      "allowed_runtime_modes": ["single", "fixed", "adaptive"]
     }
   ]
 }

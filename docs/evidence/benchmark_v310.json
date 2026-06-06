@@ -1,0 +1,783 @@
+{
+  "benchmark": "repo_review_productization_v2",
+  "run_id": "benchmark_v310_real_20260607d",
+  "commit_sha": "e107ae185c59dd35ff8207de02634022d740c706",
+  "dry_run": false,
+  "created_at": 1780769172,
+  "duration_s": 900.54,
+  "modes": [
+    "single",
+    "fixed",
+    "adaptive"
+  ],
+  "fixture_count": 5,
+  "fixtures": [
+    "security_command_surface",
+    "install_five_minute",
+    "tests_dynamic_workflow",
+    "evidence_redaction",
+    "docs_boundary_claims"
+  ],
+  "mode_summaries": {
+    "single": {
+      "total": 5,
+      "passed": 0,
+      "failed": 5,
+      "avg_score": 0.063,
+      "avg_evidence_completeness": 0.012,
+      "agents_completed": 0,
+      "agents_failed": 5,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 300.1,
+      "failure_rate": 1.0,
+      "terminal_state": "failed"
+    },
+    "fixed": {
+      "total": 5,
+      "passed": 0,
+      "failed": 5,
+      "avg_score": 0.012,
+      "avg_evidence_completeness": 0.012,
+      "agents_completed": 0,
+      "agents_failed": 25,
+      "agent_count": 25,
+      "replanner_count": 0,
+      "duration_s": 300.28,
+      "failure_rate": 1.0,
+      "terminal_state": "failed"
+    },
+    "adaptive": {
+      "total": 5,
+      "passed": 0,
+      "failed": 5,
+      "avg_score": 0.06,
+      "avg_evidence_completeness": 0.0,
+      "agents_completed": 0,
+      "agents_failed": 35,
+      "agent_count": 35,
+      "replanner_count": 10,
+      "duration_s": 0.0,
+      "failure_rate": 1.0,
+      "terminal_state": "failed"
+    }
+  },
+  "task_results": [
+    {
+      "mode": "single",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": false,
+      "agent_count": 1,
+      "agents_completed": 0,
+      "agents_failed": 1,
+      "replanner_count": 0,
+      "duration_s": 60.02,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/single/benchmark_v310_real_20260607d_single_security_command_surface/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_single_security_command_surface",
+      "terminal_state": "failed",
+      "quality_score": 0.113,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [
+        "codex exec"
+      ],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.062,
+      "missing": {
+        "keywords": [
+          "subprocess",
+          "sandbox",
+          "secret",
+          "auth"
+        ],
+        "signals": [
+          "sandbox",
+          "environment",
+          "stderr"
+        ],
+        "risk_categories": [
+          "security",
+          "secrets",
+          "process"
+        ],
+        "evidence_requirements": [
+          "file",
+          "line",
+          "command",
+          "recommendation"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s"
+    },
+    {
+      "mode": "fixed",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": false,
+      "agent_count": 5,
+      "agents_completed": 0,
+      "agents_failed": 5,
+      "replanner_count": 0,
+      "duration_s": 60.06,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/fixed/benchmark_v310_real_20260607d_fixed_security_command_surface/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_fixed_security_command_surface",
+      "terminal_state": "failed",
+      "quality_score": 0.062,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [
+        "codex exec"
+      ],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.062,
+      "missing": {
+        "keywords": [
+          "subprocess",
+          "sandbox",
+          "secret",
+          "auth"
+        ],
+        "signals": [
+          "sandbox",
+          "environment",
+          "stderr"
+        ],
+        "risk_categories": [
+          "security",
+          "secrets",
+          "process"
+        ],
+        "evidence_requirements": [
+          "file",
+          "line",
+          "command",
+          "recommendation"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s"
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": false,
+      "agent_count": 7,
+      "agents_completed": 0,
+      "agents_failed": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "failed",
+      "response_preview": "real benchmark failure: codex planner timed out after 60s",
+      "error": "codex planner timed out after 60s",
+      "quality_score": 0.05,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "subprocess",
+          "sandbox",
+          "secret",
+          "auth"
+        ],
+        "signals": [
+          "codex exec",
+          "sandbox",
+          "environment",
+          "stderr"
+        ],
+        "risk_categories": [
+          "security",
+          "secrets",
+          "process"
+        ],
+        "evidence_requirements": [
+          "file",
+          "line",
+          "command",
+          "recommendation"
+        ]
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": false,
+      "agent_count": 1,
+      "agents_completed": 0,
+      "agents_failed": 1,
+      "replanner_count": 0,
+      "duration_s": 60.02,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/single/benchmark_v310_real_20260607d_single_install_five_minute/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_single_install_five_minute",
+      "terminal_state": "failed",
+      "quality_score": 0.05,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "install",
+          "README",
+          "dry-run",
+          "command"
+        ],
+        "signals": [
+          "Use It Now",
+          "doctor",
+          "dry-run",
+          "plugin"
+        ],
+        "risk_categories": [
+          "adoption",
+          "docs",
+          "install"
+        ],
+        "evidence_requirements": [
+          "README",
+          "command",
+          "expected",
+          "gap"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s"
+    },
+    {
+      "mode": "fixed",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": false,
+      "agent_count": 5,
+      "agents_completed": 0,
+      "agents_failed": 5,
+      "replanner_count": 0,
+      "duration_s": 60.05,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/fixed/benchmark_v310_real_20260607d_fixed_install_five_minute/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_fixed_install_five_minute",
+      "terminal_state": "failed",
+      "quality_score": 0.0,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "install",
+          "README",
+          "dry-run",
+          "command"
+        ],
+        "signals": [
+          "Use It Now",
+          "doctor",
+          "dry-run",
+          "plugin"
+        ],
+        "risk_categories": [
+          "adoption",
+          "docs",
+          "install"
+        ],
+        "evidence_requirements": [
+          "README",
+          "command",
+          "expected",
+          "gap"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s"
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": false,
+      "agent_count": 7,
+      "agents_completed": 0,
+      "agents_failed": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "failed",
+      "response_preview": "real benchmark failure: codex planner timed out after 60s",
+      "error": "codex planner timed out after 60s",
+      "quality_score": 0.05,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "install",
+          "README",
+          "dry-run",
+          "command"
+        ],
+        "signals": [
+          "Use It Now",
+          "doctor",
+          "dry-run",
+          "plugin"
+        ],
+        "risk_categories": [
+          "adoption",
+          "docs",
+          "install"
+        ],
+        "evidence_requirements": [
+          "README",
+          "command",
+          "expected",
+          "gap"
+        ]
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": false,
+      "agent_count": 1,
+      "agents_completed": 0,
+      "agents_failed": 1,
+      "replanner_count": 0,
+      "duration_s": 60.02,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/single/benchmark_v310_real_20260607d_single_docs_boundary_claims/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_single_docs_boundary_claims",
+      "terminal_state": "failed",
+      "quality_score": 0.05,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "App-native",
+          "Codex CLI",
+          "process swarm",
+          "boundary"
+        ],
+        "signals": [
+          "App-native",
+          "Codex CLI",
+          "runtime",
+          "read-only"
+        ],
+        "risk_categories": [
+          "docs",
+          "positioning",
+          "adoption"
+        ],
+        "evidence_requirements": [
+          "README",
+          "boundary",
+          "risk",
+          "recommendation"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s"
+    },
+    {
+      "mode": "fixed",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": false,
+      "agent_count": 5,
+      "agents_completed": 0,
+      "agents_failed": 5,
+      "replanner_count": 0,
+      "duration_s": 60.06,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/fixed/benchmark_v310_real_20260607d_fixed_docs_boundary_claims/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_fixed_docs_boundary_claims",
+      "terminal_state": "failed",
+      "quality_score": 0.0,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "App-native",
+          "Codex CLI",
+          "process swarm",
+          "boundary"
+        ],
+        "signals": [
+          "App-native",
+          "Codex CLI",
+          "runtime",
+          "read-only"
+        ],
+        "risk_categories": [
+          "docs",
+          "positioning",
+          "adoption"
+        ],
+        "evidence_requirements": [
+          "README",
+          "boundary",
+          "risk",
+          "recommendation"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s"
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": false,
+      "agent_count": 7,
+      "agents_completed": 0,
+      "agents_failed": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "failed",
+      "response_preview": "real benchmark failure: codex planner timed out after 60s",
+      "error": "codex planner timed out after 60s",
+      "quality_score": 0.05,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "App-native",
+          "Codex CLI",
+          "process swarm",
+          "boundary"
+        ],
+        "signals": [
+          "App-native",
+          "Codex CLI",
+          "runtime",
+          "read-only"
+        ],
+        "risk_categories": [
+          "docs",
+          "positioning",
+          "adoption"
+        ],
+        "evidence_requirements": [
+          "README",
+          "boundary",
+          "risk",
+          "recommendation"
+        ]
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": false,
+      "agent_count": 1,
+      "agents_completed": 0,
+      "agents_failed": 1,
+      "replanner_count": 0,
+      "duration_s": 60.02,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/single/benchmark_v310_real_20260607d_single_tests_dynamic_workflow/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_single_tests_dynamic_workflow",
+      "terminal_state": "failed",
+      "quality_score": 0.05,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "planner",
+          "replanner",
+          "trigger",
+          "reducer"
+        ],
+        "signals": [
+          "DynamicWorkflowRuntime",
+          "ReplanTriggerPolicy",
+          "broker reducer",
+          "checkpoint"
+        ],
+        "risk_categories": [
+          "tests",
+          "coverage",
+          "workflow"
+        ],
+        "evidence_requirements": [
+          "test",
+          "coverage",
+          "gap",
+          "recommendation"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s"
+    },
+    {
+      "mode": "fixed",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": false,
+      "agent_count": 5,
+      "agents_completed": 0,
+      "agents_failed": 5,
+      "replanner_count": 0,
+      "duration_s": 60.05,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/fixed/benchmark_v310_real_20260607d_fixed_tests_dynamic_workflow/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_fixed_tests_dynamic_workflow",
+      "terminal_state": "failed",
+      "quality_score": 0.0,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "planner",
+          "replanner",
+          "trigger",
+          "reducer"
+        ],
+        "signals": [
+          "DynamicWorkflowRuntime",
+          "ReplanTriggerPolicy",
+          "broker reducer",
+          "checkpoint"
+        ],
+        "risk_categories": [
+          "tests",
+          "coverage",
+          "workflow"
+        ],
+        "evidence_requirements": [
+          "test",
+          "coverage",
+          "gap",
+          "recommendation"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s"
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": false,
+      "agent_count": 7,
+      "agents_completed": 0,
+      "agents_failed": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "failed",
+      "response_preview": "real benchmark failure: codex planner timed out after 60s",
+      "error": "codex planner timed out after 60s",
+      "quality_score": 0.1,
+      "passed": false,
+      "keyword_hits": [
+        "planner"
+      ],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "replanner",
+          "trigger",
+          "reducer"
+        ],
+        "signals": [
+          "DynamicWorkflowRuntime",
+          "ReplanTriggerPolicy",
+          "broker reducer",
+          "checkpoint"
+        ],
+        "risk_categories": [
+          "tests",
+          "coverage",
+          "workflow"
+        ],
+        "evidence_requirements": [
+          "test",
+          "coverage",
+          "gap",
+          "recommendation"
+        ]
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": false,
+      "agent_count": 1,
+      "agents_completed": 0,
+      "agents_failed": 1,
+      "replanner_count": 0,
+      "duration_s": 60.02,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/single/benchmark_v310_real_20260607d_single_evidence_redaction/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_single_evidence_redaction",
+      "terminal_state": "failed",
+      "quality_score": 0.05,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "evidence",
+          "sanitize",
+          "secret",
+          "path"
+        ],
+        "signals": [
+          "$REPO_ROOT",
+          "sensitive scan",
+          "raw output",
+          "dashboard"
+        ],
+        "risk_categories": [
+          "evidence",
+          "privacy",
+          "security"
+        ],
+        "evidence_requirements": [
+          "file",
+          "scan",
+          "path",
+          "recommendation"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s"
+    },
+    {
+      "mode": "fixed",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": false,
+      "agent_count": 5,
+      "agents_completed": 0,
+      "agents_failed": 5,
+      "replanner_count": 0,
+      "duration_s": 60.06,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_real_20260607d/fixed/benchmark_v310_real_20260607d_fixed_evidence_redaction/trace.json",
+      "broker_thread_id": "benchmark_v310_real_20260607d_fixed_evidence_redaction",
+      "terminal_state": "failed",
+      "quality_score": 0.0,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "evidence",
+          "sanitize",
+          "secret",
+          "path"
+        ],
+        "signals": [
+          "$REPO_ROOT",
+          "sensitive scan",
+          "raw output",
+          "dashboard"
+        ],
+        "risk_categories": [
+          "evidence",
+          "privacy",
+          "security"
+        ],
+        "evidence_requirements": [
+          "file",
+          "scan",
+          "path",
+          "recommendation"
+        ]
+      },
+      "response_preview": "codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s codex exec timed out after 60s"
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": false,
+      "agent_count": 7,
+      "agents_completed": 0,
+      "agents_failed": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "failed",
+      "response_preview": "real benchmark failure: codex planner timed out after 60s",
+      "error": "codex planner timed out after 60s",
+      "quality_score": 0.05,
+      "passed": false,
+      "keyword_hits": [],
+      "signal_hits": [],
+      "risk_hits": [],
+      "evidence_hits": [],
+      "evidence_completeness": 0.0,
+      "missing": {
+        "keywords": [
+          "evidence",
+          "sanitize",
+          "secret",
+          "path"
+        ],
+        "signals": [
+          "$REPO_ROOT",
+          "sensitive scan",
+          "raw output",
+          "dashboard"
+        ],
+        "risk_categories": [
+          "evidence",
+          "privacy",
+          "security"
+        ],
+        "evidence_requirements": [
+          "file",
+          "scan",
+          "path",
+          "recommendation"
+        ]
+      }
+    }
+  ],
+  "known_limitations": [
+    "Manual real benchmark evidence; not part of default CI.",
+    "Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.",
+    "This run was intentionally bounded with 60 second worker/planner timeouts; timeout and failure rows are preserved.",
+    "This proves Codex CLI process-swarm behavior, not App-native isolated subagents."
+  ],
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
+}

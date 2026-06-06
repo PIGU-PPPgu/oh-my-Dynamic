@@ -13,7 +13,7 @@ One-line trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
 ```
 
-Current v3.0.0 status:
+Current v3.1.0 status:
 
 - Preferred developer imports now use `oh_my_dynamic.*`; root-level files such as `dynamic_workflow.py`, `codex_cli_swarm.py`, and `agent_broker.py` are compatibility shims.
 
@@ -21,7 +21,8 @@ Current v3.0.0 status:
   broker reducer, `examples/real_repo_review.py`, static observability
   dashboards, round-aware compact evidence, and deterministic quality evals.
 - Trust gates: sanitized evidence, `python -m doctor --json`, Bandit CI, MIT
-  license, threat model docs, and deterministic benchmark dry-runs.
+  license, threat model docs, deterministic benchmark dry-runs, real v3.1
+  benchmark compact evidence, and pytest coverage fail-under 80.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
 - Experimental: Codex App bridge, A2A gateway, and TEA protocol.
@@ -42,10 +43,10 @@ When triggered inside Codex App, this skill must work immediately after installa
 - If the user asks for a real repo review demo or evidence run, use `python examples/real_repo_review.py --agents 5 --max-parallel 3`; add `--dry-run` only for CI/demo shape checks that must not launch Codex CLI.
 - If the user asks to inspect progress/evidence after a run, use `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`.
 - If the user asks whether agent output quality is good enough, or asks for an eval, use `python scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md` for deterministic CI-safe shape checks, or pass a redacted responses JSON with `--responses`.
-- If the user asks whether adaptive workflow is better than a baseline, use `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v240.json` for a deterministic benchmark shape check; real Codex CLI benchmark evidence remains manual.
+- If the user asks whether adaptive workflow is better than a baseline, use `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v310_dry.json` for a deterministic benchmark shape check, or add `--real --fixtures security_command_surface,install_five_minute,tests_dynamic_workflow,evidence_redaction,docs_boundary_claims --output docs/evidence/benchmark_v310.json` for release-quality Codex CLI evidence.
 - If the user asks whether installation is healthy, use `python -m doctor --json`.
 - If the user asks for streaming progress or resume, use `python -m dynamic_workflow "goal" --stream-events --checkpoint-dir .orchestry/checkpoints` and resume with `python -m dynamic_workflow --resume RUN_ID`.
-- Treat `src/oh_my_dynamic/runtime/dynamic_workflow.py` as the planner/replanner/reducer orchestration layer and `src/oh_my_dynamic/codex/codex_cli_swarm.py` plus `codex_swarm_*` helpers as the Codex CLI worker execution layer. Root-level modules are deprecated compatibility shims for one major version.
+- Treat `src/oh_my_dynamic/runtime/dynamic_workflow.py` as the planner/replanner/reducer orchestration layer and `src/oh_my_dynamic/codex/codex_cli_swarm.py` plus `codex_swarm_*` helpers as the Codex CLI worker execution layer. Root-level modules are deprecated compatibility shims for one major version; see `docs/V3_MIGRATION_GUIDE.md`.
 - If the user explicitly asks for concurrent code writing, use worktree mode: `workspace_mode="worktree"` and `write_intent="patch"`. Do not auto-merge agent worktrees.
 - If the user has not clearly granted write intent, stay read-only review by default.
 - Use the Codex App bridge contract for real subagents: dispatch plan, per-subagent prompt, structured JSON envelope, and AgentBroker ingestion.

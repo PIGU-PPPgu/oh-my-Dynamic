@@ -1,5 +1,29 @@
 # Changelog
 
+## 3.1.0 - 2026-06-07
+
+- Added v3.1 benchmark hardening for five fixed repo-review fixtures:
+  `security_command_surface`, `install_five_minute`, `tests_dynamic_workflow`,
+  `evidence_redaction`, and `docs_boundary_claims`.
+- Extended `scripts/run_benchmark.py` with `--real`, fixture filtering,
+  compact evidence fields, risk-category coverage, evidence completeness,
+  mode-specific proof, and real Codex CLI single/fixed/adaptive execution paths.
+- Added `--allow-failures` so manual real benchmark smoke runs can commit honest
+  compact evidence with timeout/failure rows instead of dropping the report.
+- Recorded v3.1 compact evidence: a 5-fixture bounded real benchmark smoke and
+  a separate adaptive replanner sample where real replanning created 2 follow-up
+  Codex CLI agents after 3 planner-generated agents.
+- Expanded benchmark fixtures with expected signals, risk categories, minimum
+  scores, evidence requirements, and allowed runtime modes.
+- Added pytest coverage for benchmark scoring, doctor checks, evidence
+  sanitization, workflow observability dashboards, package CLI entrypoints, and
+  the legacy `test_suite.py` bridge.
+- Raised the release coverage gate to pytest coverage fail-under 80.
+- Added `docs/V3_MIGRATION_GUIDE.md` and updated README/skills to prefer
+  package imports while keeping v3 root façade compatibility documented.
+- Hardened evidence sanitization for obvious secret-looking values in compact
+  public artifacts.
+
 ## 3.0.0 - 2026-06-07
 
 - Migrated implementation modules from root-level `py-modules` into the standard `src/oh_my_dynamic/` package layout.

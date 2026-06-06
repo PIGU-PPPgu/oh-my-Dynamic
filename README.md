@@ -15,6 +15,7 @@
 | 5 分钟 dry-run | `python examples/real_repo_review.py --dry-run --run-id five-minute-demo` | 安装、JSON/Markdown evidence 形状、无 API key 路径 |
 | 真实 5-agent repo review | `python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard` | 真实 Codex CLI workers、broker reducer、dashboard |
 | v2.2+ adaptive replanner proof | `python scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs,replanner-proof --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dashboard` | planner 生成 agents，trigger policy 发现缺口，replanner 追加 follow-up agents |
+| v3.1 bounded benchmark | `python scripts/run_benchmark.py --real --allow-failures --mode single,fixed,adaptive --output docs/evidence/benchmark_v310.json` | 对 5 个固定 repo-review fixture 启动真实 Codex CLI workers，并记录 timeout/failure evidence |
 
 Latest release and committed evidence: <https://github.com/PIGU-PPPgu/oh-my-Dynamic/releases/latest>
 
@@ -28,13 +29,21 @@ Codex App skill 触发句仍可用：
 
 | Gate | Command |
 |------|---------|
-| Test + coverage | `python test_suite.py && python -m coverage run test_suite.py && python -m coverage report --fail-under=70` |
+| Test + coverage | `python test_suite.py && python -m pytest tests -q && python -m coverage run -m pytest tests -q && python -m coverage report --fail-under=80` |
 | Security scan | `python -m bandit -r . -c pyproject.toml` |
 | Local install doctor | `python -m doctor --json` |
 | Deterministic benchmark | `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark.json` |
 | Evidence redaction | `! grep -R "/Users/" docs/evidence` |
 
-Committed benchmark baseline: [`docs/evidence/benchmark_v240.md`](docs/evidence/benchmark_v240.md). It is a deterministic dry-run shape check, not a real Codex CLI quality benchmark.
+## Benchmark Evidence
+
+| Evidence | Mode | What it proves | Link |
+|----------|------|----------------|------|
+| v2.4 dry-run baseline | deterministic shape check | scoring/report schema only; no Codex CLI workers | [`docs/evidence/benchmark_v240.md`](docs/evidence/benchmark_v240.md) |
+| v3.1 bounded benchmark | real Codex CLI evidence | 5 fixed fixtures over single / fixed swarm / adaptive workflow; records timeout/failure evidence honestly | [`docs/evidence/benchmark_v310.md`](docs/evidence/benchmark_v310.md) |
+| v3.1 replanner sample | real Codex CLI evidence | adaptive planner generated 3 agents, replanner generated 2 follow-up agents; partial due worker timeouts | [`docs/evidence/benchmark_v310_replanner_sample.md`](docs/evidence/benchmark_v310_replanner_sample.md) |
+
+Dry-run benchmark evidence is a CI-safe shape check. v3.1 real benchmark evidence is manual release evidence and does not change the boundary: App-native isolated subagents still depend on Codex App runtime, while the verified large-scale backend is Codex CLI process swarm. The current v3.1 real evidence also exposes an adoption risk: full-quality Codex CLI workers can exceed short benchmark timeouts, so compact evidence records completed/failed counts rather than hiding failures.
 
 ## ✨ 特性
 
@@ -84,7 +93,7 @@ from agent_broker import AgentBroker
 
 `python -m dynamic_workflow`, `python -m codex_cli_swarm`, and `python -m doctor`
 still work. New code should prefer package imports; root-level modules are
-deprecated compatibility shims.
+deprecated compatibility shims. See [V3 Migration Guide](docs/V3_MIGRATION_GUIDE.md).
 
 ## v3.0 结构边界
 
@@ -124,42 +133,16 @@ src/oh_my_dynamic/codex/codex_cli_swarm.py
 
 ## 文件说明
 
-| 文件 | 作用 |
+| 包路径 | 作用 |
 |------|------|
-| `task.py` | Task 状态机（TaskStatus 枚举 + 合法转换表） |
-| `agents.py` | 三种角色定义（planner/builder/reviewer） |
-| `llm_client.py` | **通用 LLM 客户端**（`call_llm()` 自动识别模型选择 provider，`call_glm()` 保留兼容） |
-| `orchestrator.py` | 串行编排引擎（核心调度器） |
-| `team_engine.py` | 并行团队引擎（多 agent 协作） |
-| `dag.py` | DAG 任务图 + 并行执行器 |
-| `dynamic_replan.py` | 动态重规划（运行中调整策略） |
-| `tea_protocol.py` | TEA 工具进化协议（LLM 驱动的工具改进） |
-| `message_bus.py` | Agent 间消息总线（文件系统队列，线程安全） |
-| `agent_broker.py` | A2A-style 协作 broker：policy、messages、artifacts、handoff、review request/response、audit trace |
-| `broker_gateway.py` | 本地 HTTP/SSE gateway：Agent Card、agents/inbox、task snapshot、events、messages、artifacts、handoffs、review requests/responses |
-| `broker_reducer.py` | Broker-aware reducer：读取 artifacts、失败、依赖图、review responses 和 worktree diff artifacts |
-| `codex_app_bridge.py` | Codex App subagent bridge：dispatch plan、subagent prompt、JSON envelope、broker ingestion |
-| `codex_cli_swarm.py` | Codex CLI swarm façade：保留 public imports 和 runtime coordinator |
-| `codex_swarm_cli.py` | Codex CLI swarm 命令行解析与默认 shard spec 生成；`python -m codex_cli_swarm` 仍兼容 |
-| `codex_swarm_models.py` | Codex CLI swarm dataclasses：agent spec、worker result、trace |
-| `codex_swarm_process.py` | 单个 `codex exec` worker 生命周期：prompt、process、envelope、result event |
-| `codex_swarm_scheduler.py` | Codex CLI swarm 依赖校验、拓扑层和 batch helper |
-| `codex_swarm_artifacts.py` | Codex CLI swarm prompt、manifest、trace、broker/worktree artifact helper |
-| `codex_worker.py` | Codex CLI worker 命令、环境和 timeout helper，隔离执行层细节 |
-| `dynamic_workflow.py` | Planner/replanner dynamic workflow runtime：多轮派生 Codex CLI agents 并最终 reducer |
-| `workflow_config.py` | Dynamic workflow 质量阈值与默认评分配置 |
-| `workflow_observer.py` | 从 broker/trace/checkpoint 生成静态 observability dashboard |
-| `eval_runner.py` | deterministic quality eval：按任务 fixture、关键词、证据项和最低分评估 agent 输出 |
-| `native_runtime.py` | sandboxed fan-out runtime 原型（isolated worker、tool grants、trace、reducer） |
-| `pipeline.py` | 端到端 Pipeline（组合所有组件） |
-| `stop_conditions.py` | 停止条件（迭代上限 / token 预算 / 收敛检测） |
-| `synthesis.py` | 结果汇总 |
-| `token_tracker.py` | Token 预算追踪 |
-| `validator.py` | 验证框架（单元/集成/端到端） |
-| `prompt_kit.py` | Prompt 工程工具包 |
-| `visualize.py` | DAG 可视化（DOT/SVG） |
-| `worktree.py` | Git worktree 管理 |
-| `protocol_adapters.py` | MCP/A2A 风格协议适配层（tool descriptor、Agent Card、Task payload） |
+| `src/oh_my_dynamic/runtime/` | DAG、planner/replanner dynamic workflow、checkpoint/resume、streaming events、stop conditions、pipeline、task/status、token tracking |
+| `src/oh_my_dynamic/codex/` | Codex CLI swarm、worker process lifecycle、scheduler、worktree patch artifacts、Codex App bridge contract |
+| `src/oh_my_dynamic/broker/` | AgentBroker、broker-aware reducer、本地 HTTP/SSE gateway |
+| `src/oh_my_dynamic/evals/` | evidence sanitizer、doctor、workflow observer、deterministic quality eval |
+| `src/oh_my_dynamic/protocol/` | MCP/A2A-style protocol adapters |
+| `src/oh_my_dynamic/core/` | agents、LLM client、message bus、prompt kit、TEA、validator、visualize 等共享基础模块 |
+| `src/oh_my_dynamic/cli/` | console-script entrypoints |
+| 根目录 `dynamic_workflow.py` / `codex_cli_swarm.py` / `agent_broker.py` 等 | v3 兼容 façade；旧 import 和 `python -m ...` 仍可用，但新代码应使用包路径 |
 | `examples/` | 无需 API Key 的端到端 demo |
 | `docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md` | Codex 原生 dynamic workflows 能力提案 |
 
@@ -515,8 +498,9 @@ oh-my-Dynamic 的默认定位是：在 Codex App 里，如果 subagent tools/run
 
 ```bash
 python3 test_suite.py
-python3 -m coverage run test_suite.py
-python3 -m coverage report --fail-under=70
+python3 -m pytest tests -q
+python3 -m coverage run -m pytest tests -q
+python3 -m coverage report --fail-under=80
 python3 scripts/run_quality_eval.py --sample --output /tmp/ohmy-quality-eval.md
 ```
 

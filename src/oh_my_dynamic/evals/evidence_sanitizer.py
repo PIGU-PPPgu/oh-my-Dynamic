@@ -10,6 +10,12 @@ import re
 
 REPO_ROOT_LABEL = "$REPO_ROOT"
 HOME_LABEL = "$HOME"
+SECRET_LABEL = "$REDACTED_VALUE"  # nosec B105
+SECRET_PATTERNS = [
+    r"sk-[A-Za-z0-9_-]{20,}",
+    r"BEGIN [A-Z ]*PRIVATE KEY",
+    r"(?i)(password|secret|token)\\s*[:=]\\s*['\"][^'\"]{8,}",
+]
 
 
 def repo_root(start: str = ".") -> Path:
@@ -33,6 +39,8 @@ def sanitize_text(value: str, root: str = ".") -> str:
     for source, target in replacements:
         if source:
             text = text.replace(source, target)
+    for pattern in SECRET_PATTERNS:
+        text = re.sub(pattern, SECRET_LABEL, text)
     return text
 
 
@@ -76,9 +84,7 @@ def sensitive_hits(path: str) -> list[str]:
     patterns = [
         re.escape(str(Path.home())),
         r"/Users/[^\\s\"'<]+",
-        r"sk-[A-Za-z0-9_-]{20,}",
-        r"BEGIN [A-Z ]*PRIVATE KEY",
-        r"(?i)(password|secret|token)\\s*[:=]\\s*['\"][^'\"]{8,}",
+        *SECRET_PATTERNS,
     ]
     hits: list[str] = []
     file_path = Path(path)

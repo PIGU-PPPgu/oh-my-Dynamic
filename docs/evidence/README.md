@@ -47,13 +47,20 @@ python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
 python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 python scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md
-python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v240.json
+python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v310_dry.json
+python scripts/run_benchmark.py --real --allow-failures --suite benchmarks/repo_review.json --mode single,fixed,adaptive --fixtures security_command_surface,install_five_minute,tests_dynamic_workflow,evidence_redaction,docs_boundary_claims --timeout-s 60 --planner-timeout-s 60 --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' --codex-extra-arg=-c --codex-extra-arg='model_reasoning_effort="low"' --output docs/evidence/benchmark_v310.json
 ```
 
 `--dry-run` evidence is only a deterministic shape check. It can prove that the
 markdown/JSON/dashboard schema renders, but it does not prove real agents,
 planner quality, replanner behavior, Codex CLI login health, or sandbox
 behavior.
+
+The v3.1 bounded benchmark is intentionally failure-preserving: short timeouts
+make it suitable as release smoke evidence, and timeout/failure rows are kept
+instead of hidden. `benchmark_v310_replanner_sample.md` records a separate
+compact adaptive sample where the replanner created 2 real follow-up Codex CLI
+agents after planner-generated evidence.
 
 The v2.1 real adaptive smoke can be reproduced with:
 
