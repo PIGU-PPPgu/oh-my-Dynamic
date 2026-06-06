@@ -32,11 +32,12 @@ transport surface is needed.
 prompts, structured JSON envelopes, and AgentBroker ingestion.
 `codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
 process-level fan-out.
-`dynamic_workflow.py` defines the v1.9 planner/replanner runtime: start with a
+`dynamic_workflow.py` defines the v2.0 planner/replanner runtime: start with a
 planner, fan out Codex CLI workers, let a replanner add follow-up agents, then
 run a broker-aware reducer over artifacts, failures, dependency graph, review
 responses, optional worktree diff artifacts, checkpoint/resume state, and
-streaming workflow events.
+streaming workflow events. `eval_runner.py` adds deterministic quality evals so
+agent outputs can be scored without model credentials.
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
@@ -54,7 +55,8 @@ One-line App trigger:
 Current product status:
 
 - Stable: Codex CLI swarm, dynamic workflow planner/replanner, broker reducer,
-  the real repo review demo, and static observability dashboards.
+  the real repo review demo, static observability dashboards, and deterministic
+  quality evals.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
 - Experimental: Codex App bridge, A2A gateway, and TEA protocol.
@@ -85,6 +87,9 @@ In App fallback/zero-config mode:
 - Use `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`
   when the user asks to inspect broker trace, artifacts, failures, low-score
   events, review responses, dependency traces, or checkpoint evidence.
+- Use `python scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md`
+  for deterministic eval shape checks, or `--responses RESPONSES.json` for
+  redacted agent output scoring.
 - Keep the runtime boundary clear: `dynamic_workflow.py` orchestrates planner,
   replanner, checkpoint/resume, events, and reducer; `codex_cli_swarm.py` and
   the `codex_swarm_*` helper modules execute Codex CLI workers and own worker

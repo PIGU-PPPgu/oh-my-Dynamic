@@ -35,5 +35,8 @@ jobs:
           python -m dynamic_workflow --help >/dev/null
           python scripts/record_swarm_evidence.py --help >/dev/null
           python scripts/render_workflow_observability.py --help >/dev/null
+          python scripts/run_quality_eval.py --help >/dev/null
           python examples/codex_cli_swarm_review.py --help >/dev/null
           python examples/real_repo_review.py --help >/dev/null
+      - name: Quality eval smoke
+        run: python scripts/run_quality_eval.py --sample --output /tmp/quality_eval.md

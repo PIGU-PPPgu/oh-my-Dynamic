@@ -2013,6 +2013,42 @@ def test_workflow_observer_static_dashboard():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("QualityEval: deterministic scoring and report")
+def test_quality_eval_runner():
+    import shutil, tempfile
+    from eval_runner import (
+        evaluate_responses,
+        load_eval_suite,
+        render_eval_report,
+        sample_responses,
+        score_response,
+        summarize_results,
+    )
+
+    d = tempfile.mkdtemp()
+    try:
+        tasks = load_eval_suite("evals/task_suite.json")
+        good_results = evaluate_responses(tasks, sample_responses(tasks))
+        good_summary = summarize_results(good_results)
+        assert good_summary["total"] == 4
+        assert good_summary["passed"] == 4
+        assert good_summary["avg_score"] >= 0.70
+
+        weak = score_response(tasks[0], "Looks okay.")
+        assert not weak.passed
+        assert weak.missing_keywords
+        assert weak.missing_evidence
+
+        output = Path(d) / "quality_eval.md"
+        rendered = render_eval_report(good_results, str(output), "evals/task_suite.json")
+        body = Path(rendered).read_text(encoding="utf-8")
+        assert "oh-my-Dynamic Quality Eval" in body
+        assert "security_review" in body
+        assert '"terminal_state": "passed"' in body
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
 @test("CLI: dynamic workflow, swarm, and evidence help")
 def test_cli_help_entrypoints():
     import contextlib
@@ -2025,6 +2061,7 @@ def test_cli_help_entrypoints():
         [sys.executable, "-m", "codex_swarm_cli", "--help"],
         [sys.executable, "scripts/record_swarm_evidence.py", "--help"],
         [sys.executable, "scripts/render_workflow_observability.py", "--help"],
+        [sys.executable, "scripts/run_quality_eval.py", "--help"],
         [sys.executable, "examples/real_repo_review.py", "--help"],
     ]
     for command in commands:
@@ -2539,6 +2576,7 @@ if __name__ == "__main__":
         test_dynamic_workflow_planner_timeout_records_evidence,
         test_real_repo_review_dry_run_evidence,
         test_workflow_observer_static_dashboard,
+        test_quality_eval_runner,
         test_cli_help_entrypoints,
         test_native_runtime_fanout,
         test_native_runtime_dependency_scheduling,

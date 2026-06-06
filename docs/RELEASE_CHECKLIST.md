@@ -18,6 +18,8 @@ python3 -m codex_cli_swarm --help >/dev/null
 python3 -m codex_swarm_cli --help >/dev/null
 python3 scripts/record_swarm_evidence.py --help >/dev/null
 python3 scripts/render_workflow_observability.py --help >/dev/null
+python3 scripts/run_quality_eval.py --help >/dev/null
+python3 scripts/run_quality_eval.py --sample --output /tmp/ohmy-quality-eval.md
 python3 examples/codex_cli_swarm_review.py --help >/dev/null
 python3 examples/real_repo_review.py --help >/dev/null
 ```
@@ -31,6 +33,7 @@ python3 examples/real_repo_review.py --agents 5 --max-parallel 3
 python3 scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 python3 scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
 python3 scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
+python3 scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md
 ```
 
 ## Version And Tag
@@ -41,7 +44,7 @@ python3 scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 4. Tag the exact commit:
 
 ```bash
-git tag v1.9.0
+git tag v2.0.0
 git push origin main --tags
 ```
 

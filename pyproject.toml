@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oh-my-dynamic"
-version = "1.9.0"
+version = "2.0.0"
 description = "Multi-agent orchestration engine with DAG execution, dynamic replan, TEA protocol, and model-provider routing."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -32,6 +32,7 @@ dev = [
 oh-my-dynamic-gateway = "broker_gateway:main"
 oh-my-dynamic-codex-swarm = "codex_cli_swarm:main"
 oh-my-dynamic-dynamic-workflow = "dynamic_workflow:main"
+oh-my-dynamic-quality-eval = "eval_runner:main"
 
 [tool.setuptools]
 py-modules = [
@@ -52,6 +53,7 @@ py-modules = [
   "dag",
   "dynamic_workflow",
   "dynamic_replan",
+  "eval_runner",
   "llm_client",
   "message_bus",
   "native_runtime",

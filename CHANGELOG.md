@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.0 - 2026-06-06
+
+- Added a productization plan in `docs/V2_PRODUCTIZATION_PLAN.md` that defines evidence, eval, and dashboard acceptance criteria.
+- Added deterministic quality evals via `eval_runner.py`, `evals/task_suite.json`, and `scripts/run_quality_eval.py`.
+- Wired eval help and sample quality scoring into CI and the release checklist without requiring model credentials.
+- Updated README, skills, and evidence docs around the v2.0 product path: dynamic workflow + compact evidence + static dashboard + quality eval.
+- Kept real 20/50/100-agent swarm evidence as manual smoke runs so default CI stays deterministic and safe.
+
 ## 1.9.0 - 2026-06-05
 
 - Split the Codex CLI swarm backend into model, scheduler, artifact, process, CLI, and worker helper modules while preserving `codex_cli_swarm.py` public imports and CLI behavior.

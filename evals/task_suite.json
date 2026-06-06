@@ -1,0 +1,34 @@
+{
+  "suite_id": "dynamic_workflow_productization_v1",
+  "description": "Deterministic quality evals for repo review and dynamic workflow evidence.",
+  "tasks": [
+    {
+      "id": "security_review",
+      "prompt": "Review security risks in this repository.",
+      "expected_keywords": ["secret", "subprocess", "auth", "sandbox"],
+      "required_evidence": ["file", "line"],
+      "min_score": 0.65
+    },
+    {
+      "id": "install_docs_review",
+      "prompt": "Review install experience and README clarity.",
+      "expected_keywords": ["install", "README", "skill", "CLI"],
+      "required_evidence": ["command", "expected"],
+      "min_score": 0.65
+    },
+    {
+      "id": "dynamic_workflow_alignment",
+      "prompt": "Review alignment with dynamic workflow behavior.",
+      "expected_keywords": ["planner", "replanner", "broker", "artifact", "checkpoint"],
+      "required_evidence": ["trace", "agent"],
+      "min_score": 0.70
+    },
+    {
+      "id": "test_gap_review",
+      "prompt": "Review tests, coverage, and evidence gaps.",
+      "expected_keywords": ["coverage", "test", "CI", "eval"],
+      "required_evidence": ["gap", "recommendation"],
+      "min_score": 0.65
+    }
+  ]
+}
