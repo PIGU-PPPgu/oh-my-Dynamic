@@ -69,6 +69,14 @@ def _write_evidence(path: Path, payload: Dict[str, object], samples: List[str]) 
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def _safe_sample_summaries(trace, limit: int = 5) -> List[str]:
+    samples = []
+    for result in trace.results[:limit]:
+        summary = (result.summary or result.error or "").replace("\n", " ").strip()
+        samples.append(f"- {result.agent_id} ({result.status}): {summary[:300]}")
+    return samples
+
+
 def run_dry(args: argparse.Namespace) -> Dict[str, object]:
     run_id = args.run_id or f"dry_repo_review_{int(time.time())}"
     return {
@@ -104,8 +112,10 @@ def run_real(args: argparse.Namespace) -> Dict[str, object]:
             role=role,
             goal=f"{args.goal}\n\nLane focus: {lane_goal}",
             context="Read-only review. Do not edit files. Return concise, evidence-oriented findings.",
+            sandbox="read-only",
             workspace_mode="shared",
             write_intent="none",
+            extra_args=args.codex_extra_arg,
         )
         for lane_id, role, lane_goal in REVIEW_LANES[:args.agents]
     ]
@@ -113,6 +123,11 @@ def run_real(args: argparse.Namespace) -> Dict[str, object]:
     trace = runtime.run(args.goal, specs, run_id=args.run_id or None)
     reduction = reduce_broker_thread(broker, trace.run_id, args.goal)
     summary = trace.summary()
+    run_risk_summary = (
+        "No failed agents in Codex CLI trace."
+        if summary["failed"] == 0
+        else f"{summary['failed']} agent(s) failed in Codex CLI trace."
+    )
     return {
         "run_id": trace.run_id,
         "goal": args.goal,
@@ -127,7 +142,9 @@ def run_real(args: argparse.Namespace) -> Dict[str, object]:
         "checkpoint_path": "",
         "dry_run": False,
         "reducer_state": reduction.terminal_state,
-        "risk_summary": reduction.risk_summary,
+        "risk_summary": run_risk_summary,
+        "reducer_risk_summary": reduction.risk_summary,
+        "_sample_summaries": _safe_sample_summaries(trace),
     }
 
 
@@ -144,6 +161,12 @@ def main() -> None:
     parser.add_argument("--run-id", default="")
     parser.add_argument("--timeout-s", type=int, default=1800)
     parser.add_argument("--total-timeout-s", type=int, default=None)
+    parser.add_argument(
+        "--codex-extra-arg",
+        action="append",
+        default=[],
+        help="Extra argument passed to every codex exec worker. Repeat for multiple args.",
+    )
     parser.add_argument("--dry-run", action="store_true", help="Write sample evidence without launching Codex CLI.")
     parser.add_argument("--dashboard", action="store_true", help="Also render a static observability dashboard HTML file.")
     args = parser.parse_args()
@@ -154,10 +177,13 @@ def main() -> None:
 
     payload = run_dry(args) if args.dry_run else run_real(args)
     evidence_path = Path(args.output_dir) / f"{payload['run_id']}.md"
-    samples = [
-        f"- {lane_id}: {lane_goal}"
-        for lane_id, _role, lane_goal in REVIEW_LANES[:args.agents]
-    ] if args.dry_run else []
+    if args.dry_run:
+        samples = [
+            f"- {lane_id}: {lane_goal}"
+            for lane_id, _role, lane_goal in REVIEW_LANES[:args.agents]
+        ]
+    else:
+        samples = list(payload.pop("_sample_summaries", []))
     _write_evidence(evidence_path, payload, samples)
     if args.dashboard:
         dashboard_path = Path(args.output_dir) / f"{payload['run_id']}-dashboard.html"

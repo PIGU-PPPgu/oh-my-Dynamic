@@ -1,0 +1,23 @@
+{
+  "run_id": "codex_cli_run_98b78a645c",
+  "commit_sha": "2b86dc86b9eb4d9e6691b528182d749bb29f238d",
+  "agents_requested": 100,
+  "agents_completed": 100,
+  "agents_failed": 0,
+  "duration_s": 1049.35,
+  "max_parallel": 20,
+  "sandbox": "read-only",
+  "codex_extra_args": [
+    "-c",
+    "service_tier=\"fast\"",
+    "-c",
+    "model_reasoning_effort=\"low\""
+  ],
+  "trace_manifest_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/evidence_swarm/codex_cli_run_98b78a645c/manifest.json",
+  "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/evidence_swarm/codex_cli_run_98b78a645c/trace.json",
+  "known_limitations": [
+    "Manual smoke evidence; not part of default CI.",
+    "Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.",
+    "Sample summaries are truncated and may omit detailed findings."
+  ]
+}

@@ -8,11 +8,11 @@
       "name": "oh-my-dynamic",
       "source": {
         "source": "local",
-        "path": "../../codex-plugin"
+        "path": "./plugins/oh-my-dynamic"
       },
       "policy": {
         "installation": "AVAILABLE",
-        "authentication": "NONE"
+        "authentication": "ON_USE"
       },
       "category": "Developer Tools"
     }

@@ -72,6 +72,7 @@ from pathlib import Path
 marketplace_path = Path(sys.argv[1])
 template_path = Path(sys.argv[2])
 plugin_dir = str(Path(sys.argv[3]).resolve())
+relative_plugin_path = "./plugins/oh-my-dynamic"
 plugin_name = "oh-my-dynamic"
 
 if not template_path.exists():
@@ -86,11 +87,11 @@ except json.JSONDecodeError as exc:
 template_plugins = template.get("plugins", [])
 template_entry = next(
     (plugin for plugin in template_plugins if plugin.get("name") == plugin_name),
-	    {
-	        "name": plugin_name,
-	        "policy": {"installation": "AVAILABLE", "authentication": "NONE"},
-	        "category": "Developer Tools",
-	    },
+    {
+        "name": plugin_name,
+        "policy": {"installation": "AVAILABLE", "authentication": "ON_USE"},
+        "category": "Developer Tools",
+    },
 )
 
 if marketplace_path.exists():
@@ -124,7 +125,7 @@ if existing_index is not None:
 entry["name"] = plugin_name
 entry["source"] = {
     "source": "local",
-    "path": plugin_dir,
+    "path": relative_plugin_path,
 }
 
 updated = copy.deepcopy(data)

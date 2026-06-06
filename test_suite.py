@@ -1925,6 +1925,25 @@ def test_real_repo_review_dry_run_evidence():
         shutil.rmtree(d, ignore_errors=True)
 
 
+@test("Evidence scripts: Codex extra args and marketplace policy are documented")
+def test_evidence_cli_extra_args_and_marketplace_policy():
+    import subprocess
+
+    root = Path(__file__).resolve().parent
+    for command in [
+        [sys.executable, "examples/real_repo_review.py", "--help"],
+        [sys.executable, "scripts/record_swarm_evidence.py", "--help"],
+    ]:
+        result = subprocess.run(command, cwd=root, capture_output=True, text=True)
+        assert result.returncode == 0, result.stderr
+        assert "--codex-extra-arg" in result.stdout
+
+    marketplace = json.loads((root / ".agents/plugins/marketplace.json").read_text(encoding="utf-8"))
+    plugin = next(item for item in marketplace["plugins"] if item["name"] == "oh-my-dynamic")
+    assert plugin["policy"]["authentication"] == "ON_USE"
+    assert plugin["source"]["path"] == "./plugins/oh-my-dynamic"
+
+
 @test("WorkflowObserver: renders static dashboard evidence")
 def test_workflow_observer_static_dashboard():
     import shutil, tempfile
@@ -2575,6 +2594,7 @@ if __name__ == "__main__":
         test_dynamic_workflow_resume_skips_completed_agents,
         test_dynamic_workflow_planner_timeout_records_evidence,
         test_real_repo_review_dry_run_evidence,
+        test_evidence_cli_extra_args_and_marketplace_policy,
         test_workflow_observer_static_dashboard,
         test_quality_eval_runner,
         test_cli_help_entrypoints,

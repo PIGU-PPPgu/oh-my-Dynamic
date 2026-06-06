@@ -169,7 +169,8 @@ python examples/real_repo_review.py --dry-run --run-id five-minute-demo
 如果你已经登录 Codex CLI，再跑真实 5-agent repo review：
 
 ```bash
-python examples/real_repo_review.py --agents 5 --max-parallel 3
+python examples/real_repo_review.py --agents 5 --max-parallel 3 \
+  --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"'
 ```
 
 #### LLM 执行模式说明
@@ -237,9 +238,12 @@ python -m codex_cli_swarm --agents 8 --max-parallel 4 \
   "并发实现这些小修复，输出每个 agent 的 patch artifact"
 
 # 手动记录 20/50/100 agent compact evidence；raw trace 留在 .orchestry/，不提交
-python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
-python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
-python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
+python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5 \
+  --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"'
+python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10 \
+  --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"'
+python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20 \
+  --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"'
 ```
 
 ### 3. 可选：安装本地 Python engine 依赖

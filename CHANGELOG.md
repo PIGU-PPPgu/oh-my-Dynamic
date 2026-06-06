@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.1 - 2026-06-06
+
+- Recorded real Codex CLI smoke evidence for 5-agent repo review plus 20/50/100-agent read-only swarms, including compact JSON summaries and a static dashboard for the 5-agent run.
+- Added `--codex-extra-arg` support to the real repo review and swarm evidence scripts so local Codex CLI config overrides such as `service_tier="fast"` and `model_reasoning_effort="low"` can be captured reproducibly.
+- Hardened evidence scripts to launch review workers in read-only sandbox mode and to keep raw prompts/stdout/stderr under `.orchestry/`.
+- Fixed real repo review evidence so real runs include actual sample findings and separate Codex CLI trace risk from reducer risk.
+- Updated the plugin marketplace template and installer for Codex CLI 0.128 compatibility with `authentication: "ON_USE"` and a relative local plugin path.
+
 ## 2.0.0 - 2026-06-06
 
 - Added a productization plan in `docs/V2_PRODUCTIZATION_PLAN.md` that defines evidence, eval, and dashboard acceptance criteria.

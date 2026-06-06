@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>oh-my-Dynamic Observability - real_repo_review_v2_clean_20260606</title>
+<style>
+body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:#f7f8fb; color:#172033; }
+header { padding:24px 32px; background:#172033; color:white; }
+main { padding:24px 32px; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px; }
+.card, .panel { background:white; border:1px solid #dfe4ee; border-radius:8px; padding:16px; }
+.label { color:#667085; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+.value { font-size:28px; font-weight:700; margin-top:6px; }
+.grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(320px,1fr); gap:16px; }
+.row { border-top:1px solid #edf0f5; padding:10px 0; }
+.row:first-child { border-top:0; }
+.kind { display:inline-block; min-width:120px; font-weight:700; color:#2f5f9f; }
+.failed { color:#b42318; }
+.low { color:#b54708; }
+pre { overflow:auto; background:#101828; color:#f2f4f7; padding:12px; border-radius:6px; font-size:12px; }
+h2 { font-size:16px; margin:0 0 12px; }
+small { color:#667085; }
+@media (max-width: 900px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+<h1>oh-my-Dynamic Observability</h1>
+<p>Run: <strong>real_repo_review_v2_clean_20260606</strong> · Source: .orchestry</p>
+</header>
+<main>
+<div class="cards"><section class="card"><div class="label">Events</div><div class="value">22</div></section>
+<section class="card"><div class="label">Artifacts</div><div class="value">5</div></section>
+<section class="card"><div class="label">Agents</div><div class="value">6</div></section>
+<section class="card"><div class="label">Failures</div><div class="value">0</div></section>
+<section class="card"><div class="label">Low Scores</div><div class="value">0</div></section>
+<section class="card"><div class="label">Reviews</div><div class="value">0</div></section></div>
+<div class="grid">
+<section class="panel"><h2>Timeline</h2><div class="row"><span class="kind">trace</span>codex_cli_swarm_started<br><small>2026-06-06T06:10:45.520422+00:00 · from orchestrator to None</small><div>Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T06:10:45.523435+00:00 · from security to None</small><div>Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.
+
+Lane focus: Review security risks, unsafe subprocess/file handling, secret leakage, and dependency risks.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T06:10:45.523574+00:00 · from architecture to None</small><div>Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.
+
+Lane focus: Review architecture boundaries, module coupling, and dynamic workflow design gaps.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T06:10:45.523586+00:00 · from install_docs to None</small><div>Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.
+
+Lane focus: Review install experience, README clarity, CLI usability, and docs consistency.</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T06:13:35.354419+00:00 · from architecture to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T06:13:35.354727+00:00 · from architecture to None</small><div>Architecture review found strong separation intent (AgentBroker, Codex CLI swarm, App bridge), but several boundary gaps: read-only/write intent is not enforced by default worker sandbox, dynamic workflow stop/replan is LLM-gated rather tha</div></div>
+<div class="row"><span class="kind">message</span>architecture_review_completed<br><small>2026-06-06T06:13:35.354966+00:00 · from architecture to orchestrator</small><div>Reviewed architecture boundaries, module coupling, and dynamic workflow design gaps. Main actionable issues: enforce read-only sandbox for write_intent=none, make reducer/quality gates first-class in DynamicWorkflowRuntime, restore failed_i</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T06:13:49.003479+00:00 · from security to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T06:13:49.003683+00:00 · from security to None</small><div>Found 4 security-relevant issues: unsanitized run_id path traversal, broad secret-bearing env inheritance to Codex workers, unsanitized native sandbox path segments, and weak dependency/CI supply-chain coverage. Positive: subprocess calls u</div></div>
+<div class="row"><span class="kind">message</span>security_review_completed<br><small>2026-06-06T06:13:49.003860+00:00 · from security to orchestrator</small><div>Completed read-only security lane. Main risks are path traversal via run_id, full environment inheritance into Codex workers, native sandbox path escape via agent id, and missing dependency/security CI checks. See result artifact for eviden</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T06:13:59.095069+00:00 · from install_docs to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T06:13:59.095392+00:00 · from install_docs to None</small><div>Install/docs review found three documentation consistency issues: stale plugin version metadata, conflicting marketplace auth policy, and a demo command that writes into the repo without documenting --output-dir. CLI help and main README co</div></div>
+<div class="row"><span class="kind">message</span>install_docs review complete<br><small>2026-06-06T06:13:59.095564+00:00 · from install_docs to orchestrator</small><div>Found stale plugin version metadata, marketplace auth policy mismatch, and a dry-run docs side-effect gap. CLI help and overall README command structure look coherent.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T06:13:59.096516+00:00 · from tests to None</small><div>Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.
+
+Lane focus: Review test coverage, CI gaps, fake-vs-real evidence, and missing edge cases.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T06:13:59.096618+00:00 · from workflow_alignment to None</small><div>Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.
+
+Lane focus: Compare this repo against Claude-style dynamic workflows and VMAO-style verify/replan loops.</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T06:16:57.028161+00:00 · from workflow_alignment to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T06:16:57.028420+00:00 · from workflow_alignment to None</small><div>Read-only workflow-alignment review completed. The repo has a strong written contract for Claude-style dynamic workflows, Codex App native boundaries, A2A broker events, and VMAO-inspired replan concepts, but the executable dynamic workflow</div></div>
+<div class="row"><span class="kind">message</span>workflow alignment review complete<br><small>2026-06-06T06:16:57.028615+00:00 · from workflow_alignment to orchestrator</small><div>The repository has strong boundary documentation and broker-contract alignment, but the executable dynamic workflow needs least-privilege planner/replanner sandboxing and deterministic VMAO stop/verify gates to match the claims. Docs also r</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T06:17:09.428027+00:00 · from tests to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T06:17:09.428236+00:00 · from tests to None</small><div>Found CI/test and evidence-quality gaps: security tooling is configured but not enforced, real-vs-dry evidence is internally inconsistent, quality eval smoke is self-fulfilling, and dynamic workflow claims are mostly validated through fake </div></div>
+<div class="row"><span class="kind">message</span>test coverage and evidence review complete<br><small>2026-06-06T06:17:09.428424+00:00 · from tests to orchestrator</small><div>Review found high-signal gaps in CI/evidence: Bandit configured but not run, committed real-repo evidence contradicts itself, quality eval smoke only validates generated sample answers, real Codex runtime smoke is manual-only, and coverage </div></div>
+<div class="row"><span class="kind">trace</span>workflow_completed<br><small>2026-06-06T06:17:09.429042+00:00 · from orchestrator to None</small><div>Codex CLI swarm finished with 5 completed and 0 failed agents.</div></div></section>
+<aside class="panel"><h2>Checkpoint</h2><p>No checkpoint found.</p><h2>Traces</h2><div class="row"><strong>.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/manifest.json</strong><br><small></small></div>
+<div class="row"><strong>.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/trace.json</strong><br><small></small></div></aside>
+</div>
+<section class="panel" style="margin-top:16px"><h2>Artifacts</h2><div class="row"><strong>result</strong> <small>analysis · architecture</small><div>Architecture findings:
+
+1. High: read-only/write-intent boundary is metadata, not enforcement. CodexCliAgentSpec defaults to sandbox=&quot;workspace-write&quot; while write_intent=&quot;none&quot; (codex_swarm_models.py:28-32). Shared-mode workers then execute through build_codex_exec_command with that sandbox (codex_s</div></div>
+<div class="row"><strong>result</strong> <small>analysis · security</small><div>Security review result
+
+Scope: read-only review for unsafe subprocess/file handling, secret leakage, dependency risk, and dynamic-workflow security alignment. Tests were not run.
+
+Findings:
+1. HIGH - Dynamic workflow run_id can escape intended storage roots. `checkpoint.py:11-14` builds `checkpoint_</div></div>
+<div class="row"><strong>result</strong> <small>analysis · install_docs</small><div>Lane: install_docs / docs_reviewer
+
+Findings:
+
+1. Stale plugin metadata can mislead install/update checks.
+Evidence: pyproject declares package version 2.0.0 at pyproject.toml:5-7 and CHANGELOG has 2.0.0 dated 2026-06-06 at CHANGELOG.md:3-9, but codex-plugin/.codex-plugin/plugin.json still reports v</div></div>
+<div class="row"><strong>result</strong> <small>analysis · workflow_alignment</small><div>Findings:
+
+1. Security / least-privilege gap: dynamic_workflow planner and replanner workers run `codex exec` with `--sandbox workspace-write` even though they are only expected to produce JSON planning decisions. Evidence: dynamic_workflow.py:373-395 builds planner/replanner commands and sets `--sa</div></div>
+<div class="row"><strong>result</strong> <small>analysis · tests</small><div>Findings:
+
+1. Security/dev dependency is declared but never enforced in CI or release gates. pyproject.toml declares bandit in dev extras and configures [tool.bandit] at pyproject.toml:26-29 and pyproject.toml:78-79, but .github/workflows/tests.yml only runs install asset checks, py_compile, test_su</div></div></section>
+<section class="panel" style="margin-top:16px"><h2>Raw Snapshot</h2><pre id="raw"></pre></section>
+</main>
+<script>
+const DATA = {
+  "run_id": "real_repo_review_v2_clean_20260606",
+  "source": ".orchestry",
+  "events": [
+    {
+      "id": "trace_3f3a4a71ce7c",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "codex_cli_swarm_started",
+      "body": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "agents": 5,
+        "max_parallel": 3,
+        "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic"
+      },
+      "created_at": "2026-06-06T06:10:45.520422+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_2698b0c77bf8",
+      "kind": "trace",
+      "from_agent": "security",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Review security risks, unsafe subprocess/file handling, secret leakage, and dependency risks.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "security_reviewer",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/security",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T06:10:45.523435+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_23ed9638de61",
+      "kind": "trace",
+      "from_agent": "architecture",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Review architecture boundaries, module coupling, and dynamic workflow design gaps.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "architecture_reviewer",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/architecture",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T06:10:45.523574+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_6034036bc630",
+      "kind": "trace",
+      "from_agent": "install_docs",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Review install experience, README clarity, CLI usability, and docs consistency.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "docs_reviewer",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/install_docs",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T06:10:45.523586+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_98964710a417",
+      "kind": "trace",
+      "from_agent": "architecture",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_5df32844bf38"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T06:13:35.354419+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_a9d863dedad5",
+      "kind": "trace",
+      "from_agent": "architecture",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Architecture review found strong separation intent (AgentBroker, Codex CLI swarm, App bridge), but several boundary gaps: read-only/write intent is not enforced by default worker sandbox, dynamic workflow stop/replan is LLM-gated rather than reducer/quality-gate driven, checkpoint resume drops failed-agent state, and legacy MessageBus remains a second collaboration channel outside the AgentBroker contract.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_5df32844bf38"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T06:13:35.354727+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "message_e4742ca79f50",
+      "kind": "message",
+      "from_agent": "architecture",
+      "to_agent": "orchestrator",
+      "subject": "architecture_review_completed",
+      "body": "Reviewed architecture boundaries, module coupling, and dynamic workflow design gaps. Main actionable issues: enforce read-only sandbox for write_intent=none, make reducer/quality gates first-class in DynamicWorkflowRuntime, restore failed_ids on checkpoint resume, and consolidate MessageBus behind AgentBroker or deprecate it for v2 workflows.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_5df32844bf38"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T06:13:35.354966+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_b0d41d9083e3",
+      "kind": "trace",
+      "from_agent": "security",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_a364802a83a6"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T06:13:49.003479+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_1f4b02879775",
+      "kind": "trace",
+      "from_agent": "security",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Found 4 security-relevant issues: unsanitized run_id path traversal, broad secret-bearing env inheritance to Codex workers, unsanitized native sandbox path segments, and weak dependency/CI supply-chain coverage. Positive: subprocess calls use argv arrays, and gateway has loopback/auth safeguards.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_a364802a83a6"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T06:13:49.003683+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "message_a308900bc6f1",
+      "kind": "message",
+      "from_agent": "security",
+      "to_agent": "orchestrator",
+      "subject": "security_review_completed",
+      "body": "Completed read-only security lane. Main risks are path traversal via run_id, full environment inheritance into Codex workers, native sandbox path escape via agent id, and missing dependency/security CI checks. See result artifact for evidence and remediation notes.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_a364802a83a6"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T06:13:49.003860+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_bd01bc9adc34",
+      "kind": "trace",
+      "from_agent": "install_docs",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_741fce9afedc"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T06:13:59.095069+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_7ae97bfc8467",
+      "kind": "trace",
+      "from_agent": "install_docs",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Install/docs review found three documentation consistency issues: stale plugin version metadata, conflicting marketplace auth policy, and a demo command that writes into the repo without documenting --output-dir. CLI help and main README command coverage are otherwise coherent for swarm/dynamic workflow usage.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_741fce9afedc"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T06:13:59.095392+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "message_d35a528ec2f2",
+      "kind": "message",
+      "from_agent": "install_docs",
+      "to_agent": "orchestrator",
+      "subject": "install_docs review complete",
+      "body": "Found stale plugin version metadata, marketplace auth policy mismatch, and a dry-run docs side-effect gap. CLI help and overall README command structure look coherent.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_741fce9afedc"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T06:13:59.095564+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_ccf10d1d8819",
+      "kind": "trace",
+      "from_agent": "tests",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Review test coverage, CI gaps, fake-vs-real evidence, and missing edge cases.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "test_reviewer",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/tests",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T06:13:59.096516+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_72ae836086b1",
+      "kind": "trace",
+      "from_agent": "workflow_alignment",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Compare this repo against Claude-style dynamic workflows and VMAO-style verify/replan loops.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "workflow_reviewer",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/workflow_alignment",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T06:13:59.096618+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_8ef469038996",
+      "kind": "trace",
+      "from_agent": "workflow_alignment",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_e4f73f0079e3"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T06:16:57.028161+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_562911e4be59",
+      "kind": "trace",
+      "from_agent": "workflow_alignment",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Read-only workflow-alignment review completed. The repo has a strong written contract for Claude-style dynamic workflows, Codex App native boundaries, A2A broker events, and VMAO-inspired replan concepts, but the executable dynamic workflow still has gaps around deterministic verify/replan gates, planner sandboxing, and docs/tests consistency.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_e4f73f0079e3"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T06:16:57.028420+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "message_ec107c42ac48",
+      "kind": "message",
+      "from_agent": "workflow_alignment",
+      "to_agent": "orchestrator",
+      "subject": "workflow alignment review complete",
+      "body": "The repository has strong boundary documentation and broker-contract alignment, but the executable dynamic workflow needs least-privilege planner/replanner sandboxing and deterministic VMAO stop/verify gates to match the claims. Docs also reference a missing `.env.example`. See result artifact for evidence and recommendations.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_e4f73f0079e3"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T06:16:57.028615+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_15b11df24286",
+      "kind": "trace",
+      "from_agent": "tests",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_d35ccce02b66"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T06:17:09.428027+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_02d5c61f65a0",
+      "kind": "trace",
+      "from_agent": "tests",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Found CI/test and evidence-quality gaps: security tooling is configured but not enforced, real-vs-dry evidence is internally inconsistent, quality eval smoke is self-fulfilling, and dynamic workflow claims are mostly validated through fake codex workers rather than real runtime smoke in CI.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_d35ccce02b66"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T06:17:09.428236+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "message_f788689e73a3",
+      "kind": "message",
+      "from_agent": "tests",
+      "to_agent": "orchestrator",
+      "subject": "test coverage and evidence review complete",
+      "body": "Review found high-signal gaps in CI/evidence: Bandit configured but not run, committed real-repo evidence contradicts itself, quality eval smoke only validates generated sample answers, real Codex runtime smoke is manual-only, and coverage omits several architecture modules. See result artifact for file/line evidence and recommendations.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_d35ccce02b66"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T06:17:09.428424+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    },
+    {
+      "id": "trace_b0a29b8945c0",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "workflow_completed",
+      "body": "Codex CLI swarm finished with 5 completed and 0 failed agents.",
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "backend": "codex_cli_swarm",
+        "backend_event": "codex_cli_swarm_completed",
+        "completed": 5,
+        "failed": 0
+      },
+      "created_at": "2026-06-06T06:17:09.429042+00:00",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/events.jsonl"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "artifact_5df32844bf38",
+      "producer": "architecture",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Architecture findings:\n\n1. High: read-only/write-intent boundary is metadata, not enforcement. CodexCliAgentSpec defaults to sandbox=\"workspace-write\" while write_intent=\"none\" (codex_swarm_models.py:28-32). Shared-mode workers then execute through build_codex_exec_command with that sandbox (codex_swarm_process.py:68-75; codex_worker.py:18-30). Dynamic planner/replanner JSON workers are also always launched with --sandbox workspace-write (dynamic_workflow.py:383-395). This conflicts with the documented default read-only review posture and means a reviewer lane can mutate the shared repo unless the prompt/runtime prevents it. Recommendation: derive sandbox from write_intent/workspace_mode, use read-only for write_intent=none, and reserve workspace-write for worktree patch mode.\n\n2. High: DynamicWorkflowRuntime's verify/replan loop depends on the replanner's free-form stop_reason, not first-class reducer/quality gate state. After each round it reduces broker evidence, asks the replanner, and stops only when stop_reason == \"ready_for_reducer\" or no new agents are returned (dynamic_workflow.py:284-297). Broker reducer can recommend low_score_reviewer/failure_triage (broker_reducer.py:164-183), but DynamicWorkflowRuntime only passes this as prompt snapshot and does not require explicit accept/reject or auto-schedule. README claims coverage gate support (README.md:16), but the runtime does not enforce a concrete coverage/quality threshold in this path. Recommendation: make reducer recommendations and quality gates typed control inputs, with traceable decisions.\n\n3. Medium: checkpoint resume loses failed-agent state and can change dependency semantics across resumed runs. Checkpoints save failed_agent_ids (dynamic_workflow.py:498-500), but resume initializes failed_ids = set() and only uses checkpoint failed ids to refill pending when pending is empty (dynamic_workflow.py:206-215). _round_spec only warns/removes dependencies based on current failed_ids/completed_ids, so resumed workflows may forget prior failures and schedule dependent work differently. Recommendation: restore failed_ids from checkpoint and add a resume regression for failed dependency handling.\n\n4. Medium: runtime boundaries are documented well, but implementation still has competing collaboration channels. docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md says AgentBroker should be the controlled collaboration contract and direct peer-to-peer messaging is not preferred (lines 150-156). However message_bus.py implements a separate filesystem inbox with broadcast/lead/direct delivery and prompt injection (message_bus.py:57-186), while README still advertises TeamEngine message bus communication (README.md:19-20). Recommendation: either deprecate MessageBus for v2 dynamic workflows or wrap it behind AgentBroker events so audit, policy, artifacts, and reducer evidence stay unified.\n\n5. Medium: protocol/scheduler responsibilities are partially duplicated across legacy and v2 paths. pipeline.py owns a separate VMAO-style DynamicPipeline with StopConditionManager and should_trigger_replan (pipeline.py:21-27, 190-234), while dynamic_workflow.py owns Codex CLI planner/replanner/reducer orchestration (dynamic_workflow.py:167-349), and codex_swarm_scheduler.py owns topological batching for CLI specs. This is workable for prototypes, but the public docs present one product surface. Recommendation: declare pipeline.py legacy/local-engine, move shared dependency/stop/replan policy into one module, and keep DynamicWorkflowRuntime as the v2 orchestration entrypoint.\n\n6. Positive: the main Codex CLI swarm has a clean process boundary and deterministic dependency scheduler. topological_layers validates duplicate ids, unknown deps, self-deps, duplicate deps, and cycles (codex_swarm_scheduler.py:11-57). CodexCliSwarmRuntime registers agents in AgentBroker with role/dependency/workspace metadata before execution (codex_cli_swarm.py:130-154), and run_agent_process parses/ingests structured JSON envelopes into broker artifacts/events (codex_swarm_process.py:88-126).",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "real_repo_review_v2_clean_20260606"
+      },
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "created_at": "2026-06-06T06:13:35.353948+00:00",
+      "blob_path": ".orchestry/agent_broker_real_repo_review/artifact_blobs/artifact_5df32844bf38.txt",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_a364802a83a6",
+      "producer": "security",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Security review result\n\nScope: read-only review for unsafe subprocess/file handling, secret leakage, dependency risk, and dynamic-workflow security alignment. Tests were not run.\n\nFindings:\n1. HIGH - Dynamic workflow run_id can escape intended storage roots. `checkpoint.py:11-14` builds `checkpoint_dir / f\"{run_id}.json\"` without rejecting `../`; `dynamic_workflow.py:715-716` accepts `--run-id`/`--resume`; `dynamic_workflow.py:345-347` writes traces under `workspace_root / run_id`; `dynamic_workflow.py:481-503` saves checkpoints from the same value. Validate run ids with a safe slug policy and assert resolved paths remain below checkpoint/workspace roots.\n2. HIGH - Codex worker subprocesses inherit the full parent environment, including likely provider/API secrets. `codex_worker.py:34-38` copies `os.environ`; `codex_swarm_process.py:75-87` passes that env to every `codex exec`; `dynamic_workflow.py:411-414` uses `env=os.environ.copy()` for planner/replanner workers. Generated workers can expose `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `DEEPSEEK_API_KEY`, `LLM_API_KEY`, etc. via stdout/stderr/artifacts. Use a narrow allowlist for Codex CLI runtime/auth variables and redact persisted process output.\n3. MEDIUM - `SandboxedFanoutRuntime` uses unsanitized `AgentSpec.id` as a filesystem path segment. `native_runtime.py:210-230` passes `sandbox_root / spec.id`; `native_runtime.py:297` creates it. An id like `../escape` can create or use a directory outside the advertised sandbox root. Reuse `validate_agent_id` or an equivalent path-safe validator and enforce resolved-path containment.\n4. LOW - Dependency and CI supply-chain controls are incomplete. `pyproject.toml:13-28` uses broad lower-bound dependencies and declares Bandit only as an optional dev dependency; `.github/workflows/tests.yml:18-41` runs compile/tests/coverage/help/eval but no Bandit, pip-audit, lock/constraints install, or dependency review. Add CI security scanning and locked/constraints-based release checks.\n\nPositive evidence:\n- Worker/git subprocess execution observed here uses argv arrays, not `shell=True`, which lowers command injection risk.\n- Gateway creation rejects non-loopback binding without a token (`broker_gateway.py:433-442` from CodeGraph context), and tests cover gateway auth/body-limit behavior.\n- No hardcoded credential value patterns were evident from the targeted source/docs scan; the main secret risk is runtime environment propagation.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "real_repo_review_v2_clean_20260606"
+      },
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "created_at": "2026-06-06T06:13:49.003223+00:00",
+      "blob_path": ".orchestry/agent_broker_real_repo_review/artifact_blobs/artifact_a364802a83a6.txt",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_741fce9afedc",
+      "producer": "install_docs",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Lane: install_docs / docs_reviewer\n\nFindings:\n\n1. Stale plugin metadata can mislead install/update checks.\nEvidence: pyproject declares package version 2.0.0 at pyproject.toml:5-7 and CHANGELOG has 2.0.0 dated 2026-06-06 at CHANGELOG.md:3-9, but codex-plugin/.codex-plugin/plugin.json still reports version 1.5.0 at lines 1-4. The skill docs also describe current v2.0.0 status. Users or plugin loaders that surface plugin.json will see an older release than the installed package/docs.\nRecommendation: update plugin.json version/description to match 2.0.0 and the current product positioning.\n\n2. Marketplace authentication policy is inconsistent across release notes, template, and installer output.\nEvidence: CHANGELOG.md:59 says the plugin marketplace auth policy was changed to NONE, but .agents/plugins/marketplace.json:13-16 sets authentication to ON_USE. install_plugin.sh copies/merges the template entry and its fallback also uses ON_USE at install_plugin.sh:87-95 and install_plugin.sh:119-129. README repeatedly says App usage needs no provider API key, but this policy mismatch can make install behavior look more gated than documented.\nRecommendation: decide whether marketplace auth should be NONE or ON_USE, then align .agents/plugins/marketplace.json, install_plugin.sh fallback, README, and changelog.\n\n3. The five-minute dry-run docs omit that the command writes evidence into the repository by default.\nEvidence: README.md:158-167 recommends python examples/real_repo_review.py --dry-run --run-id five-minute-demo as a zero-config shape check. The script defaults --output-dir to docs/evidence at examples/real_repo_review.py:158-160 and always writes {run_id}.json/{run_id}.md at examples/real_repo_review.py:42-69 and examples/real_repo_review.py:178-195. In this read-only worker, that exact path failed with PermissionError writing docs/evidence/docs-review-dryrun.json. This is not necessarily a product bug in writable environments, but the docs underspecify the side effect and the existing --output-dir escape hatch.\nRecommendation: document that dry-run writes compact evidence, and show an alternate temporary output path such as --output-dir /tmp/oh-my-dynamic-evidence for users who only want a smoke check.\n\nPositive notes:\n- README gives clear separate paths for Codex App zero-config, Codex CLI swarm, local Python engine, external provider keys, tests, and demos.\n- CLI entry points are declared in pyproject.toml:31-35 and the help output for python -m codex_cli_swarm / python -m dynamic_workflow exposes the documented options, including --agents, --max-parallel, --workspace-mode, --write-intent, --stream-events, and --resume.\n- install_plugin.sh is cautious about non-symlink skill targets and backs up marketplace.json before mutation.\n\nVerification performed:\n- Read README, examples README, smoke docs, install script, pyproject, plugin metadata, changelog, gitignore, and CI config.\n- Ran python -m codex_cli_swarm --help and python -m dynamic_workflow --help successfully.\n- Ran python examples/research_analysis.py successfully.\n- Ran python examples/real_repo_review.py --dry-run --run-id docs-review-dryrun; it failed only because this review sandbox is read-only and the command writes docs/evidence by default.\n- Ran python test_suite.py; many write-dependent tests failed due the read-only sandbox/no usable temp directory, so this was not treated as repository test failure evidence.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "real_repo_review_v2_clean_20260606"
+      },
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "created_at": "2026-06-06T06:13:59.094755+00:00",
+      "blob_path": ".orchestry/agent_broker_real_repo_review/artifact_blobs/artifact_741fce9afedc.txt",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_e4f73f0079e3",
+      "producer": "workflow_alignment",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Findings:\n\n1. Security / least-privilege gap: dynamic_workflow planner and replanner workers run `codex exec` with `--sandbox workspace-write` even though they are only expected to produce JSON planning decisions. Evidence: dynamic_workflow.py:373-395 builds planner/replanner commands and sets `--sandbox workspace-write`; README.md:5-7 and docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md:93-99 emphasize isolated sandboxes and least-privilege tool grants. Risk: a planning pass can modify the repository or generated artifacts before execution lanes are reviewed. Recommendation: run planner/replanner in read-only sandbox by default, only escalating worker specs with explicit write intent/worktree mode.\n\n2. VMAO alignment is partly documented but not fully wired into the main dynamic workflow loop. Evidence: stop_conditions.py implements ReadyForSynthesis, HighConfidence, DiminishingReturns, TokenBudget, and MaxIterations; dynamic_replan.py implements ResultPreservingReplanner with gap analysis and keep/drop/new/modify concepts; but dynamic_workflow.py:229-299 only stops on no pending agents, max_agents, max_rounds, or LLM replanner stop_reason == ready_for_reducer. There is no deterministic completeness/confidence/token-budget stop manager in this main path. Risk: the product can claim VMAO-style verify/replan, but runtime behavior depends mostly on prompt decisions plus hard bounds. Recommendation: feed reducer/eval metrics into StopConditionManager each round, record the stop condition in checkpoint/trace, and make replanner output explicitly include verify metrics.\n\n3. Claude-style dynamic-workflow contract is well represented at the boundary level. Evidence: docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md:20-27 lists native fan-out, isolated contexts, tool permissions, DAG scheduling, broker collaboration, progress/artifact/budget streaming, and reducer synthesis; codex_app_bridge.py:135-215 builds dispatch plans with topological layers and ready batches; codex_app_bridge.py:218-255 requires subagents to return a structured JSON envelope; agent_broker.py:111-131 defines policy limits and content types; agent_broker.py:496-519 validates event kind, sender/receiver, body sizes, and artifact references. This is the strongest alignment area.\n\n4. Main architecture boundary is coherent but still hybrid. Evidence: README.md:38-56 cleanly separates dynamic_workflow.py orchestration from codex_cli_swarm.py execution helpers; codex_cli_swarm.py:51-101 validates goal/agents and computes dependency layers/batches; codex_swarm_process.py:21-174 owns one worker lifecycle, envelope parsing, broker ingestion, and events. This matches the repo's stated product path, but App-native execution is still a contract rather than a real spawn implementation, which is honestly documented in codex_app_bridge.py:1-15 and docs/CODEX_NATIVE_DYNAMIC_WORKFLOWS.md:134-148.\n\n5. Install/docs are mostly aligned, but there is one stale instruction. README.md:262-264 tells users to `cp .env.example .env`, but `rg --files` did not show `.env.example` in the repository. Risk: first-run local provider setup fails at the documented step. Recommendation: add `.env.example` or change docs to direct environment-variable setup only.\n\n6. Test and release coverage is broad for the prototype shape. Evidence: test_suite.py covers DAG scheduling/status, stop conditions, token tracker, prompt kit, TEA sandbox escape blocking, provider routing, protocol adapters, AgentBroker policy, broker gateway lifecycle, native runtime fan-out/dependencies/broker traces, and more; .github/workflows/tests.yml runs syntax checks, `python test_suite.py`, coverage fail-under 70, CLI help checks, and quality eval smoke. Gap: CI intentionally avoids real 20/50/100-agent swarm and true Codex App-native backend, so scale/isolation claims rely on manual evidence and mocked/local process paths.\n\n7. Dynamic workflow dependency handling is reasonable for planned rounds but not a full adaptive DAG scheduler. Evidence: dynamic_workflow.py:238-263 sends all currently pending agents for the round into CodexCliSwarmRuntime, and codex_cli_swarm.py:99-101/164-205 handles topological layers and dependency-failure propagation inside the swarm. Replanning occurs only after a whole swarm round completes at dynamic_workflow.py:284-297. This is acceptable for batch dynamic workflows, but less aligned with Claude-style continuous verify/replan loops that can react after individual node completion.\n\nOverall assessment: The repo is directionally aligned with Claude-style dynamic workflows and VMAO-style result-preserving replanning at the specification and broker-contract levels. The highest-priority fixes are making planner/replanner least-privilege, wiring deterministic VMAO stop/verify metrics into dynamic_workflow.py, and correcting the missing `.env.example` doc/install path.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "real_repo_review_v2_clean_20260606"
+      },
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "created_at": "2026-06-06T06:16:57.027819+00:00",
+      "blob_path": ".orchestry/agent_broker_real_repo_review/artifact_blobs/artifact_e4f73f0079e3.txt",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_d35ccce02b66",
+      "producer": "tests",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Findings:\n\n1. Security/dev dependency is declared but never enforced in CI or release gates. pyproject.toml declares bandit in dev extras and configures [tool.bandit] at pyproject.toml:26-29 and pyproject.toml:78-79, but .github/workflows/tests.yml only runs install asset checks, py_compile, test_suite.py, coverage, CLI help, and sample eval at .github/workflows/tests.yml:18-42. docs/RELEASE_CHECKLIST.md mirrors the same gates at lines 7-25. For a repo that launches subprocesses and manages worktrees, this leaves subprocess/env/path regressions outside automated review. Recommendation: add a non-blocking-then-blocking Bandit gate or targeted security tests around subprocess argv/env and path handling.\n\n2. Committed real-repo evidence is contradictory and can mislead reviewers. docs/evidence/real_repo_review_v2_20260606.md says agents_completed=5, agents_failed=0, dry_run=false at lines 10-18, but risk_summary says 5 agents failed at line 20 and Top Findings says Dry run only at line 26. The evidence writer fallback text in examples/real_repo_review.py emits Dry run only whenever samples are empty at lines 55-57, so a real run with empty summaries can look like a dry run. Recommendation: make evidence generation fail or label as incomplete when real runs produce no sample summaries, and add a regression test for internal consistency between completed/failed/risk_summary/dry_run/top findings.\n\n3. The quality eval CI gate is self-fulfilling. CI runs scripts/run_quality_eval.py --sample at .github/workflows/tests.yml:41-42, and sample_responses injects every expected keyword/evidence token directly into each response at eval_runner.py:96-105. That proves the scorer can pass its own generated answer, not that agent outputs meet quality criteria. Recommendation: add fixture responses with known pass/fail cases and run evals against recent broker artifacts or redacted real outputs, not only --sample.\n\n4. Core Codex CLI swarm coverage is mostly fake process based. test_suite.py creates fake codex executables for fan-out, dependency failure, process failure modes, and worktree patch artifacts at test_suite.py:1080-1149, 1226-1369, and 1374-1440. This is useful deterministic unit coverage, but CI has no gated real codex smoke; real Codex runs are documented as optional/manual in docs/RELEASE_CHECKLIST.md:27-37. Recommendation: keep fake tests, but add a clearly skipped/conditional real smoke job keyed on Codex CLI availability and assert the actual envelope, trace, broker event, and dashboard paths.\n\n5. Coverage threshold can overstate runtime confidence. pyproject.toml omits message_bus.py, orchestrator.py, team_engine.py, validator.py, agents.py, and demo.py from coverage at lines 81-97 while the README presents the validation system as the main proof path at README.md:435-444. Some omitted files are legacy, but several are user-visible architecture pieces. Recommendation: either document these as legacy/out-of-scope or bring the active ones back under coverage with focused tests.\n\nPositive coverage noted:\n- The suite does cover broker auth/body limits, actor binding, artifact compatibility, dependency validation, failure traces, checkpoint resume, planner timeout evidence, static dashboard rendering, and worktree patch artifacts.\n- CI runs on Python 3.9 and 3.12 and includes compile, coverage, CLI help, install asset validation, and deterministic eval smoke.\n\nVerification note:\n- This was a read-only static review. I did not run the test suite because the current worker is sandboxed read-only and the tests/scripts create temp repos, evidence files, pyc/cache output, and generated artifacts.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "real_repo_review_v2_clean_20260606"
+      },
+      "thread_id": "real_repo_review_v2_clean_20260606",
+      "task_id": "",
+      "created_at": "2026-06-06T06:17:09.427780+00:00",
+      "blob_path": ".orchestry/agent_broker_real_repo_review/artifact_blobs/artifact_d35ccce02b66.txt",
+      "_source_path": ".orchestry/agent_broker_real_repo_review/artifacts.jsonl"
+    }
+  ],
+  "traces": [
+    {
+      "run_id": "real_repo_review_v2_clean_20260606",
+      "goal": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.",
+      "started_at": "2026-06-06T14:10:45.519318",
+      "codex_bin": "codex",
+      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+      "workspace_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review",
+      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606",
+      "max_parallel": 3,
+      "timeout_s": 900,
+      "total_timeout_s": 1800,
+      "keep_workdirs": true,
+      "topological_layers": [
+        [
+          "security",
+          "architecture",
+          "install_docs",
+          "tests",
+          "workflow_alignment"
+        ]
+      ],
+      "ready_batches": [
+        [
+          "security",
+          "architecture",
+          "install_docs"
+        ],
+        [
+          "tests",
+          "workflow_alignment"
+        ]
+      ],
+      "agents": [
+        {
+          "id": "security",
+          "role": "security_reviewer",
+          "goal": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Review security risks, unsafe subprocess/file handling, secret leakage, and dependency risks.",
+          "context": "Read-only review. Do not edit files. Return concise, evidence-oriented findings.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "architecture",
+          "role": "architecture_reviewer",
+          "goal": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Review architecture boundaries, module coupling, and dynamic workflow design gaps.",
+          "context": "Read-only review. Do not edit files. Return concise, evidence-oriented findings.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "install_docs",
+          "role": "docs_reviewer",
+          "goal": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Review install experience, README clarity, CLI usability, and docs consistency.",
+          "context": "Read-only review. Do not edit files. Return concise, evidence-oriented findings.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "tests",
+          "role": "test_reviewer",
+          "goal": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Review test coverage, CI gaps, fake-vs-real evidence, and missing edge cases.",
+          "context": "Read-only review. Do not edit files. Return concise, evidence-oriented findings.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "workflow_alignment",
+          "role": "workflow_reviewer",
+          "goal": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.\n\nLane focus: Compare this repo against Claude-style dynamic workflows and VMAO-style verify/replan loops.",
+          "context": "Read-only review. Do not edit files. Return concise, evidence-oriented findings.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        }
+      ],
+      "_source_path": ".orchestry/real_repo_review/real_repo_review_v2_clean_20260606/manifest.json"
+    },
+    {
+      "run_id": "real_repo_review_v2_clean_20260606",
+      "goal": "Review this repository for security, architecture, install/docs, tests, and dynamic workflow alignment.",
+      "max_parallel": 3,
+      "started_at": "2026-06-06T14:10:45.519318",
+      "completed_at": "2026-06-06T14:17:09.429228",
+      "duration_s": 383.9105861186981,
+      "results": [
+        {
+          "agent_id": "security",
+          "role": "security_reviewer",
+          "status": "completed",
+          "summary": "Found 4 security-relevant issues: unsanitized run_id path traversal, broad secret-bearing env inheritance to Codex workers, unsanitized native sandbox path segments, and weak dependency/CI supply-chain coverage. Positive: subprocess calls use argv arrays, and gateway has loopback/auth safeguards.",
+          "started_at": "2026-06-06T14:10:45.523365",
+          "completed_at": "2026-06-06T14:13:49.004244",
+          "duration_s": 183.48088312149048,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/security",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/security/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/security/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/security/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/security/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_a364802a83a6"
+          },
+          "event_ids": [
+            "message_a308900bc6f1"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "architecture",
+          "role": "architecture_reviewer",
+          "status": "completed",
+          "summary": "Architecture review found strong separation intent (AgentBroker, Codex CLI swarm, App bridge), but several boundary gaps: read-only/write intent is not enforced by default worker sandbox, dynamic workflow stop/replan is LLM-gated rather than reducer/quality-gate driven, checkpoint resume drops failed-agent state, and legacy MessageBus remains a second collaboration channel outside the AgentBroker contract.",
+          "started_at": "2026-06-06T14:10:45.523276",
+          "completed_at": "2026-06-06T14:13:35.356754",
+          "duration_s": 169.83347988128662,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/architecture",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/architecture/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/architecture/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/architecture/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/architecture/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_5df32844bf38"
+          },
+          "event_ids": [
+            "message_e4742ca79f50"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "install_docs",
+          "role": "docs_reviewer",
+          "status": "completed",
+          "summary": "Install/docs review found three documentation consistency issues: stale plugin version metadata, conflicting marketplace auth policy, and a demo command that writes into the repo without documenting --output-dir. CLI help and main README command coverage are otherwise coherent for swarm/dynamic workflow usage.",
+          "started_at": "2026-06-06T14:10:45.523484",
+          "completed_at": "2026-06-06T14:13:59.095905",
+          "duration_s": 193.57242226600647,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/install_docs",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/install_docs/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/install_docs/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/install_docs/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/install_docs/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_741fce9afedc"
+          },
+          "event_ids": [
+            "message_d35a528ec2f2"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "tests",
+          "role": "test_reviewer",
+          "status": "completed",
+          "summary": "Found CI/test and evidence-quality gaps: security tooling is configured but not enforced, real-vs-dry evidence is internally inconsistent, quality eval smoke is self-fulfilling, and dynamic workflow claims are mostly validated through fake codex workers rather than real runtime smoke in CI.",
+          "started_at": "2026-06-06T14:13:59.096469",
+          "completed_at": "2026-06-06T14:17:09.428788",
+          "duration_s": 190.3323199748993,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/tests",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/tests/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/tests/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/tests/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/tests/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_d35ccce02b66"
+          },
+          "event_ids": [
+            "message_f788689e73a3"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "workflow_alignment",
+          "role": "workflow_reviewer",
+          "status": "completed",
+          "summary": "Read-only workflow-alignment review completed. The repo has a strong written contract for Claude-style dynamic workflows, Codex App native boundaries, A2A broker events, and VMAO-inspired replan concepts, but the executable dynamic workflow still has gaps around deterministic verify/replan gates, planner sandboxing, and docs/tests consistency.",
+          "started_at": "2026-06-06T14:13:59.096534",
+          "completed_at": "2026-06-06T14:16:57.029118",
+          "duration_s": 177.93258595466614,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/workflow_alignment",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/workflow_alignment/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/workflow_alignment/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/workflow_alignment/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/workflow_alignment/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_e4f73f0079e3"
+          },
+          "event_ids": [
+            "message_ec107c42ac48"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        }
+      ],
+      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606",
+      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+      "topological_layers": [
+        [
+          "security",
+          "architecture",
+          "install_docs",
+          "tests",
+          "workflow_alignment"
+        ]
+      ],
+      "ready_batches": [
+        [
+          "security",
+          "architecture",
+          "install_docs"
+        ],
+        [
+          "tests",
+          "workflow_alignment"
+        ]
+      ],
+      "broker_thread_id": "real_repo_review_v2_clean_20260606",
+      "broker_event_count": 22,
+      "manifest_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/manifest.json",
+      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/trace.json",
+      "_source_path": ".orchestry/real_repo_review/real_repo_review_v2_clean_20260606/trace.json"
+    }
+  ],
+  "checkpoint": {},
+  "summary": {
+    "event_count": 22,
+    "artifact_count": 5,
+    "trace_count": 2,
+    "agent_count": 6,
+    "failed_count": 0,
+    "low_score_count": 0,
+    "review_response_count": 0,
+    "checkpoint": false
+  }
+};
+document.getElementById("raw").textContent = JSON.stringify(DATA, null, 2);
+</script>
+</body>
+</html>

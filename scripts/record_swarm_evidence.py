@@ -46,6 +46,12 @@ def main() -> None:
     parser.add_argument("--timeout-s", type=int, default=1800)
     parser.add_argument("--total-timeout-s", type=int, default=None)
     parser.add_argument("--output-dir", default="docs/evidence")
+    parser.add_argument(
+        "--codex-extra-arg",
+        action="append",
+        default=[],
+        help="Extra argument passed to every codex exec worker. Repeat for multiple args.",
+    )
     args = parser.parse_args()
     if args.agents < 1:
         raise SystemExit("--agents must be at least 1")
@@ -68,6 +74,8 @@ def main() -> None:
             role="evidence_reviewer",
             goal=f"Shard {index + 1}/{args.agents}: {args.goal}",
             context="Return concise evidence only. Do not include secrets, tokens, or full raw logs.",
+            sandbox="read-only",
+            extra_args=args.codex_extra_arg,
         )
         for index in range(args.agents)
     ]
@@ -79,6 +87,7 @@ def main() -> None:
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"swarm_{args.agents}_agents_{trace.run_id}.md"
+    json_path = out_path.with_suffix(".json")
     payload = {
         "run_id": trace.run_id,
         "commit_sha": _commit_sha(),
@@ -87,6 +96,8 @@ def main() -> None:
         "agents_failed": summary["failed"],
         "duration_s": round(duration_s, 2),
         "max_parallel": args.max_parallel,
+        "sandbox": "read-only",
+        "codex_extra_args": args.codex_extra_arg,
         "trace_manifest_path": trace.manifest_path,
         "trace_path": trace.trace_path,
         "known_limitations": [
@@ -95,8 +106,11 @@ def main() -> None:
             "Sample summaries are truncated and may omit detailed findings.",
         ],
     }
+    json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     lines = [
         f"# Codex CLI Swarm Evidence: {args.agents} agents",
+        "",
+        f"Compact JSON: `{json_path.name}`",
         "",
         "```json",
         json.dumps(payload, ensure_ascii=False, indent=2),

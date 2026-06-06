@@ -39,3 +39,12 @@ python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
 python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 python scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md
 ```
+
+For Codex CLI installations that require explicit config overrides, pass the
+same extra args to every worker and let the evidence JSON record them:
+
+```bash
+python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5 \
+  --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' \
+  --codex-extra-arg=-c --codex-extra-arg='model_reasoning_effort="low"'
+```
