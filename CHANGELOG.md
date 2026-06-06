@@ -8,6 +8,7 @@
 - Extended adaptive evidence JSON/Markdown with `replan_triggers`, `missing_coverage`, `low_score_agents`, `followup_agents_requested`, and `followup_agents_generated`.
 - Enhanced static observability dashboards with replan trigger summaries, missing coverage, low-score agents, and follow-up budgets.
 - Added fake coverage-gap and no-gap regression tests for adaptive replanning behavior.
+- Recorded real v2.2 replanner-proof evidence: 8 planner-generated Codex CLI agents completed, trigger policy detected the forced `replanner-proof` coverage gap, and 2 replanner-generated follow-up agents completed with 0 failures.
 
 ## 2.1.1 - 2026-06-06
 

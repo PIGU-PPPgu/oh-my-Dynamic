@@ -1,0 +1,2512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>oh-my-Dynamic Observability - adaptive_v220_replanner_real_20260606b</title>
+<style>
+body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:#f7f8fb; color:#172033; }
+header { padding:24px 32px; background:#172033; color:white; }
+main { padding:24px 32px; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:20px; }
+.card, .panel { background:white; border:1px solid #dfe4ee; border-radius:8px; padding:16px; }
+.label { color:#667085; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+.value { font-size:28px; font-weight:700; margin-top:6px; }
+.grid { display:grid; grid-template-columns:minmax(0,2fr) minmax(320px,1fr); gap:16px; }
+.row { border-top:1px solid #edf0f5; padding:10px 0; }
+.row:first-child { border-top:0; }
+.kind { display:inline-block; min-width:120px; font-weight:700; color:#2f5f9f; }
+.failed { color:#b42318; }
+.low { color:#b54708; }
+pre { overflow:auto; background:#101828; color:#f2f4f7; padding:12px; border-radius:6px; font-size:12px; }
+h2 { font-size:16px; margin:0 0 12px; }
+small { color:#667085; }
+@media (max-width: 900px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header>
+<h1>oh-my-Dynamic Observability</h1>
+<p>Run: <strong>adaptive_v220_replanner_real_20260606b</strong> · Source: .orchestry</p>
+</header>
+<main>
+<div class="cards"><section class="card"><div class="label">Events</div><div class="value">50</div></section>
+<section class="card"><div class="label">Artifacts</div><div class="value">11</div></section>
+<section class="card"><div class="label">Agents</div><div class="value">11</div></section>
+<section class="card"><div class="label">Rounds</div><div class="value">2</div></section>
+<section class="card"><div class="label">Failures</div><div class="value">0</div></section>
+<section class="card"><div class="label">Low Scores</div><div class="value">0</div></section>
+<section class="card"><div class="label">Reviews</div><div class="value">0</div></section></div>
+<div class="grid">
+<section class="panel"><h2>Timeline</h2><div class="row"><span class="kind">trace</span>dynamic_workflow_started<br><small>2026-06-06T14:34:34.767169+00:00 · from orchestrator to None</small><div>Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up ag</div></div>
+<div class="row"><span class="kind">trace</span>dynamic_planner_started<br><small>2026-06-06T14:34:34.767902+00:00 · from orchestrator to None</small><div>Started planner JSON worker.</div></div>
+<div class="row"><span class="kind">trace</span>dynamic_planner_completed<br><small>2026-06-06T14:36:38.846104+00:00 · from orchestrator to None</small><div>Completed planner JSON worker.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_swarm_started<br><small>2026-06-06T14:36:38.852749+00:00 · from orchestrator to None</small><div>Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up ag</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:36:38.861662+00:00 · from security_smoke to None</small><div>Read-only release smoke for security regressions in oh-my-Dynamic v2.2; inspect auth boundaries, command execution surfaces, file access, dependency risk signals, and secret-handling paths; return compact evidence with file/symbol reference</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:36:38.861955+00:00 · from architecture_smoke to None</small><div>Read-only architecture smoke for v2.2; verify main control flow, planner/broker/replanner boundaries, agent lifecycle assumptions, and module coupling risks; return compact evidence with concrete code references.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:36:38.861993+00:00 · from broker_smoke to None</small><div>Read-only broker smoke for v2.2; inspect broker evidence contracts, trigger-policy inputs, round-0 result handling, and failure propagation; return compact evidence needed by later deterministic replanner policy.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:36:38.862049+00:00 · from tests_smoke to None</small><div>Read-only test smoke for v2.2; inspect available tests, release-critical coverage around planner, broker, replan triggers, and read-only constraints; identify missing high-risk tests with compact evidence.</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:39:21.527233+00:00 · from tests_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:39:21.527813+00:00 · from tests_smoke to None</small><div>Read-only smoke found broad test coverage for broker/reducer/swarm/replan, but the v2.2 release path is not exactly covered: current adaptive workflow smoke asserts 5 initial planner agents plus 2 replanners, not the required 8 narrow plann</div></div>
+<div class="row"><span class="kind">message</span>tests smoke coverage gaps<br><small>2026-06-06T14:39:21.528320+00:00 · from tests_smoke to orchestrator</small><div>Existing tests cover much of broker/swarm/replan behavior, but not the exact v2.2 release smoke contract. Closest adaptive test is 5 planner agents + 2 replanners, while release needs exactly 8 initial lanes and exactly 2 forced replanner-p</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:39:41.031331+00:00 · from architecture_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:39:41.031945+00:00 · from architecture_smoke to None</small><div>Architecture smoke found the v2.2 control-flow split is present: DynamicWorkflowRuntime plans, runs CodexCliSwarmRuntime rounds, reduces broker evidence, applies deterministic replan trigger evidence, then replans. Main release risks are co</div></div>
+<div class="row"><span class="kind">message</span>architecture smoke completed<br><small>2026-06-06T14:39:41.032473+00:00 · from architecture_smoke to orchestrator</small><div>Control-flow and broker boundaries are present. Release blockers: exact 8/2 agent counts and read-only worker sandbox are not hard-enforced; forced replanner-proof budget is advisory; resume resets failed_ids.</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:40:01.765848+00:00 · from broker_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:40:01.766405+00:00 · from broker_smoke to None</small><div>Broker path supports structured worker envelopes, broker-backed reduction, deterministic replan triggers, and failure/dependency propagation. Key v2.2 smoke risks: planner/replanner worker failure artifacts can include stderr excerpts, and </div></div>
+<div class="row"><span class="kind">message</span>broker smoke complete<br><small>2026-06-06T14:40:01.766922+00:00 · from broker_smoke to orchestrator</small><div>Broker evidence ingestion, reducer inputs, deterministic trigger policy, round-0 handling, and failure propagation are present. Use forced missing coverage with min_followup_agents=2 and max_followup_agents=2 for the replanner-proof lane; s</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:40:26.907350+00:00 · from security_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:40:26.907846+00:00 · from security_smoke to None</small><div>Read-only security smoke found no obvious shell-injection path because subprocesses use argv lists and agent ids are validated, but identified three release-relevant risks: full environment inheritance into Codex workers, planner/worker std</div></div>
+<div class="row"><span class="kind">message</span>security smoke complete<br><small>2026-06-06T14:40:26.908301+00:00 · from security_smoke to orchestrator</small><div>Security lane completed read-only. Main risks are env inheritance into Codex workers, raw stderr/error evidence persistence, planner/worker extra_args policy, and dependency lower-bound drift. Gateway and broker local auth/path controls loo</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:40:26.910129+00:00 · from docs_install_smoke to None</small><div>Read-only docs-adjacent install review for v2.2; inspect install/setup docs, plugin/skill wiring notes, required commands, prerequisites, and mismatch risks between docs and code; return compact evidence.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:40:26.910177+00:00 · from release_readiness_smoke to None</small><div>Read-only release readiness smoke for oh-my-Dynamic v2.2; inspect versioning, changelog/release notes, packaging assumptions, CI/release scripts, and obvious blockers; return compact release-gate evidence.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:40:26.910194+00:00 · from evidence_quality_smoke to None</small><div>Read-only evidence quality smoke for v2.2; inspect whether agent outputs, broker summaries, and release proofs are specific, attributable, compact, non-secret, and sufficient for deterministic replanning.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:40:26.910219+00:00 · from observability_smoke to None</small><div>Read-only observability smoke for v2.2; inspect logging, metrics, trace IDs, status events, redaction, and release-debuggability around planner/broker/replanner paths; return compact evidence and risks.</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:43:02.328517+00:00 · from evidence_quality_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:43:02.329007+00:00 · from evidence_quality_smoke to None</small><div>Evidence quality is mostly structured and attributable, with durable broker artifacts and deterministic trigger metadata, but release-smoke sufficiency has three gaps: no built-in secret/raw-log redaction, dependency artifact previews can p</div></div>
+<div class="row"><span class="kind">message</span>evidence quality smoke complete<br><small>2026-06-06T14:43:02.329480+00:00 · from evidence_quality_smoke to orchestrator</small><div>Structured broker/reducer/replan evidence is present and attributable, but release proof should close redaction enforcement and exact 8+2 cardinality checks before treating v2.2 smoke as sufficient.</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:43:19.783723+00:00 · from release_readiness_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:43:19.784251+00:00 · from release_readiness_smoke to None</small><div>v2.2 release metadata is mostly aligned: pyproject, changelog, plugin metadata, README, CI, and checklist all reference 2.2.0-era gates. Main release blockers/risks: repository is ahead of origin by 1 commit with no local v2.2 tag observed,</div></div>
+<div class="row"><span class="kind">message</span>release_readiness_smoke completed<br><small>2026-06-06T14:43:19.784706+00:00 · from release_readiness_smoke to orchestrator</small><div>v2.2 release metadata is coherent, but release gate remains conditional on pushing/handling the ahead commit, creating the v2.2 tag, running required gates, and producing or waiving real v2.2 replanner-proof evidence.</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:43:23.606088+00:00 · from observability_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:43:23.606629+00:00 · from observability_smoke to None</small><div>Observability path is usable for v2.2 smoke: workflow events, broker traces/artifacts, checkpoint state, deterministic replan-trigger records, static dashboard rendering, and evidence summary scripts exist and are tested. Main release risks</div></div>
+<div class="row"><span class="kind">message</span>observability smoke complete<br><small>2026-06-06T14:43:23.607514+00:00 · from observability_smoke to orchestrator</small><div>Observability is present and test-covered across events, broker trace, checkpoint, replan trigger records, evidence summaries, and dashboard rendering. Key risks are lack of automatic redaction/sanitization and no runtime invariant enforcin</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:43:46.948344+00:00 · from docs_install_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:43:46.948950+00:00 · from docs_install_smoke to None</small><div>Docs-adjacent install review completed read-only. Main install/setup path is coherent for v2.2.0: README, skill files, plugin metadata, pyproject entry points, install_plugin.sh, and release checklist mostly agree. Two notable mismatch risk</div></div>
+<div class="row"><span class="kind">message</span>docs-adjacent install smoke complete<br><small>2026-06-06T14:43:46.949530+00:00 · from docs_install_smoke to orchestrator</small><div>Read-only docs/install review completed. Install path and v2.2.0 wiring are broadly coherent; reducer should carry two risks: App-native subagent capability is documented but not install-verifiable, and release checklist validates the in-re</div></div>
+<div class="row"><span class="kind">trace</span>replan_trigger_policy<br><small>2026-06-06T14:43:46.956089+00:00 · from orchestrator to None</small><div>Deterministic replan trigger policy requested follow-up agents.</div></div>
+<div class="row"><span class="kind">trace</span>dynamic_replanner_started<br><small>2026-06-06T14:43:46.956921+00:00 · from orchestrator to None</small><div>Started replanner JSON worker.</div></div>
+<div class="row"><span class="kind">trace</span>dynamic_replanner_completed<br><small>2026-06-06T14:45:47.787578+00:00 · from orchestrator to None</small><div>Completed replanner JSON worker.</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_swarm_started<br><small>2026-06-06T14:45:47.791876+00:00 · from orchestrator to None</small><div>Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up ag</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:45:47.795487+00:00 · from replanner_proof_policy_smoke to None</small><div>Read-only v2.2 replanner-proof smoke. Verify the deterministic replan trigger path for missing coverage lane &#x27;replanner-proof&#x27;: where triggers are detected, how followup_agent_budget=2 is passed, and whether runtime/broker/replanner contrac</div></div>
+<div class="row"><span class="kind">trace</span>codex_cli_agent_started<br><small>2026-06-06T14:45:47.795516+00:00 · from replanner_proof_evidence_smoke to None</small><div>Read-only v2.2 replanner-proof evidence smoke. Inspect docs/evidence, release checklist, tests, and broker/reducer artifacts expectations for committed or generated proof that round 0 has exactly 8 planner agents and replanner adds exactly </div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:48:48.594185+00:00 · from replanner_proof_policy_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:48:48.594746+00:00 · from replanner_proof_policy_smoke to None</small><div>Deterministic missing-coverage trigger path exists and passes followup_agent_budget=2 for a single forced &#x27;replanner-proof&#x27; lane, but runtime/replanner contracts only request/respect the budget; they do not enforce exactly 2 follow-up agent</div></div>
+<div class="row"><span class="kind">message</span>replanner-proof policy smoke complete<br><small>2026-06-06T14:48:48.595283+00:00 · from replanner_proof_policy_smoke to orchestrator</small><div>Verified forced missing coverage lane path. followup_agent_budget=2 is deterministic for a single forced &#x27;replanner-proof&#x27; lane, and it is passed into the replanner snapshot. Runtime/broker/schema currently request but do not enforce exactl</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:48:49.608796+00:00 · from replanner_proof_evidence_smoke to None</small><div>Artifact published: result</div></div>
+<div class="row"><span class="kind">trace</span>codex_subagent_completed<br><small>2026-06-06T14:48:49.609324+00:00 · from replanner_proof_evidence_smoke to None</small><div>Read-only smoke found partial generated proof for v2.2: run adaptive_v220_replanner_real_20260606b has round_0 manifest with exactly 8 planner agents and round_1 manifest with exactly 2 replanner-proof agents, but there is no committed docs</div></div>
+<div class="row"><span class="kind">message</span>v2.2 replanner-proof evidence smoke<br><small>2026-06-06T14:48:49.609915+00:00 · from replanner_proof_evidence_smoke to orchestrator</small><div>Generated manifests prove the intended 8 planner + 2 replanner-proof shape for adaptive_v220_replanner_real_20260606b, but release evidence is not complete until a final compact docs/evidence artifact or updated checkpoint/reducer output re</div></div>
+<div class="row"><span class="kind">trace</span>artifact_published<br><small>2026-06-06T14:48:49.615821+00:00 · from orchestrator to None</small><div>Artifact published: final_answer</div></div>
+<div class="row"><span class="kind">trace</span>workflow_completed<br><small>2026-06-06T14:48:49.616360+00:00 · from orchestrator to None</small><div># Broker Reduction
+
+Goal: Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. </div></div></section>
+<aside class="panel"><h2>Round Timeline</h2><div class="row"><span class="kind">round 0</span>planner · 8/8 completed · 0 failed<br><small>428.1020658016205s · /Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json</small><div>security_smoke, architecture_smoke, tests_smoke, broker_smoke, observability_smoke, evidence_quality_smoke, release_readiness_smoke, docs_install_smoke</div></div>
+<div class="row"><span class="kind">round 1</span>replanner · 2/2 completed · 0 failed<br><small>181.82233786582947s · /Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json</small><div>replanner_proof_policy_smoke, replanner_proof_evidence_smoke</div></div><h2>Replan Triggers</h2><div class="row"><span class="kind">after round 0</span>missing_coverage: replanner-proof<br><small>missing=replanner-proof · low_score=none · follow-up budget=2</small></div></aside>
+</div>
+<div class="grid" style="margin-top:16px">
+<aside class="panel"><h2>Checkpoint</h2><p><strong>.orchestry/checkpoints/adaptive_v220_replanner_real_20260606b.json</strong><br><small>stop=max_rounds · completed=10 · failed=0</small></p><h2>Traces</h2><div class="row"><strong>.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/dynamic_trace.json</strong><br><small>max_rounds</small></div>
+<div class="row"><strong>.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/manifest.json</strong><br><small></small></div>
+<div class="row"><strong>.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json</strong><br><small></small></div>
+<div class="row"><strong>.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/manifest.json</strong><br><small></small></div>
+<div class="row"><strong>.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json</strong><br><small></small></div>
+<div class="row"><strong>.orchestry/checkpoints/adaptive_v220_replanner_real_20260606b.json</strong><br><small>max_rounds</small></div></aside>
+</div>
+<section class="panel" style="margin-top:16px"><h2>Artifacts</h2><div class="row"><strong>result</strong> <small>analysis · tests_smoke</small><div>Scope: read-only inspection plus test smoke for release-critical coverage around planner, broker, deterministic replan triggers, and read-only constraints.
+
+Evidence inspected:
+- CodeGraph index healthy: 43 files, 921 nodes, 2355 edges.
+- Test entrypoint: test_suite.py; CI runs python test_suite.py </div></div>
+<div class="row"><strong>result</strong> <small>analysis · architecture_smoke</small><div>Architecture smoke evidence:
+- Main control flow is DynamicWorkflowRuntime.run: registers orchestrator and workflow trace, obtains planner decision, persists checkpoint, executes pending agents through CodexCliSwarmRuntime, reduces broker evidence, evaluates ReplanTriggerPolicy, asks replanner, appe</div></div>
+<div class="row"><strong>result</strong> <small>analysis · broker_smoke</small><div>Read-only broker smoke evidence for v2.2.
+
+Broker evidence contract:
+- codex_swarm_artifacts.py:57-85 builds the worker prompt requiring exactly one JSON object with agent_id/status/summary/artifacts/messages/handoffs/reviews/metadata/error.
+- codex_app_bridge.py:264-283 validates envelope agent_id </div></div>
+<div class="row"><strong>result</strong> <small>analysis · security_smoke</small><div>Security smoke evidence for v2.2:
+
+Findings:
+1. Medium: Codex CLI workers inherit the full parent environment. codex_worker.py:34-38 copies os.environ and overlays inherited_env; codex_swarm_process.py:75-87 passes that env to subprocess.Popen. If a worker prompt or CLI failure path exposes environm</div></div>
+<div class="row"><strong>result</strong> <small>analysis · evidence_quality_smoke</small><div>Scope: read-only evidence-quality smoke; inspected broker/evidence/replan contracts and docs, did not run tests or write files.
+
+Positive evidence shape:
+- Worker prompt requires exactly one JSON envelope with summary, artifacts, messages, metadata, and error fields (codex_swarm_artifacts.py:63-85).</div></div>
+<div class="row"><strong>result</strong> <small>analysis · release_readiness_smoke</small><div>Release readiness smoke evidence (read-only):
+- Version alignment: pyproject.toml declares project version 2.2.0 and console scripts for gateway, codex swarm, dynamic workflow, and quality eval at pyproject.toml:5-35.
+- Packaging surface: setuptools py-modules include new v2.2 modules replan_trigger</div></div>
+<div class="row"><strong>result</strong> <small>analysis · observability_smoke</small><div>Scope: read-only inspection of planner/broker/replanner observability surfaces. No raw logs or secrets quoted.
+
+Evidence:
+- dynamic_workflow.py emits WorkflowEvent lifecycle events for dynamic_workflow_started, round_started, round_done, reducer_done, with run_id/status/preview/metadata; it also bro</div></div>
+<div class="row"><strong>result</strong> <small>analysis · docs_install_smoke</small><div>Scope: read-only docs-adjacent install/setup review. Inspected README.md, docs/RELEASE_CHECKLIST.md, docs/CODEX_CLI_SWARM_SMOKE.md, pyproject.toml, install_plugin.sh, codex-plugin skill files, plugin metadata, and CLI arg definitions.
+
+Positive evidence:
+- Version alignment: pyproject.toml declares </div></div>
+<div class="row"><strong>result</strong> <small>analysis · replanner_proof_policy_smoke</small><div>Read-only evidence for v2.2 replanner-proof lane:
+
+1. Trigger detection: replan_trigger_policy.py:30-48 defines ReplanTriggerPolicy with default min_followup_agents=2 and max_followup_agents=5. evaluate() computes covered planner text from completed planned agents, appends force_missing_coverage lan</div></div>
+<div class="row"><strong>result</strong> <small>analysis · replanner_proof_evidence_smoke</small><div>Assertions:
+- PASS generated round 0 cardinality: .orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/manifest.json has 8 agents: security_smoke, architecture_smoke, tests_smoke, broker_smoke, observability_smoke, evidence_quality_smoke,</div></div>
+<div class="row"><strong>final_answer</strong> <small>final_answer · orchestrator</small><div># Broker Reduction
+
+Goal: Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After r</div></div></section>
+<section class="panel" style="margin-top:16px"><h2>Raw Snapshot</h2><pre id="raw"></pre></section>
+</main>
+<script>
+const DATA = {
+  "run_id": "adaptive_v220_replanner_real_20260606b",
+  "source": ".orchestry",
+  "events": [
+    {
+      "id": "trace_01d6ab7d065b",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "dynamic_workflow_started",
+      "body": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "max_rounds": 2,
+        "max_agents": 12,
+        "max_parallel": 4
+      },
+      "created_at": "2026-06-06T14:34:34.767169+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_8a9ede78dd0e",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "dynamic_planner_started",
+      "body": "Started planner JSON worker.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "worker_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526",
+        "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/prompt.md",
+        "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/last_message.txt",
+        "timeout_s": 300,
+        "sandbox": "read-only"
+      },
+      "created_at": "2026-06-06T14:34:34.767902+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_9afdc78641eb",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "dynamic_planner_completed",
+      "body": "Completed planner JSON worker.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "worker_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526",
+        "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/last_message.txt"
+      },
+      "created_at": "2026-06-06T14:36:38.846104+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_7d0193c2bf53",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "codex_cli_swarm_started",
+      "body": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "agents": 8,
+        "max_parallel": 4,
+        "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic"
+      },
+      "created_at": "2026-06-06T14:36:38.852749+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_c391f42cb661",
+      "kind": "trace",
+      "from_agent": "security_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only release smoke for security regressions in oh-my-Dynamic v2.2; inspect auth boundaries, command execution surfaces, file access, dependency risk signals, and secret-handling paths; return compact evidence with file/symbol references only, no secrets or raw logs.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "security",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:36:38.861662+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_dacded977d02",
+      "kind": "trace",
+      "from_agent": "architecture_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only architecture smoke for v2.2; verify main control flow, planner/broker/replanner boundaries, agent lifecycle assumptions, and module coupling risks; return compact evidence with concrete code references.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "architecture",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:36:38.861955+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_c8af2390da92",
+      "kind": "trace",
+      "from_agent": "broker_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only broker smoke for v2.2; inspect broker evidence contracts, trigger-policy inputs, round-0 result handling, and failure propagation; return compact evidence needed by later deterministic replanner policy.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "broker",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:36:38.861993+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_d9b14de99f27",
+      "kind": "trace",
+      "from_agent": "tests_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only test smoke for v2.2; inspect available tests, release-critical coverage around planner, broker, replan triggers, and read-only constraints; identify missing high-risk tests with compact evidence.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "tests",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:36:38.862049+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_6fa100666d07",
+      "kind": "trace",
+      "from_agent": "tests_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_4f051c4df668"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:39:21.527233+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_0767e909645e",
+      "kind": "trace",
+      "from_agent": "tests_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Read-only smoke found broad test coverage for broker/reducer/swarm/replan, but the v2.2 release path is not exactly covered: current adaptive workflow smoke asserts 5 initial planner agents plus 2 replanners, not the required 8 narrow planner agents plus exactly 2 forced replanner-proof follow-ups. Full suite could not pass in this read-only sandbox because temp/repo writes are blocked, yielding 27 pass / 33 fail; failures are environment-permission dominated, not enough to certify release.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_4f051c4df668"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:39:21.527813+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_b72a07477fd6",
+      "kind": "message",
+      "from_agent": "tests_smoke",
+      "to_agent": "orchestrator",
+      "subject": "tests smoke coverage gaps",
+      "body": "Existing tests cover much of broker/swarm/replan behavior, but not the exact v2.2 release smoke contract. Closest adaptive test is 5 planner agents + 2 replanners, while release needs exactly 8 initial lanes and exactly 2 forced replanner-proof follow-ups. Read-only smoke command ran but failed under worker sandbox write restrictions: 27 pass / 33 fail, mostly temp/cwd permission errors.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_4f051c4df668"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:39:21.528320+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_92d51278c86a",
+      "kind": "trace",
+      "from_agent": "architecture_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_14ed8f99dfa7"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:39:41.031331+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_b374075081ef",
+      "kind": "trace",
+      "from_agent": "architecture_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Architecture smoke found the v2.2 control-flow split is present: DynamicWorkflowRuntime plans, runs CodexCliSwarmRuntime rounds, reduces broker evidence, applies deterministic replan trigger evidence, then replans. Main release risks are contract enforcement gaps: exact 8 initial agents and exact 2 forced follow-ups are prompt/goal-driven, not hard runtime invariants; worker read-only can be overridden by planner-supplied sandbox/extra_args; resume drops failed_ids before rebuilding pending state.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_14ed8f99dfa7"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:39:41.031945+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_36734fc1404b",
+      "kind": "message",
+      "from_agent": "architecture_smoke",
+      "to_agent": "orchestrator",
+      "subject": "architecture smoke completed",
+      "body": "Control-flow and broker boundaries are present. Release blockers: exact 8/2 agent counts and read-only worker sandbox are not hard-enforced; forced replanner-proof budget is advisory; resume resets failed_ids.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_14ed8f99dfa7"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:39:41.032473+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_fcda06845f55",
+      "kind": "trace",
+      "from_agent": "broker_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_a5340a2a5e0f"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:40:01.765848+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_ca1e36dff132",
+      "kind": "trace",
+      "from_agent": "broker_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Broker path supports structured worker envelopes, broker-backed reduction, deterministic replan triggers, and failure/dependency propagation. Key v2.2 smoke risks: planner/replanner worker failure artifacts can include stderr excerpts, and the trigger policy enforces a 2..5 budget but does not itself verify replanner returned exactly the requested count.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_a5340a2a5e0f"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:40:01.766405+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_4f9df8697763",
+      "kind": "message",
+      "from_agent": "broker_smoke",
+      "to_agent": "orchestrator",
+      "subject": "broker smoke complete",
+      "body": "Broker evidence ingestion, reducer inputs, deterministic trigger policy, round-0 handling, and failure propagation are present. Use forced missing coverage with min_followup_agents=2 and max_followup_agents=2 for the replanner-proof lane; separately assert the replanner actually returns exactly 2 follow-up agents. Watch stderr-bearing failure artifacts before release evidence publication.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_a5340a2a5e0f"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:40:01.766922+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_701dc6583857",
+      "kind": "trace",
+      "from_agent": "security_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_24554fa6a54e"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:40:26.907350+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_26617fae2b7c",
+      "kind": "trace",
+      "from_agent": "security_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Read-only security smoke found no obvious shell-injection path because subprocesses use argv lists and agent ids are validated, but identified three release-relevant risks: full environment inheritance into Codex workers, planner/worker stderr persistence into broker/artifacts, and non-pinned runtime dependencies. Gateway auth and broker path controls look intentionally bounded for loopback/local use.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_24554fa6a54e"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:40:26.907846+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_23e47aaae5da",
+      "kind": "message",
+      "from_agent": "security_smoke",
+      "to_agent": "orchestrator",
+      "subject": "security smoke complete",
+      "body": "Security lane completed read-only. Main risks are env inheritance into Codex workers, raw stderr/error evidence persistence, planner/worker extra_args policy, and dependency lower-bound drift. Gateway and broker local auth/path controls look bounded.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_24554fa6a54e"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:40:26.908301+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_007be952921a",
+      "kind": "trace",
+      "from_agent": "docs_install_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only docs-adjacent install review for v2.2; inspect install/setup docs, plugin/skill wiring notes, required commands, prerequisites, and mismatch risks between docs and code; return compact evidence.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "docs_adjacent_install_review",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:40:26.910129+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_ba50c7946734",
+      "kind": "trace",
+      "from_agent": "release_readiness_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only release readiness smoke for oh-my-Dynamic v2.2; inspect versioning, changelog/release notes, packaging assumptions, CI/release scripts, and obvious blockers; return compact release-gate evidence.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "release_readiness",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:40:26.910177+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_8d18e1084f74",
+      "kind": "trace",
+      "from_agent": "evidence_quality_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only evidence quality smoke for v2.2; inspect whether agent outputs, broker summaries, and release proofs are specific, attributable, compact, non-secret, and sufficient for deterministic replanning.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "evidence_quality",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:40:26.910194+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_88b9268c854f",
+      "kind": "trace",
+      "from_agent": "observability_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only observability smoke for v2.2; inspect logging, metrics, trace IDs, status events, redaction, and release-debuggability around planner/broker/replanner paths; return compact evidence and risks.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "observability",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:40:26.910219+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_9208c603c624",
+      "kind": "trace",
+      "from_agent": "evidence_quality_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_eeca706c94a8"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:43:02.328517+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_525dc835ef8e",
+      "kind": "trace",
+      "from_agent": "evidence_quality_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Evidence quality is mostly structured and attributable, with durable broker artifacts and deterministic trigger metadata, but release-smoke sufficiency has three gaps: no built-in secret/raw-log redaction, dependency artifact previews can propagate 1200 raw chars per artifact, and v2.2 docs allow 2-5 follow-ups while this run requires exactly 2.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_eeca706c94a8"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:43:02.329007+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_09dd25c250c2",
+      "kind": "message",
+      "from_agent": "evidence_quality_smoke",
+      "to_agent": "orchestrator",
+      "subject": "evidence quality smoke complete",
+      "body": "Structured broker/reducer/replan evidence is present and attributable, but release proof should close redaction enforcement and exact 8+2 cardinality checks before treating v2.2 smoke as sufficient.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_eeca706c94a8"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:43:02.329480+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_f853b8e945b5",
+      "kind": "trace",
+      "from_agent": "release_readiness_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_5c994635bf38"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:43:19.783723+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_fdc84afc10d6",
+      "kind": "trace",
+      "from_agent": "release_readiness_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "v2.2 release metadata is mostly aligned: pyproject, changelog, plugin metadata, README, CI, and checklist all reference 2.2.0-era gates. Main release blockers/risks: repository is ahead of origin by 1 commit with no local v2.2 tag observed, required gates were not executed in this read-only worker, and v2.2 replanner-proof evidence is documented but not yet present as a committed v220 evidence artifact in docs/evidence.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_5c994635bf38"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:43:19.784251+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_991c0694a2ff",
+      "kind": "message",
+      "from_agent": "release_readiness_smoke",
+      "to_agent": "orchestrator",
+      "subject": "release_readiness_smoke completed",
+      "body": "v2.2 release metadata is coherent, but release gate remains conditional on pushing/handling the ahead commit, creating the v2.2 tag, running required gates, and producing or waiving real v2.2 replanner-proof evidence.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_5c994635bf38"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:43:19.784706+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_94c1954b60fe",
+      "kind": "trace",
+      "from_agent": "observability_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_29c0d12d9ca5"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:43:23.606088+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_3f55e4c370a1",
+      "kind": "trace",
+      "from_agent": "observability_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Observability path is usable for v2.2 smoke: workflow events, broker traces/artifacts, checkpoint state, deterministic replan-trigger records, static dashboard rendering, and evidence summary scripts exist and are tested. Main release risks are redaction gaps: planner/replanner and worker paths retain raw prompts/stdout/stderr under .orchestry, broker/dashboard surfaces render body/artifact snippets without secret scanning, and exact 2 follow-up replanner generation is requested by policy but not enforced by runtime.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_29c0d12d9ca5"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:43:23.606629+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_4134d42fbcfa",
+      "kind": "message",
+      "from_agent": "observability_smoke",
+      "to_agent": "orchestrator",
+      "subject": "observability smoke complete",
+      "body": "Observability is present and test-covered across events, broker trace, checkpoint, replan trigger records, evidence summaries, and dashboard rendering. Key risks are lack of automatic redaction/sanitization and no runtime invariant enforcing exactly 2 replanner follow-ups.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_29c0d12d9ca5"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:43:23.607514+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_d8af342fe2ee",
+      "kind": "trace",
+      "from_agent": "docs_install_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_c2577811a46a"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:43:46.948344+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_39e4793a741c",
+      "kind": "trace",
+      "from_agent": "docs_install_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Docs-adjacent install review completed read-only. Main install/setup path is coherent for v2.2.0: README, skill files, plugin metadata, pyproject entry points, install_plugin.sh, and release checklist mostly agree. Two notable mismatch risks: README/skills advertise App-native subagents as preferred when runtime exposes tools, but install docs cannot validate that capability after install; Release Checklist validates .agents/plugins/marketplace.json in-repo while actual install check uses ~/.agents/plugins/marketplace.json, so the required gate may pass without proving installed marketplace merge.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_c2577811a46a"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:43:46.948950+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_e167b63c39d1",
+      "kind": "message",
+      "from_agent": "docs_install_smoke",
+      "to_agent": "orchestrator",
+      "subject": "docs-adjacent install smoke complete",
+      "body": "Read-only docs/install review completed. Install path and v2.2.0 wiring are broadly coherent; reducer should carry two risks: App-native subagent capability is documented but not install-verifiable, and release checklist validates the in-repo marketplace template before the user-level installed marketplace. Result artifact contains compact file/line evidence.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_c2577811a46a"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:43:46.949530+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_8d4ec7478ab1",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "replan_trigger_policy",
+      "body": "Deterministic replan trigger policy requested follow-up agents.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "round_index": 0,
+        "replan_triggers": [
+          {
+            "kind": "missing_coverage",
+            "lanes": [
+              "replanner-proof"
+            ],
+            "reason": "Required coverage lanes were not represented by completed planner agents."
+          }
+        ],
+        "missing_coverage": [
+          "replanner-proof"
+        ],
+        "low_score_agents": [],
+        "failed_agents": [],
+        "open_questions": [
+          "No review responses were recorded; consider adding a reviewer agent for high-risk changes."
+        ],
+        "followup_agent_budget": 2
+      },
+      "created_at": "2026-06-06T14:43:46.956089+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_b6bbe61c28b3",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "dynamic_replanner_started",
+      "body": "Started replanner JSON worker.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "worker_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed",
+        "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/prompt.md",
+        "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/last_message.txt",
+        "timeout_s": 300,
+        "sandbox": "read-only"
+      },
+      "created_at": "2026-06-06T14:43:46.956921+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_f5b1a3658d34",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "dynamic_replanner_completed",
+      "body": "Completed replanner JSON worker.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "worker_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed",
+        "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/last_message.txt"
+      },
+      "created_at": "2026-06-06T14:45:47.787578+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_a2dcb6159d10",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "codex_cli_swarm_started",
+      "body": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "agents": 2,
+        "max_parallel": 4,
+        "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic"
+      },
+      "created_at": "2026-06-06T14:45:47.791876+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_4de4f3140532",
+      "kind": "trace",
+      "from_agent": "replanner_proof_policy_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only v2.2 replanner-proof smoke. Verify the deterministic replan trigger path for missing coverage lane 'replanner-proof': where triggers are detected, how followup_agent_budget=2 is passed, and whether runtime/broker/replanner contracts enforce or only request exactly 2 focused follow-up agents. Return compact evidence with file/function references only. Do not read secrets or raw logs; do not modify files.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "replanner-proof",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:45:47.795487+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_1fd647d5ba4b",
+      "kind": "trace",
+      "from_agent": "replanner_proof_evidence_smoke",
+      "to_agent": null,
+      "subject": "codex_cli_agent_started",
+      "body": "Read-only v2.2 replanner-proof evidence smoke. Inspect docs/evidence, release checklist, tests, and broker/reducer artifacts expectations for committed or generated proof that round 0 has exactly 8 planner agents and replanner adds exactly 2 forced replanner-proof follow-ups. Identify the smallest release-blocking evidence gap, if any. Return compact evidence with paths and assertions only. Do not read secrets or raw logs; do not modify files.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "role": "replanner-proof",
+        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke",
+        "workspace_mode": "shared",
+        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "worktree_branch": ""
+      },
+      "created_at": "2026-06-06T14:45:47.795516+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_08aa0a95c057",
+      "kind": "trace",
+      "from_agent": "replanner_proof_policy_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_b2807d4a9212"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:48:48.594185+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_eaa1fe89a4e3",
+      "kind": "trace",
+      "from_agent": "replanner_proof_policy_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Deterministic missing-coverage trigger path exists and passes followup_agent_budget=2 for a single forced 'replanner-proof' lane, but runtime/replanner contracts only request/respect the budget; they do not enforce exactly 2 follow-up agents. Planner prompt requests initial-round-only agents, but exact 8 planner agents is goal/prompt-driven, not schema-enforced.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_b2807d4a9212"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:48:48.594746+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_e43cbe1c8fc0",
+      "kind": "message",
+      "from_agent": "replanner_proof_policy_smoke",
+      "to_agent": "orchestrator",
+      "subject": "replanner-proof policy smoke complete",
+      "body": "Verified forced missing coverage lane path. followup_agent_budget=2 is deterministic for a single forced 'replanner-proof' lane, and it is passed into the replanner snapshot. Runtime/broker/schema currently request but do not enforce exactly 2 follow-up agents.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_b2807d4a9212"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:48:48.595283+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_569aa3e617ac",
+      "kind": "trace",
+      "from_agent": "replanner_proof_evidence_smoke",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: result",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_e3db6bcbb5a6"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "analysis",
+        "content_type": "text/plain"
+      },
+      "created_at": "2026-06-06T14:48:49.608796+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_843a73a61daa",
+      "kind": "trace",
+      "from_agent": "replanner_proof_evidence_smoke",
+      "to_agent": null,
+      "subject": "codex_subagent_completed",
+      "body": "Read-only smoke found partial generated proof for v2.2: run adaptive_v220_replanner_real_20260606b has round_0 manifest with exactly 8 planner agents and round_1 manifest with exactly 2 replanner-proof agents, but there is no committed docs/evidence/adaptive_v220* compact evidence file and the checkpoint observed only records round 0, so the smallest release-blocking evidence gap is the missing final compact evidence artifact/checkpoint proving the combined 8+2 run.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_e3db6bcbb5a6"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "status": "completed",
+        "backend": "codex_cli_swarm"
+      },
+      "created_at": "2026-06-06T14:48:49.609324+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "message_fdef7feead4c",
+      "kind": "message",
+      "from_agent": "replanner_proof_evidence_smoke",
+      "to_agent": "orchestrator",
+      "subject": "v2.2 replanner-proof evidence smoke",
+      "body": "Generated manifests prove the intended 8 planner + 2 replanner-proof shape for adaptive_v220_replanner_real_20260606b, but release evidence is not complete until a final compact docs/evidence artifact or updated checkpoint/reducer output records both rounds and final state.",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_e3db6bcbb5a6"
+      ],
+      "status": "pending",
+      "parent_id": "",
+      "metadata": {},
+      "created_at": "2026-06-06T14:48:49.609915+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_c93eb692ef58",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "artifact_published",
+      "body": "Artifact published: final_answer",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_41972ebb4bd6"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "kind": "final_answer",
+        "content_type": "text/markdown"
+      },
+      "created_at": "2026-06-06T14:48:49.615821+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    },
+    {
+      "id": "trace_4156ca9f0c31",
+      "kind": "trace",
+      "from_agent": "orchestrator",
+      "to_agent": null,
+      "subject": "workflow_completed",
+      "body": "# Broker Reduction\n\nGoal: Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.\nState: completed\nCompleted agents: 10\nFailed agents: 0\nArtifacts: 10\nReview responses: 0\nWorktree diff artifacts: 0\nLow-score events: 0\n\n## Agent Findings\n- tests_smoke: Read-only smoke found broad test coverage for broker/reducer/swarm/replan, but the v2.2 release path is not exactly covered: current adaptive workflow smoke asserts 5 initial planner agents plus 2 replanners, not the required 8 narrow planner agents plus exactly 2 forced replanner-proof follow-up",
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "artifact_ids": [
+        "artifact_41972ebb4bd6"
+      ],
+      "status": "recorded",
+      "parent_id": "",
+      "metadata": {
+        "backend": "dynamic_workflow",
+        "terminal_state": "completed",
+        "stop_reason": "max_rounds"
+      },
+      "created_at": "2026-06-06T14:48:49.616360+00:00",
+      "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "artifact_4f051c4df668",
+      "producer": "tests_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Scope: read-only inspection plus test smoke for release-critical coverage around planner, broker, deterministic replan triggers, and read-only constraints.\n\nEvidence inspected:\n- CodeGraph index healthy: 43 files, 921 nodes, 2355 edges.\n- Test entrypoint: test_suite.py; CI runs python test_suite.py and coverage in .github/workflows/tests.yml.\n- Relevant tests exist for AgentBroker collaboration/safety, broker gateway auth/limits, broker reducer evidence, Codex app bridge ingestion, Codex CLI swarm fan-out/dependency/failure/worktree modes, planner JSON validation, ReplanTriggerPolicy missing coverage, dynamic workflow replanning, dry-run evidence, observer dashboard, quality eval, CLI help, and native runtime broker traces.\n\nSmoke run:\n- Command: python test_suite.py\n- Result in current read-only sandbox: 27 PASS / 33 FAIL / exit 33.\n- Dominant failure cause: no writable temp directory or repo write permission, e.g. tempfile errors against /tmp, /var/tmp, and cwd; native runtime attempts .orchestry/native_runtime writes; visualization attempts /tmp/test_dashboard.html.\n- This is expected for the worker constraint but means this run cannot certify functional release readiness.\n\nHigh-risk coverage gap:\n- Required release scenario says exactly 8 narrow initial planner agents: security, architecture, tests, broker, observability, evidence quality, release readiness, docs-adjacent install review.\n- Existing closest test is test_dynamic_workflow_adaptive_fake_planner_replanner at test_suite.py:1657. It asserts only 5 initial agents: security_review, tests_review, architecture_review, broker_review, observability_review.\n- It then asserts 2 replanner agents and read-only CLI sandbox arg, but it does not cover evidence_quality, release_readiness, or docs-adjacent install review as first-round planner lanes.\n- Existing ReplanTriggerPolicy unit at test_suite.py:1547 covers required_coverage=[security, tests, docs] and missing docs -> budget 2. It does not prove a forced replanner-proof lane via force_missing_coverage or the exact v2.2 trigger set.\n\nRead-only constraint coverage:\n- Closest assertion is inside the fake codex for adaptive workflow: it exits unless --sandbox read-only is passed.\n- This verifies Codex CLI arg propagation for that path, but not that all release smoke agents avoid secrets/raw logs or avoid workspace mutations beyond isolated temp/worktree artifacts.\n\nRecommended missing tests before v2.2 certification:\n1. Add/update an exact v2.2 adaptive workflow smoke asserting round 0 agent_ids length 8 and exact ordered lanes: security, architecture, tests, broker, observability, evidence_quality, release_readiness, docs_install_review.\n2. Add a forced replanner-proof coverage test using ReplanTriggerPolicy(force_missing_coverage=[...]) or equivalent release policy, asserting should_replan true and followup_agent_budget exactly 2 even when normal required coverage appears satisfied.\n3. Assert no follow-up agents are created in planner round 0, and exactly 2 are created only in round 1 from the deterministic policy snapshot.\n4. Add evidence-sanitization/read-only smoke checks for compact artifacts: no raw logs/secrets, artifact content_type/kind constrained, and fake codex invoked with --sandbox read-only for all release-smoke agents.\n5. Separate CI-friendly tests from sandbox-hostile tests or provide an explicit writable temp/output root, because current test_suite.py cannot be validated under read-only constraints.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:39:21.526144+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_4f051c4df668.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_14ed8f99dfa7",
+      "producer": "architecture_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Architecture smoke evidence:\n- Main control flow is DynamicWorkflowRuntime.run: registers orchestrator and workflow trace, obtains planner decision, persists checkpoint, executes pending agents through CodexCliSwarmRuntime, reduces broker evidence, evaluates ReplanTriggerPolicy, asks replanner, appends new agents, then publishes final reducer artifact. refs: dynamic_workflow.py:183-245, dynamic_workflow.py:247-328, dynamic_workflow.py:338-352.\n- Planner/replanner boundary exists but exact v2.2 counts are not enforced by parse/runtime. Planner prompt says initial planner only, but parse_planner_decision accepts any agents[] and runtime truncates only by max_agents. Replanner prompt says respect followup_agent_budget, but parse_replan_decision accepts any new agents and runtime schedules all new unique ids until max_agents. refs: dynamic_workflow.py:588-612, dynamic_workflow.py:714-731, dynamic_workflow.py:734-737.\n- Deterministic replan trigger policy supports missing coverage, forced missing coverage, low score, and failures, with budget min=2/max=5. For the forced replanner-proof lane, a single missing lane requests budget 2, but this is advisory evidence to the replanner, not an enforced exactly-2 scheduler limit. refs: replan_trigger_policy.py:30-47, replan_trigger_policy.py:61-76, replan_trigger_policy.py:90-104, dynamic_workflow.py:302-314.\n- Broker boundary is coherent: CodexCliSwarmRuntime registers orchestrator and all worker agents, records swarm start, worker metadata, terminal traces, and writes manifest/trace. Worker process parses JSON envelope, validates agent_id match, ingests artifacts/messages into AgentBroker, and emits done/failed lifecycle events. refs: codex_cli_swarm.py:130-154, codex_cli_swarm.py:164-216, codex_swarm_process.py:68-141.\n- Agent lifecycle assumptions: dependency graph is topologically layered, dependency failures create failed results before children run, batches are parallelized with ThreadPoolExecutor, and results are sorted back to plan order. refs: codex_cli_swarm.py:99-101, codex_cli_swarm.py:164-190, codex_cli_swarm.py:190-216, codex_cli_swarm.py:323-346.\n- Read-only assumption is mostly defaulted but not enforced. DynamicAgentPlan defaults sandbox=read-only and runtime defaults planner_sandbox/sandbox=read-only, but _round_spec keeps agent.sandbox when present, so a planner/replanner can override worker sandbox. extra_args from agents also override runtime codex_extra_args when present. refs: dynamic_workflow.py:34-59, dynamic_workflow.py:152-181, dynamic_workflow.py:570-585.\n- Planner/replanner JSON workers run with planner_sandbox but inherit os.environ wholesale and write prompt/stdout/stderr paths under workspace. This is acceptable for local smoke mechanics but increases coupling between orchestration and evidence retention; do not treat raw .orchestry traces as release artifacts. refs: dynamic_workflow.py:472-534.\n- Resume risk: when loading checkpoint, completed_ids are restored but failed_ids is reset to an empty set; only if no pending agents exist does it rebuild pending from persisted failed_agent_ids. This can change dependency/lifecycle behavior after resume and should be considered a release blocker if checkpoint/resume is part of v2.2 acceptance. refs: dynamic_workflow.py:222-235, dynamic_workflow.py:557-568.\n- Module coupling risk: dynamic_workflow.py directly owns planning, replanning, checkpoint, broker reduction, event streaming, and CLI worker invocation. The runtime boundary is understandable for smoke, but exact release-contract checks are spread across prompts, ReplanTriggerPolicy, evidence script args, and reducer output rather than centralized invariants.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:39:41.030926+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_14ed8f99dfa7.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_a5340a2a5e0f",
+      "producer": "broker_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Read-only broker smoke evidence for v2.2.\n\nBroker evidence contract:\n- codex_swarm_artifacts.py:57-85 builds the worker prompt requiring exactly one JSON object with agent_id/status/summary/artifacts/messages/handoffs/reviews/metadata/error.\n- codex_app_bridge.py:264-283 validates envelope agent_id presence and status in completed|failed, then materializes typed artifacts/messages/handoffs/reviews.\n- codex_app_bridge.py:286-378 ingests each envelope into AgentBroker: registers the agent, publishes named artifacts with thread_id, traces codex_subagent_completed or codex_subagent_failed with metadata, resolves artifact_names into broker event artifact_ids, and returns artifact/event ids.\n\nRound-0 result handling:\n- codex_cli_swarm.py:88-162 writes manifest/trace inputs, registers orchestrator and each worker with goal/dependencies/workspace metadata, and emits codex_cli_swarm_started.\n- codex_cli_swarm.py:164-216 executes topological layers and batches; dependency failures are converted to failed results before runnable batch launch.\n- codex_cli_swarm.py:217-260 emits terminal broker trace only when terminal_trace is true, then writes CodexCliSwarmTrace including ordered results, broker_thread_id, broker_event_count, manifest_path, trace_path.\n- dynamic_workflow.py:247-304 runs round 0 through CodexCliSwarmRuntime, updates completed_ids/failed_ids from swarm_trace.results, appends DynamicWorkflowRound, saves checkpoint, then reduces broker evidence and evaluates deterministic trigger policy.\n\nFailure propagation:\n- codex_swarm_process.py:117-134 maps nonzero codex returncode to _failed_process_result; 175-190 catches parse/runtime exceptions and maps them to failed results.\n- codex_swarm_artifacts.py:153-226 builds a failed envelope, ingests it into broker as codex_subagent_failed, publishes an error artifact/message, returns CodexCliAgentResult(status=failed), and emits WorkflowEvent(kind=agent_failed).\n- codex_cli_swarm.py:323-346 converts failed dependencies into synthetic failed process results with returncode -1.\n- broker_reducer.py:75-104 derives completed/failed evidence from codex_subagent_completed/codex_subagent_failed traces and sets terminal_state to partial or failed when failures exist.\n\nTrigger-policy inputs and replanner handoff:\n- broker_reducer.py:31-68 reduces broker thread events/artifacts into BrokerReductionResult with terminal_state, open_questions, recommended_next_agents, artifact_ids.\n- replan_trigger_policy.py:49-104 evaluates reduction plus planned agents, completed ids, failed ids, and low_score_agents; triggers missing_coverage, low_score_agents, and failed_agents; followup_agent_budget is min(max_followup_agents, max(min_followup_agents, missing+low+failed)). Defaults are 2..5.\n- dynamic_workflow.py:405-421 feeds ReplanTriggerPolicy with asdict(planned), completed_ids, failed_ids, and _low_score_agents(run_id).\n- dynamic_workflow.py:393-403 passes reducer.to_dict(), sorted planned_agent_ids, and replan_trigger_policy.to_dict() into replanner snapshot.\n\nForced replanner-proof lane evidence:\n- replan_trigger_policy.py:33-47 accepts force_missing_coverage and min/max follow-up settings; 66-68 adds forced lanes to missing coverage even if not absent from completed text.\n- scripts/record_adaptive_workflow_evidence.py rg evidence shows a controlled dry-run path with force missing coverage and exactly two replanner agents, but this worker did not execute it due read-only/no-follow-up constraint.\n\nCompact risks for orchestrator/reducer:\n- Planner/replanner failure artifacts in dynamic_workflow.py:489-495 include stderr_text[:4000] for timeouts; this is useful diagnostics but conflicts with the release-smoke constraint to avoid raw logs/secrets unless redacted upstream.\n- ReplanTriggerPolicy computes a budget but parse_replan_decision only validates shape/duplicates/deps; exact count enforcement appears external to this broker lane. For the forced replanner-proof coverage lane, orchestrator should assert exactly 2 follow-up agents after round 0.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:40:01.765452+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_a5340a2a5e0f.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_24554fa6a54e",
+      "producer": "security_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Security smoke evidence for v2.2:\n\nFindings:\n1. Medium: Codex CLI workers inherit the full parent environment. codex_worker.py:34-38 copies os.environ and overlays inherited_env; codex_swarm_process.py:75-87 passes that env to subprocess.Popen. If a worker prompt or CLI failure path exposes environment-derived data, provider tokens or local secrets can be available to spawned workers. Consider an allowlist env for Codex-required variables and proxy settings.\n2. Medium: Planner/replanner failures can persist raw stderr snippets into broker artifacts. dynamic_workflow.py:483-495 writes timeout stdout/stderr and publishes stderr[:4000] as a broker error artifact; dynamic_workflow.py:506-515 writes completed stdout/stderr and publishes failure text. This is useful evidence but needs redaction before release evidence collection.\n3. Low/Medium: CLI command surfaces are argv-based, not shell-based, but planner-controlled extra_args pass through to codex exec. dynamic_workflow.py:38-45 defines sandbox default read-only and extra_args; dynamic_workflow.py:444-457 appends codex_extra_args to the planner command; codex_worker.py:18-31 appends extra_args to worker command. No shell injection found, but release smoke should constrain user/planner-sourced extra_args to approved flags.\n4. Low: Dependencies are broad lower bounds. pyproject.toml:13-29 uses openai>=1.0.0 and optional SDK lower bounds; dev includes bandit but security scanning is not evident as a runtime gate in this smoke. This increases supply-chain drift risk for release reproducibility.\n\nPositive controls observed:\n- Broker agent ids are constrained before path usage: agent_broker.py:25-46 validates ids; agent_broker.py:547-553 resolves inbox paths and checks they remain under inbox root.\n- Broker policy limits event/artifact size and content types: agent_broker.py:119-130, 210-226, 506-519.\n- Gateway defaults to loopback and rejects non-loopback unauthenticated binding: broker_gateway.py:433-444; auth token and per-agent token checks are implemented at broker_gateway.py:369-404.\n- Worker subprocess execution uses list argv, not shell=True: codex_swarm_process.py:83-90, dynamic_workflow.py:474-481, worktree.py:120-126.\n- Worktree agent names are slug-validated before branch/worktree creation: worktree.py:34-35 and worktree.py:168-175.\n- install_plugin.sh avoids overwriting non-symlink skill/plugin targets and parses marketplace JSON via Python: install_plugin.sh:20-36, 52-64, 97-122.\n\nVerification: static read-only review only; did not run tests or mutate files.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:40:26.907006+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_24554fa6a54e.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_eeca706c94a8",
+      "producer": "evidence_quality_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Scope: read-only evidence-quality smoke; inspected broker/evidence/replan contracts and docs, did not run tests or write files.\n\nPositive evidence shape:\n- Worker prompt requires exactly one JSON envelope with summary, artifacts, messages, metadata, and error fields (codex_swarm_artifacts.py:63-85).\n- Broker enforces registered producers, allowed content types, body/artifact size caps, durable artifact refs, and unknown-artifact validation (agent_broker.py:111-131, 210-254, 516-519).\n- Broker reducer uses only broker events/artifacts and exposes terminal_state, risk_summary, open_questions, recommended_next_agents, and artifact_ids (broker_reducer.py:31-67).\n- ReplanTriggerPolicy deterministically records missing_coverage, low_score_agents, failed_agents, reasons, and bounded followup request count (replan_trigger_policy.py:31-100).\n- Evidence writer records rounds, planner/replanner counts, required/forced coverage, trigger records, reducer artifact ids, stop/terminal state, and known limitations (scripts/record_adaptive_workflow_evidence.py:44-86).\n\nGaps for v2.2 release smoke:\n1. Secret/raw-log protection is advisory, not enforced. Broker stores full artifact content and exports full text parts in snapshots (agent_broker.py:239-244, 477-489); docs tell humans to scan dashboard HTML for secrets/raw prompts/stdout/stderr (docs/evidence/README.md:96-99). This is not sufficient as an automated release proof.\n2. Dependency evidence compaction can still leak too much raw content: dependency_artifact_context includes up to five artifacts and truncates each content field to 1200 chars without redaction or source-line normalization (codex_swarm_artifacts.py:255-276).\n3. Deterministic replanner proof is close but cardinality is inconsistent with this workflow goal. Policy defaults min=2/max=5 and docs v2.2 command says 2 to 5 follow-ups (replan_trigger_policy.py:37-38; docs/evidence/README.md:73-77), while the swarm goal requires exactly 2 forced replanner-proof agents. Dry-run fixture proves 5 planner + 2 replanner only, not the requested 8 + exactly 2 real planner/replanner shape (scripts/record_adaptive_workflow_evidence.py:94-157).\n4. Evidence quality eval guidance is structured, but docs still permit sample/redacted deterministic reports and only require short previews (docs/evidence/README.md:23-31); this supports compactness but does not prove live worker evidence quality.\n\nReducer recommendation: require the v2.2 proof artifact to assert planner_generated_agents==8, replanner_generated_agents==2, followup_agents_requested==2, force_missing_coverage contains replanner-proof, and no dashboard/artifact preview contains raw stdout/stderr/env or credential-like strings. Add a redaction/preview gate before publishing broker snapshots or dependency artifact context.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:43:02.328166+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_eeca706c94a8.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_5c994635bf38",
+      "producer": "release_readiness_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Release readiness smoke evidence (read-only):\n- Version alignment: pyproject.toml declares project version 2.2.0 and console scripts for gateway, codex swarm, dynamic workflow, and quality eval at pyproject.toml:5-35.\n- Packaging surface: setuptools py-modules include new v2.2 modules replan_trigger_policy and workflow_observer at pyproject.toml:37-76; Python >=3.9 and runtime dependency openai>=1.0.0 at pyproject.toml:10-15.\n- Changelog: CHANGELOG.md has a 2.2.0 entry dated 2026-06-06 covering deterministic ReplanTriggerPolicy, trigger records, required/forced coverage flags, evidence/dashboard fields, and regression tests at CHANGELOG.md:3-10.\n- Release checklist: required gates include editable dev install, install asset validation, py_compile, test_suite, coverage fail-under 70, CLI/script help, and quality eval sample at docs/RELEASE_CHECKLIST.md:7-25; tag/GitHub release steps are documented at docs/RELEASE_CHECKLIST.md:41-58.\n- CI: .github/workflows/tests.yml runs on push/PR for Python 3.9 and 3.12, validates install assets, compiles, runs test_suite.py, coverage fail-under 70, CLI helps, and sample quality eval at .github/workflows/tests.yml:7-43.\n- Plugin/install metadata: codex-plugin/.codex-plugin/plugin.json declares version 2.2.0 at lines 1-4; .agents/plugins/marketplace.json uses local ./plugins/oh-my-dynamic with ON_USE auth at lines 8-16.\n- Evidence docs: v2.2 replanner proof command is documented with required coverage including replanner-proof, forced missing coverage replanner-proof, max-rounds 2, max-agents 12, and dashboard at docs/evidence/README.md:67-85.\n- Git state observed: git status reported main...origin/main [ahead 1]; git tag --list 'v2.2*' produced no local tag output; latest commit observed was 03ee1a9 2026-06-06 feat: add replan trigger policy.\n- Blockers/risks: do not tag/release until the ahead commit is pushed or intentionally handled, v2.2 tag is created on the exact release commit, required gates are actually run in a writable CI/dev environment, and a real v2.2 replanner-proof evidence artifact is generated/committed or explicitly waived.\n- Not executed: no publish/tag/install/modification commands were run; tests/checklist gates were not executed because this worker stayed read-only.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:43:19.783351+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_5c994635bf38.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_29c0d12d9ca5",
+      "producer": "observability_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Scope: read-only inspection of planner/broker/replanner observability surfaces. No raw logs or secrets quoted.\n\nEvidence:\n- dynamic_workflow.py emits WorkflowEvent lifecycle events for dynamic_workflow_started, round_started, round_done, reducer_done, with run_id/status/preview/metadata; it also broker-traces dynamic_workflow_started, replan_trigger_policy, workflow_completed/failed, planner/replanner start/complete/fail, and persists dynamic_trace.json plus checkpoints.\n- workflow_events.py defines a compact event envelope with id, run_id, kind, subject, body, node_id, agent_id, status, preview, metadata, created_at.\n- agent_broker.py persists append-only events.jsonl/artifacts.jsonl and inboxes; BrokerEvent has kind/from/to/subject/body/thread_id/task_id/artifact_ids/status/metadata/created_at, giving traceability across worker messages, handoffs, reviews, and traces.\n- replan_trigger_policy.py records deterministic reasons: missing_coverage, low_score_agents, failed_agents, open_questions, and followup_agent_budget. With one forced missing lane and defaults, budget becomes 2.\n- scripts/record_adaptive_workflow_evidence.py summarizes planner_generated_agents, replanner_generated_agents, rounds, replan_triggers, missing_coverage, followup requested/generated, stop_reason, terminal_state, and known limitations; it explicitly notes raw prompts/stdout/stderr remain under .orchestry and are not committed.\n- workflow_observer.py renders static dashboard data from events, artifacts, traces, checkpoints, rounds, and replan triggers; it shows counts, timeline, round source planner/replanner, failures, low scores, reviews, checkpoint status, and raw snapshot.\n- test_suite.py covers ReplanTriggerPolicy missing coverage, adaptive fake planner plus 2 replanner agents, dry-run evidence shape, and static observability dashboard rendering with failures/low score/replan trigger/checkpoint.\n\nRisks:\n- Redaction is advisory, not enforced. Broker events/artifacts and dashboard snippets escape HTML but do not redact secrets or token-like content.\n- Planner/replanner failure artifacts may include stderr snippets; worker failure envelope/body/error can carry process error text into broker and WorkflowEvent preview.\n- Dependency context forwards prior summaries/errors and up to five artifact snippets into downstream prompts without sanitizer.\n- Static dashboard embeds a full raw JSON snapshot in HTML, so any sensitive broker artifact/event content included in evidence becomes visible in the rendered file.\n- Runtime requests follow-up budget through the deterministic policy, but _replan_decision accepts whatever new agent count the replanner returns; exact 2 generated follow-ups is validated by evidence/tests, not hard-enforced in DynamicWorkflowRuntime.\n- CodeGraph index reports 43 files, while observability-related modules like workflow_observer.py, replan_trigger_policy.py, codex_swarm_artifacts.py, eval_runner.py, and scripts were present via filesystem grep but not in the index list, so structural observability coverage from CodeGraph may be stale/incomplete.\n\nRelease-debuggability verdict: adequate for a v2.2 smoke evidence run if .orchestry remains local/uncommitted and the reducer consumes compact summaries only. For release hardening, add a central redaction/scrub step before broker publish, dashboard render, dependency-context forwarding, and failure artifact creation; add an invariant/gate that forced replanner-proof smoke generated exactly 8 planner agents and exactly 2 replanner agents.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:43:23.605711+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_29c0d12d9ca5.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_c2577811a46a",
+      "producer": "docs_install_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Scope: read-only docs-adjacent install/setup review. Inspected README.md, docs/RELEASE_CHECKLIST.md, docs/CODEX_CLI_SWARM_SMOKE.md, pyproject.toml, install_plugin.sh, codex-plugin skill files, plugin metadata, and CLI arg definitions.\n\nPositive evidence:\n- Version alignment: pyproject.toml declares 2.2.0; codex-plugin/.codex-plugin/plugin.json declares 2.2.0; skill docs say current v2.2.0.\n- Install docs match install script: README.md lines 122-141 instruct bash install_plugin.sh, verify ~/.agents/skills/{oh-my-dynamic,multi-agent-run}, and validate ~/.agents/plugins/marketplace.json. install_plugin.sh lines 7-9, 40-44, 47-61, 125-129 implement those paths and write a local source path ./plugins/oh-my-dynamic.\n- Plugin wiring is present: .agents/plugins/marketplace.json lines 6-18 contains oh-my-dynamic with local path ./plugins/oh-my-dynamic; codex-plugin/.codex-plugin/plugin.json lines 1-19 exposes skills ./skills/ and version 2.2.0.\n- CLI command docs mostly match code: README.md lines 193-240 and docs/RELEASE_CHECKLIST.md lines 16-25 reference dynamic_workflow, codex_cli_swarm, codex_swarm_cli, record_swarm_evidence, record_adaptive_workflow_evidence, render_workflow_observability, run_quality_eval, and examples. Matching add_argument evidence exists in dynamic_workflow.py, codex_swarm_cli.py, scripts/*.py, examples/*.py.\n- Release checklist includes install-relevant syntax and JSON gates: docs/RELEASE_CHECKLIST.md lines 7-25 and lines 60-67.\n\nMismatch / risk evidence:\n1. Install validation gap for App-native backend. README.md lines 157-161 and skill files codex-plugin/skills/multi-agent-run/SKILL.md lines 27-48 and codex-plugin/skills/oh-my-dynamic/SKILL.md lines 77-87 tell users App-native subagents should be used when available. The documented install checks only verify symlinks and marketplace JSON, not whether the current Codex App exposes subagent runtime/tools. This is probably acceptable as a runtime-dependent boundary, but release install smoke should label it explicitly as a post-install functional check, not an install-script guarantee.\n2. Required release gate checks in-repo marketplace template, not installed marketplace merge. docs/RELEASE_CHECKLIST.md line 11 runs python3 -m json.tool .agents/plugins/marketplace.json, while the real install check at lines 60-65 validates ~/.agents/plugins/marketplace.json. Because install_plugin.sh writes/merges ~/.agents/plugins/marketplace.json, the required gate can pass even if the user-level installed marketplace merge is broken or stale. Recommendation: keep line 11 as template validation, but name it template validation and include the ~/.agents check in required install gates for release smoke.\n3. CodeGraph index appears stale/incomplete for v2.2 helper modules: codegraph_status reported 43 indexed files, but codegraph_files tree omitted several present Python modules such as codex_swarm_cli.py, codex_swarm_models.py, eval_runner.py, replan_trigger_policy.py, workflow_observer.py, and scripts beyond record_swarm_evidence.py. Native filesystem read confirmed these files exist. This does not affect install docs directly, but release smoke relying on CodeGraph for structural evidence may need index refresh before final evidence collection.\n\nNo secrets or raw logs inspected. No files edited.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:43:46.947802+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_c2577811a46a.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_b2807d4a9212",
+      "producer": "replanner_proof_policy_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Read-only evidence for v2.2 replanner-proof lane:\n\n1. Trigger detection: replan_trigger_policy.py:30-48 defines ReplanTriggerPolicy with default min_followup_agents=2 and max_followup_agents=5. evaluate() computes covered planner text from completed planned agents, appends force_missing_coverage lanes, and emits kind='missing_coverage' for missing lanes at replan_trigger_policy.py:49-76.\n\n2. Budget calculation: replan_trigger_policy.py:90-104 sets followup_agent_budget = min(max_followup_agents, max(min_followup_agents, len(missing)+len(low_score)+len(failed))). With exactly one forced missing lane 'replanner-proof' and no low-score/failed agents, budget deterministically becomes 2.\n\n3. CLI wiring: scripts/record_adaptive_workflow_evidence.py:286-294 exposes --required-coverage and --force-missing-coverage. scripts/record_adaptive_workflow_evidence.py:308-326 constructs DynamicWorkflowRuntime with ReplanTriggerPolicy(required_coverage=..., force_missing_coverage=...). README.md:214-218 documents the controlled replanner proof command using --required-coverage security,tests,docs,replanner-proof and --force-missing-coverage replanner-proof.\n\n4. Runtime pass-through: dynamic_workflow.py:302-314 reduces broker evidence, calls _replan_trigger_decision(), appends trigger_record, traces subject='replan_trigger_policy' when should_replan, then passes trigger_decision into _replan_decision(). dynamic_workflow.py:393-403 includes trigger_decision.to_dict() under snapshot['replan_trigger_policy'] before invoking the replanner.\n\n5. Replanner contract wording: dynamic_workflow.py:780-788 tells the replanner that non-empty replan_trigger_policy.replan_triggers must add targeted follow-up agents and should respect followup_agent_budget. This is a prompt contract only.\n\n6. Enforcement gap: dynamic_workflow.py:314-324 accepts every parsed replanner agent whose id is not already planned, with no truncation or equality check against followup_agent_budget. parse_replan_decision() at dynamic_workflow.py:602-612 validates JSON shape, duplicate ids, and dependencies via _parse_agents(), but does not validate agent count against budget. AgentBroker provides id/event/artifact validation, but no budget enforcement was found in the broker path.\n\n7. Planner-round boundary: dynamic_workflow.py:769-777 planner prompt explicitly says to create only initial planner round agents and not replanner/follow-up/coverage-proof agents. However, parse_planner_decision() at dynamic_workflow.py:588-599 does not enforce exactly 8 agents; exact planner count is goal/prompt-driven plus max_agents slicing at dynamic_workflow.py:237-239.\n\n8. Test coverage: test_suite.py:1546-1578 asserts missing coverage produces followup_agent_budget==2 and no-gap produces budget 0. test_suite.py:1658-1748 asserts a fake adaptive runtime receives policy['followup_agent_budget']==2 and returns exactly two replanner agents, but that test's replanner complies voluntarily; it does not prove runtime enforcement against over/under-production.\n\nConclusion: The deterministic trigger path for forced 'replanner-proof' coverage is present and should request 2 follow-up agents. The release smoke can prove the request and compliant behavior, but not a hard runtime/broker guarantee of exactly 2 unless an additional count gate is added after parse_replan_decision().",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:48:48.593820+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_b2807d4a9212.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_e3db6bcbb5a6",
+      "producer": "replanner_proof_evidence_smoke",
+      "name": "result",
+      "kind": "analysis",
+      "content": "Assertions:\n- PASS generated round 0 cardinality: .orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/manifest.json has 8 agents: security_smoke, architecture_smoke, tests_smoke, broker_smoke, observability_smoke, evidence_quality_smoke, release_readiness_smoke, docs_install_smoke.\n- PASS generated round 1 cardinality: .orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/manifest.json has 2 agents: replanner_proof_policy_smoke, replanner_proof_evidence_smoke.\n- PASS deterministic trigger evidence exists in .orchestry/checkpoints/adaptive_v220_replanner_real_20260606b.json: missing_coverage=[replanner-proof], followup_agent_budget=2, round_index=0.\n- GAP checkpoint completeness: .orchestry/checkpoints/adaptive_v220_replanner_real_20260606b.json observed only one recorded round, round 0 with 8 completed/0 failed; it did not yet record round 1 or final stop_reason.\n- GAP committed compact evidence: rg --files docs/evidence found v2.1/adaptive_dry evidence but no docs/evidence/adaptive_v220* JSON/MD/dashboard artifact proving planner_generated_agents==8 and replanner_generated_agents==2.\n- BAD PRIOR ARTIFACT: .orchestry/checkpoints/adaptive_v220_replanner_real_20260606.json records 10 agents in round 0 including replanner_proof_coverage_01/02, so it does not prove the required planner-only round 0 shape.\n- Docs expectation: docs/evidence/README.md documents v2.2 replanner-proof command with required coverage including replanner-proof and forced missing coverage; README.md documents v2.2 dynamic workflow flags. These are instructions, not final release proof.\nSmallest release-blocking evidence gap: generate or commit one final compact v2.2 evidence artifact under docs/evidence, or equivalent reducer artifact, that records round 0 agent_count=8, round 1 agent_count=2, force_missing_coverage contains replanner-proof, followup_agents_requested=2, followup_agents_generated=2, and final terminal/stop state. No secrets or raw logs inspected; no files modified.",
+      "content_type": "text/plain",
+      "metadata": {
+        "thread_id": "adaptive_v220_replanner_real_20260606b"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:48:49.608441+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_e3db6bcbb5a6.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    },
+    {
+      "id": "artifact_41972ebb4bd6",
+      "producer": "orchestrator",
+      "name": "final_answer",
+      "kind": "final_answer",
+      "content": "# Broker Reduction\n\nGoal: Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.\nState: completed\nCompleted agents: 10\nFailed agents: 0\nArtifacts: 10\nReview responses: 0\nWorktree diff artifacts: 0\nLow-score events: 0\n\n## Agent Findings\n- tests_smoke: Read-only smoke found broad test coverage for broker/reducer/swarm/replan, but the v2.2 release path is not exactly covered: current adaptive workflow smoke asserts 5 initial planner agents plus 2 replanners, not the required 8 narrow planner agents plus exactly 2 forced replanner-proof follow-ups. Full suite could not pass in this read-only sandbox because temp/repo writes are blocked, yielding 27 pass / 33 fail; failures are environment-permission dominated, not enough to certify release.\n- architecture_smoke: Architecture smoke found the v2.2 control-flow split is present: DynamicWorkflowRuntime plans, runs CodexCliSwarmRuntime rounds, reduces broker evidence, applies deterministic replan trigger evidence, then replans. Main release risks are contract enforcement gaps: exact 8 initial agents and exact 2 forced follow-ups are prompt/goal-driven, not hard runtime invariants; worker read-only can be overridden by planner-supplied sandbox/extra_args; resume drops failed_ids before rebuilding pending stat\n- broker_smoke: Broker path supports structured worker envelopes, broker-backed reduction, deterministic replan triggers, and failure/dependency propagation. Key v2.2 smoke risks: planner/replanner worker failure artifacts can include stderr excerpts, and the trigger policy enforces a 2..5 budget but does not itself verify replanner returned exactly the requested count.\n- security_smoke: Read-only security smoke found no obvious shell-injection path because subprocesses use argv lists and agent ids are validated, but identified three release-relevant risks: full environment inheritance into Codex workers, planner/worker stderr persistence into broker/artifacts, and non-pinned runtime dependencies. Gateway auth and broker path controls look intentionally bounded for loopback/local use.\n- evidence_quality_smoke: Evidence quality is mostly structured and attributable, with durable broker artifacts and deterministic trigger metadata, but release-smoke sufficiency has three gaps: no built-in secret/raw-log redaction, dependency artifact previews can propagate 1200 raw chars per artifact, and v2.2 docs allow 2-5 follow-ups while this run requires exactly 2.\n- release_readiness_smoke: v2.2 release metadata is mostly aligned: pyproject, changelog, plugin metadata, README, CI, and checklist all reference 2.2.0-era gates. Main release blockers/risks: repository is ahead of origin by 1 commit with no local v2.2 tag observed, required gates were not executed in this read-only worker, and v2.2 replanner-proof evidence is documented but not yet present as a committed v220 evidence artifact in docs/evidence.\n- observability_smoke: Observability path is usable for v2.2 smoke: workflow events, broker traces/artifacts, checkpoint state, deterministic replan-trigger records, static dashboard rendering, and evidence summary scripts exist and are tested. Main release risks are redaction gaps: planner/replanner and worker paths retain raw prompts/stdout/stderr under .orchestry, broker/dashboard surfaces render body/artifact snippets without secret scanning, and exact 2 follow-up replanner generation is requested by policy but no\n- docs_install_smoke: Docs-adjacent install review completed read-only. Main install/setup path is coherent for v2.2.0: README, skill files, plugin metadata, pyproject entry points, install_plugin.sh, and release checklist mostly agree. Two notable mismatch risks: README/skills advertise App-native subagents as preferred when runtime exposes tools, but install docs cannot validate that capability after install; Release Checklist validates .agents/plugins/marketplace.json in-repo while actual install check uses ~/.age\n- replanner_proof_policy_smoke: Deterministic missing-coverage trigger path exists and passes followup_agent_budget=2 for a single forced 'replanner-proof' lane, but runtime/replanner contracts only request/respect the budget; they do not enforce exactly 2 follow-up agents. Planner prompt requests initial-round-only agents, but exact 8 planner agents is goal/prompt-driven, not schema-enforced.\n- replanner_proof_evidence_smoke: Read-only smoke found partial generated proof for v2.2: run adaptive_v220_replanner_real_20260606b has round_0 manifest with exactly 8 planner agents and round_1 manifest with exactly 2 replanner-proof agents, but there is no committed docs/evidence/adaptive_v220* compact evidence file and the checkpoint observed only records round 0, so the smallest release-blocking evidence gap is the missing final compact evidence artifact/checkpoint proving the combined 8+2 run.",
+      "content_type": "text/markdown",
+      "metadata": {
+        "terminal_state": "completed",
+        "stop_reason": "max_rounds"
+      },
+      "thread_id": "adaptive_v220_replanner_real_20260606b",
+      "task_id": "",
+      "created_at": "2026-06-06T14:48:49.615386+00:00",
+      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_41972ebb4bd6.txt",
+      "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
+    }
+  ],
+  "traces": [
+    {
+      "run_id": "adaptive_v220_replanner_real_20260606b",
+      "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "max_rounds": 2,
+      "max_agents": 12,
+      "max_parallel": 4,
+      "rounds": [
+        {
+          "round_index": 0,
+          "agent_ids": [
+            "security_smoke",
+            "architecture_smoke",
+            "tests_smoke",
+            "broker_smoke",
+            "observability_smoke",
+            "evidence_quality_smoke",
+            "release_readiness_smoke",
+            "docs_install_smoke"
+          ],
+          "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
+          "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
+          "completed": 8,
+          "failed": 0,
+          "duration_s": 428.1020658016205
+        },
+        {
+          "round_index": 1,
+          "agent_ids": [
+            "replanner_proof_policy_smoke",
+            "replanner_proof_evidence_smoke"
+          ],
+          "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
+          "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
+          "completed": 2,
+          "failed": 0,
+          "duration_s": 181.82233786582947
+        }
+      ],
+      "reducer_result": {
+        "final_answer": "# Broker Reduction\n\nGoal: Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.\nState: completed\nCompleted agents: 10\nFailed agents: 0\nArtifacts: 10\nReview responses: 0\nWorktree diff artifacts: 0\nLow-score events: 0\n\n## Agent Findings\n- tests_smoke: Read-only smoke found broad test coverage for broker/reducer/swarm/replan, but the v2.2 release path is not exactly covered: current adaptive workflow smoke asserts 5 initial planner agents plus 2 replanners, not the required 8 narrow planner agents plus exactly 2 forced replanner-proof follow-ups. Full suite could not pass in this read-only sandbox because temp/repo writes are blocked, yielding 27 pass / 33 fail; failures are environment-permission dominated, not enough to certify release.\n- architecture_smoke: Architecture smoke found the v2.2 control-flow split is present: DynamicWorkflowRuntime plans, runs CodexCliSwarmRuntime rounds, reduces broker evidence, applies deterministic replan trigger evidence, then replans. Main release risks are contract enforcement gaps: exact 8 initial agents and exact 2 forced follow-ups are prompt/goal-driven, not hard runtime invariants; worker read-only can be overridden by planner-supplied sandbox/extra_args; resume drops failed_ids before rebuilding pending stat\n- broker_smoke: Broker path supports structured worker envelopes, broker-backed reduction, deterministic replan triggers, and failure/dependency propagation. Key v2.2 smoke risks: planner/replanner worker failure artifacts can include stderr excerpts, and the trigger policy enforces a 2..5 budget but does not itself verify replanner returned exactly the requested count.\n- security_smoke: Read-only security smoke found no obvious shell-injection path because subprocesses use argv lists and agent ids are validated, but identified three release-relevant risks: full environment inheritance into Codex workers, planner/worker stderr persistence into broker/artifacts, and non-pinned runtime dependencies. Gateway auth and broker path controls look intentionally bounded for loopback/local use.\n- evidence_quality_smoke: Evidence quality is mostly structured and attributable, with durable broker artifacts and deterministic trigger metadata, but release-smoke sufficiency has three gaps: no built-in secret/raw-log redaction, dependency artifact previews can propagate 1200 raw chars per artifact, and v2.2 docs allow 2-5 follow-ups while this run requires exactly 2.\n- release_readiness_smoke: v2.2 release metadata is mostly aligned: pyproject, changelog, plugin metadata, README, CI, and checklist all reference 2.2.0-era gates. Main release blockers/risks: repository is ahead of origin by 1 commit with no local v2.2 tag observed, required gates were not executed in this read-only worker, and v2.2 replanner-proof evidence is documented but not yet present as a committed v220 evidence artifact in docs/evidence.\n- observability_smoke: Observability path is usable for v2.2 smoke: workflow events, broker traces/artifacts, checkpoint state, deterministic replan-trigger records, static dashboard rendering, and evidence summary scripts exist and are tested. Main release risks are redaction gaps: planner/replanner and worker paths retain raw prompts/stdout/stderr under .orchestry, broker/dashboard surfaces render body/artifact snippets without secret scanning, and exact 2 follow-up replanner generation is requested by policy but no\n- docs_install_smoke: Docs-adjacent install review completed read-only. Main install/setup path is coherent for v2.2.0: README, skill files, plugin metadata, pyproject entry points, install_plugin.sh, and release checklist mostly agree. Two notable mismatch risks: README/skills advertise App-native subagents as preferred when runtime exposes tools, but install docs cannot validate that capability after install; Release Checklist validates .agents/plugins/marketplace.json in-repo while actual install check uses ~/.age\n- replanner_proof_policy_smoke: Deterministic missing-coverage trigger path exists and passes followup_agent_budget=2 for a single forced 'replanner-proof' lane, but runtime/replanner contracts only request/respect the budget; they do not enforce exactly 2 follow-up agents. Planner prompt requests initial-round-only agents, but exact 8 planner agents is goal/prompt-driven, not schema-enforced.\n- replanner_proof_evidence_smoke: Read-only smoke found partial generated proof for v2.2: run adaptive_v220_replanner_real_20260606b has round_0 manifest with exactly 8 planner agents and round_1 manifest with exactly 2 replanner-proof agents, but there is no committed docs/evidence/adaptive_v220* compact evidence file and the checkpoint observed only records round 0, so the smallest release-blocking evidence gap is the missing final compact evidence artifact/checkpoint proving the combined 8+2 run.",
+        "risk_summary": "No reducer-detected blocking risks.",
+        "open_questions": [
+          "No review responses were recorded; consider adding a reviewer agent for high-risk changes."
+        ],
+        "recommended_next_agents": [],
+        "artifact_ids": [
+          "artifact_4f051c4df668",
+          "artifact_14ed8f99dfa7",
+          "artifact_a5340a2a5e0f",
+          "artifact_24554fa6a54e",
+          "artifact_eeca706c94a8",
+          "artifact_5c994635bf38",
+          "artifact_29c0d12d9ca5",
+          "artifact_c2577811a46a",
+          "artifact_b2807d4a9212",
+          "artifact_e3db6bcbb5a6"
+        ],
+        "terminal_state": "completed"
+      },
+      "broker_thread_id": "adaptive_v220_replanner_real_20260606b",
+      "stop_reason": "max_rounds",
+      "started_at": 1780756474.765683,
+      "completed_at": 1780757329.616854,
+      "replan_trigger_records": [
+        {
+          "round_index": 0,
+          "replan_triggers": [
+            {
+              "kind": "missing_coverage",
+              "lanes": [
+                "replanner-proof"
+              ],
+              "reason": "Required coverage lanes were not represented by completed planner agents."
+            }
+          ],
+          "missing_coverage": [
+            "replanner-proof"
+          ],
+          "low_score_agents": [],
+          "failed_agents": [],
+          "open_questions": [
+            "No review responses were recorded; consider adding a reviewer agent for high-risk changes."
+          ],
+          "followup_agent_budget": 2
+        }
+      ],
+      "_source_path": ".orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/dynamic_trace.json"
+    },
+    {
+      "run_id": "adaptive_v220_replanner_real_20260606b",
+      "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "started_at": "2026-06-06T22:36:38.850097",
+      "codex_bin": "codex",
+      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+      "workspace_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0",
+      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b",
+      "max_parallel": 4,
+      "timeout_s": 600,
+      "total_timeout_s": 3600,
+      "keep_workdirs": true,
+      "topological_layers": [
+        [
+          "security_smoke",
+          "architecture_smoke",
+          "tests_smoke",
+          "broker_smoke",
+          "observability_smoke",
+          "evidence_quality_smoke",
+          "release_readiness_smoke",
+          "docs_install_smoke"
+        ]
+      ],
+      "ready_batches": [
+        [
+          "security_smoke",
+          "architecture_smoke",
+          "tests_smoke",
+          "broker_smoke"
+        ],
+        [
+          "observability_smoke",
+          "evidence_quality_smoke",
+          "release_readiness_smoke",
+          "docs_install_smoke"
+        ]
+      ],
+      "agents": [
+        {
+          "id": "security_smoke",
+          "role": "security",
+          "goal": "Read-only release smoke for security regressions in oh-my-Dynamic v2.2; inspect auth boundaries, command execution surfaces, file access, dependency risk signals, and secret-handling paths; return compact evidence with file/symbol references only, no secrets or raw logs.",
+          "context": "Initial planner round only. Do not create follow-up or coverage-proof agents. Keep work read-only.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "architecture_smoke",
+          "role": "architecture",
+          "goal": "Read-only architecture smoke for v2.2; verify main control flow, planner/broker/replanner boundaries, agent lifecycle assumptions, and module coupling risks; return compact evidence with concrete code references.",
+          "context": "Initial planner round only. Focus on structural risks and release blockers, not broad refactors.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "tests_smoke",
+          "role": "tests",
+          "goal": "Read-only test smoke for v2.2; inspect available tests, release-critical coverage around planner, broker, replan triggers, and read-only constraints; identify missing high-risk tests with compact evidence.",
+          "context": "Initial planner round only. Do not run destructive commands or mutate files.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "broker_smoke",
+          "role": "broker",
+          "goal": "Read-only broker smoke for v2.2; inspect broker evidence contracts, trigger-policy inputs, round-0 result handling, and failure propagation; return compact evidence needed by later deterministic replanner policy.",
+          "context": "Initial planner round only. Do not add replanner agents here.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "observability_smoke",
+          "role": "observability",
+          "goal": "Read-only observability smoke for v2.2; inspect logging, metrics, trace IDs, status events, redaction, and release-debuggability around planner/broker/replanner paths; return compact evidence and risks.",
+          "context": "Avoid secrets/raw logs. Quote only short sanitized snippets if necessary.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "evidence_quality_smoke",
+          "role": "evidence_quality",
+          "goal": "Read-only evidence quality smoke for v2.2; inspect whether agent outputs, broker summaries, and release proofs are specific, attributable, compact, non-secret, and sufficient for deterministic replanning.",
+          "context": "Initial planner round only. Focus on evidence shape and verification gaps.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "release_readiness_smoke",
+          "role": "release_readiness",
+          "goal": "Read-only release readiness smoke for oh-my-Dynamic v2.2; inspect versioning, changelog/release notes, packaging assumptions, CI/release scripts, and obvious blockers; return compact release-gate evidence.",
+          "context": "Do not publish, tag, install, or modify anything.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "docs_install_smoke",
+          "role": "docs_adjacent_install_review",
+          "goal": "Read-only docs-adjacent install review for v2.2; inspect install/setup docs, plugin/skill wiring notes, required commands, prerequisites, and mismatch risks between docs and code; return compact evidence.",
+          "context": "Docs-adjacent only, not a broad documentation rewrite. No file edits.",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        }
+      ],
+      "_source_path": ".orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/manifest.json"
+    },
+    {
+      "run_id": "adaptive_v220_replanner_real_20260606b",
+      "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "max_parallel": 4,
+      "started_at": "2026-06-06T22:36:38.850097",
+      "completed_at": "2026-06-06T22:43:46.950783",
+      "duration_s": 428.1020658016205,
+      "results": [
+        {
+          "agent_id": "security_smoke",
+          "role": "security",
+          "status": "completed",
+          "summary": "Read-only security smoke found no obvious shell-injection path because subprocesses use argv lists and agent ids are validated, but identified three release-relevant risks: full environment inheritance into Codex workers, planner/worker stderr persistence into broker/artifacts, and non-pinned runtime dependencies. Gateway auth and broker path controls look intentionally bounded for loopback/local use.",
+          "started_at": "2026-06-06T22:36:38.861379",
+          "completed_at": "2026-06-06T22:40:26.908943",
+          "duration_s": 228.04756426811218,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_24554fa6a54e"
+          },
+          "event_ids": [
+            "message_23e47aaae5da"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "architecture_smoke",
+          "role": "architecture",
+          "status": "completed",
+          "summary": "Architecture smoke found the v2.2 control-flow split is present: DynamicWorkflowRuntime plans, runs CodexCliSwarmRuntime rounds, reduces broker evidence, applies deterministic replan trigger evidence, then replans. Main release risks are contract enforcement gaps: exact 8 initial agents and exact 2 forced follow-ups are prompt/goal-driven, not hard runtime invariants; worker read-only can be overridden by planner-supplied sandbox/extra_args; resume drops failed_ids before rebuilding pending state.",
+          "started_at": "2026-06-06T22:36:38.861570",
+          "completed_at": "2026-06-06T22:39:41.033448",
+          "duration_s": 182.1718819141388,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_14ed8f99dfa7"
+          },
+          "event_ids": [
+            "message_36734fc1404b"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "tests_smoke",
+          "role": "tests",
+          "status": "completed",
+          "summary": "Read-only smoke found broad test coverage for broker/reducer/swarm/replan, but the v2.2 release path is not exactly covered: current adaptive workflow smoke asserts 5 initial planner agents plus 2 replanners, not the required 8 narrow planner agents plus exactly 2 forced replanner-proof follow-ups. Full suite could not pass in this read-only sandbox because temp/repo writes are blocked, yielding 27 pass / 33 fail; failures are environment-permission dominated, not enough to certify release.",
+          "started_at": "2026-06-06T22:36:38.861708",
+          "completed_at": "2026-06-06T22:39:21.530410",
+          "duration_s": 162.66870784759521,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_4f051c4df668"
+          },
+          "event_ids": [
+            "message_b72a07477fd6"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "broker_smoke",
+          "role": "broker",
+          "status": "completed",
+          "summary": "Broker path supports structured worker envelopes, broker-backed reduction, deterministic replan triggers, and failure/dependency propagation. Key v2.2 smoke risks: planner/replanner worker failure artifacts can include stderr excerpts, and the trigger policy enforces a 2..5 budget but does not itself verify replanner returned exactly the requested count.",
+          "started_at": "2026-06-06T22:36:38.861632",
+          "completed_at": "2026-06-06T22:40:01.767646",
+          "duration_s": 202.9060161113739,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_a5340a2a5e0f"
+          },
+          "event_ids": [
+            "message_4f9df8697763"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "observability_smoke",
+          "role": "observability",
+          "status": "completed",
+          "summary": "Observability path is usable for v2.2 smoke: workflow events, broker traces/artifacts, checkpoint state, deterministic replan-trigger records, static dashboard rendering, and evidence summary scripts exist and are tested. Main release risks are redaction gaps: planner/replanner and worker paths retain raw prompts/stdout/stderr under .orchestry, broker/dashboard surfaces render body/artifact snippets without secret scanning, and exact 2 follow-up replanner generation is requested by policy but not enforced by runtime.",
+          "started_at": "2026-06-06T22:40:26.909768",
+          "completed_at": "2026-06-06T22:43:23.608367",
+          "duration_s": 176.69860005378723,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_29c0d12d9ca5"
+          },
+          "event_ids": [
+            "message_4134d42fbcfa"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "evidence_quality_smoke",
+          "role": "evidence_quality",
+          "status": "completed",
+          "summary": "Evidence quality is mostly structured and attributable, with durable broker artifacts and deterministic trigger metadata, but release-smoke sufficiency has three gaps: no built-in secret/raw-log redaction, dependency artifact previews can propagate 1200 raw chars per artifact, and v2.2 docs allow 2-5 follow-ups while this run requires exactly 2.",
+          "started_at": "2026-06-06T22:40:26.909886",
+          "completed_at": "2026-06-06T22:43:02.330273",
+          "duration_s": 155.4203917980194,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_eeca706c94a8"
+          },
+          "event_ids": [
+            "message_09dd25c250c2"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "release_readiness_smoke",
+          "role": "release_readiness",
+          "status": "completed",
+          "summary": "v2.2 release metadata is mostly aligned: pyproject, changelog, plugin metadata, README, CI, and checklist all reference 2.2.0-era gates. Main release blockers/risks: repository is ahead of origin by 1 commit with no local v2.2 tag observed, required gates were not executed in this read-only worker, and v2.2 replanner-proof evidence is documented but not yet present as a committed v220 evidence artifact in docs/evidence.",
+          "started_at": "2026-06-06T22:40:26.909809",
+          "completed_at": "2026-06-06T22:43:19.785340",
+          "duration_s": 172.87553095817566,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_5c994635bf38"
+          },
+          "event_ids": [
+            "message_991c0694a2ff"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "docs_install_smoke",
+          "role": "docs_adjacent_install_review",
+          "status": "completed",
+          "summary": "Docs-adjacent install review completed read-only. Main install/setup path is coherent for v2.2.0: README, skill files, plugin metadata, pyproject entry points, install_plugin.sh, and release checklist mostly agree. Two notable mismatch risks: README/skills advertise App-native subagents as preferred when runtime exposes tools, but install docs cannot validate that capability after install; Release Checklist validates .agents/plugins/marketplace.json in-repo while actual install check uses ~/.agents/plugins/marketplace.json, so the required gate may pass without proving installed marketplace merge.",
+          "started_at": "2026-06-06T22:40:26.909963",
+          "completed_at": "2026-06-06T22:43:46.950409",
+          "duration_s": 200.0404498577118,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_c2577811a46a"
+          },
+          "event_ids": [
+            "message_e167b63c39d1"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        }
+      ],
+      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b",
+      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+      "topological_layers": [
+        [
+          "security_smoke",
+          "architecture_smoke",
+          "tests_smoke",
+          "broker_smoke",
+          "observability_smoke",
+          "evidence_quality_smoke",
+          "release_readiness_smoke",
+          "docs_install_smoke"
+        ]
+      ],
+      "ready_batches": [
+        [
+          "security_smoke",
+          "architecture_smoke",
+          "tests_smoke",
+          "broker_smoke"
+        ],
+        [
+          "observability_smoke",
+          "evidence_quality_smoke",
+          "release_readiness_smoke",
+          "docs_install_smoke"
+        ]
+      ],
+      "broker_thread_id": "adaptive_v220_replanner_real_20260606b",
+      "broker_event_count": 36,
+      "manifest_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/manifest.json",
+      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
+      "_source_path": ".orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json"
+    },
+    {
+      "run_id": "adaptive_v220_replanner_real_20260606b",
+      "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "started_at": "2026-06-06T22:45:47.790122",
+      "codex_bin": "codex",
+      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+      "workspace_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1",
+      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b",
+      "max_parallel": 4,
+      "timeout_s": 600,
+      "total_timeout_s": 3600,
+      "keep_workdirs": true,
+      "topological_layers": [
+        [
+          "replanner_proof_policy_smoke",
+          "replanner_proof_evidence_smoke"
+        ]
+      ],
+      "ready_batches": [
+        [
+          "replanner_proof_policy_smoke",
+          "replanner_proof_evidence_smoke"
+        ]
+      ],
+      "agents": [
+        {
+          "id": "replanner_proof_policy_smoke",
+          "role": "replanner-proof",
+          "goal": "Read-only v2.2 replanner-proof smoke. Verify the deterministic replan trigger path for missing coverage lane 'replanner-proof': where triggers are detected, how followup_agent_budget=2 is passed, and whether runtime/broker/replanner contracts enforce or only request exactly 2 focused follow-up agents. Return compact evidence with file/function references only. Do not read secrets or raw logs; do not modify files.",
+          "context": "",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        },
+        {
+          "id": "replanner_proof_evidence_smoke",
+          "role": "replanner-proof",
+          "goal": "Read-only v2.2 replanner-proof evidence smoke. Inspect docs/evidence, release checklist, tests, and broker/reducer artifacts expectations for committed or generated proof that round 0 has exactly 8 planner agents and replanner adds exactly 2 forced replanner-proof follow-ups. Identify the smallest release-blocking evidence gap, if any. Return compact evidence with paths and assertions only. Do not read secrets or raw logs; do not modify files.",
+          "context": "",
+          "dependencies": [],
+          "sandbox": "read-only",
+          "approval_policy": "never",
+          "extra_args": [
+            "-c",
+            "service_tier=\"fast\"",
+            "-c",
+            "model_reasoning_effort=\"low\""
+          ],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD"
+        }
+      ],
+      "_source_path": ".orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/manifest.json"
+    },
+    {
+      "run_id": "adaptive_v220_replanner_real_20260606b",
+      "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "max_parallel": 4,
+      "started_at": "2026-06-06T22:45:47.790122",
+      "completed_at": "2026-06-06T22:48:49.611033",
+      "duration_s": 181.82233786582947,
+      "results": [
+        {
+          "agent_id": "replanner_proof_policy_smoke",
+          "role": "replanner-proof",
+          "status": "completed",
+          "summary": "Deterministic missing-coverage trigger path exists and passes followup_agent_budget=2 for a single forced 'replanner-proof' lane, but runtime/replanner contracts only request/respect the budget; they do not enforce exactly 2 follow-up agents. Planner prompt requests initial-round-only agents, but exact 8 planner agents is goal/prompt-driven, not schema-enforced.",
+          "started_at": "2026-06-06T22:45:47.795309",
+          "completed_at": "2026-06-06T22:48:48.596245",
+          "duration_s": 180.80093693733215,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_b2807d4a9212"
+          },
+          "event_ids": [
+            "message_e43cbe1c8fc0"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        },
+        {
+          "agent_id": "replanner_proof_evidence_smoke",
+          "role": "replanner-proof",
+          "status": "completed",
+          "summary": "Read-only smoke found partial generated proof for v2.2: run adaptive_v220_replanner_real_20260606b has round_0 manifest with exactly 8 planner agents and round_1 manifest with exactly 2 replanner-proof agents, but there is no committed docs/evidence/adaptive_v220* compact evidence file and the checkpoint observed only records round 0, so the smallest release-blocking evidence gap is the missing final compact evidence artifact/checkpoint proving the combined 8+2 run.",
+          "started_at": "2026-06-06T22:45:47.795365",
+          "completed_at": "2026-06-06T22:48:49.610638",
+          "duration_s": 181.81527400016785,
+          "returncode": 0,
+          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke",
+          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/prompt.md",
+          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/last_message.txt",
+          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/stdout.txt",
+          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/stderr.txt",
+          "artifact_ids": {
+            "result": "artifact_e3db6bcbb5a6"
+          },
+          "event_ids": [
+            "message_fdef7feead4c"
+          ],
+          "workspace_mode": "shared",
+          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "worktree_branch": "",
+          "worktree_path": "",
+          "error": ""
+        }
+      ],
+      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b",
+      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+      "topological_layers": [
+        [
+          "replanner_proof_policy_smoke",
+          "replanner_proof_evidence_smoke"
+        ]
+      ],
+      "ready_batches": [
+        [
+          "replanner_proof_policy_smoke",
+          "replanner_proof_evidence_smoke"
+        ]
+      ],
+      "broker_thread_id": "adaptive_v220_replanner_real_20260606b",
+      "broker_event_count": 48,
+      "manifest_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/manifest.json",
+      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
+      "_source_path": ".orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json"
+    },
+    {
+      "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+      "run_id": "adaptive_v220_replanner_real_20260606b",
+      "rounds": [
+        {
+          "round_index": 0,
+          "agent_ids": [
+            "security_smoke",
+            "architecture_smoke",
+            "tests_smoke",
+            "broker_smoke",
+            "observability_smoke",
+            "evidence_quality_smoke",
+            "release_readiness_smoke",
+            "docs_install_smoke"
+          ],
+          "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
+          "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
+          "completed": 8,
+          "failed": 0,
+          "duration_s": 428.1020658016205
+        },
+        {
+          "round_index": 1,
+          "agent_ids": [
+            "replanner_proof_policy_smoke",
+            "replanner_proof_evidence_smoke"
+          ],
+          "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
+          "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
+          "completed": 2,
+          "failed": 0,
+          "duration_s": 181.82233786582947
+        }
+      ],
+      "planned_agents": [
+        {
+          "id": "security_smoke",
+          "role": "security",
+          "goal": "Read-only release smoke for security regressions in oh-my-Dynamic v2.2; inspect auth boundaries, command execution surfaces, file access, dependency risk signals, and secret-handling paths; return compact evidence with file/symbol references only, no secrets or raw logs.",
+          "context": "Initial planner round only. Do not create follow-up or coverage-proof agents. Keep work read-only.",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "architecture_smoke",
+          "role": "architecture",
+          "goal": "Read-only architecture smoke for v2.2; verify main control flow, planner/broker/replanner boundaries, agent lifecycle assumptions, and module coupling risks; return compact evidence with concrete code references.",
+          "context": "Initial planner round only. Focus on structural risks and release blockers, not broad refactors.",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "tests_smoke",
+          "role": "tests",
+          "goal": "Read-only test smoke for v2.2; inspect available tests, release-critical coverage around planner, broker, replan triggers, and read-only constraints; identify missing high-risk tests with compact evidence.",
+          "context": "Initial planner round only. Do not run destructive commands or mutate files.",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "broker_smoke",
+          "role": "broker",
+          "goal": "Read-only broker smoke for v2.2; inspect broker evidence contracts, trigger-policy inputs, round-0 result handling, and failure propagation; return compact evidence needed by later deterministic replanner policy.",
+          "context": "Initial planner round only. Do not add replanner agents here.",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "observability_smoke",
+          "role": "observability",
+          "goal": "Read-only observability smoke for v2.2; inspect logging, metrics, trace IDs, status events, redaction, and release-debuggability around planner/broker/replanner paths; return compact evidence and risks.",
+          "context": "Avoid secrets/raw logs. Quote only short sanitized snippets if necessary.",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "evidence_quality_smoke",
+          "role": "evidence_quality",
+          "goal": "Read-only evidence quality smoke for v2.2; inspect whether agent outputs, broker summaries, and release proofs are specific, attributable, compact, non-secret, and sufficient for deterministic replanning.",
+          "context": "Initial planner round only. Focus on evidence shape and verification gaps.",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "release_readiness_smoke",
+          "role": "release_readiness",
+          "goal": "Read-only release readiness smoke for oh-my-Dynamic v2.2; inspect versioning, changelog/release notes, packaging assumptions, CI/release scripts, and obvious blockers; return compact release-gate evidence.",
+          "context": "Do not publish, tag, install, or modify anything.",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "docs_install_smoke",
+          "role": "docs_adjacent_install_review",
+          "goal": "Read-only docs-adjacent install review for v2.2; inspect install/setup docs, plugin/skill wiring notes, required commands, prerequisites, and mismatch risks between docs and code; return compact evidence.",
+          "context": "Docs-adjacent only, not a broad documentation rewrite. No file edits.",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "replanner_proof_policy_smoke",
+          "role": "replanner-proof",
+          "goal": "Read-only v2.2 replanner-proof smoke. Verify the deterministic replan trigger path for missing coverage lane 'replanner-proof': where triggers are detected, how followup_agent_budget=2 is passed, and whether runtime/broker/replanner contracts enforce or only request exactly 2 focused follow-up agents. Return compact evidence with file/function references only. Do not read secrets or raw logs; do not modify files.",
+          "context": "",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        },
+        {
+          "id": "replanner_proof_evidence_smoke",
+          "role": "replanner-proof",
+          "goal": "Read-only v2.2 replanner-proof evidence smoke. Inspect docs/evidence, release checklist, tests, and broker/reducer artifacts expectations for committed or generated proof that round 0 has exactly 8 planner agents and replanner adds exactly 2 forced replanner-proof follow-ups. Identify the smallest release-blocking evidence gap, if any. Return compact evidence with paths and assertions only. Do not read secrets or raw logs; do not modify files.",
+          "context": "",
+          "dependencies": [],
+          "workspace_mode": "shared",
+          "write_intent": "none",
+          "base_ref": "HEAD",
+          "sandbox": "read-only",
+          "extra_args": []
+        }
+      ],
+      "pending_agents": [],
+      "completed_agent_ids": [
+        "architecture_smoke",
+        "broker_smoke",
+        "docs_install_smoke",
+        "evidence_quality_smoke",
+        "observability_smoke",
+        "release_readiness_smoke",
+        "replanner_proof_evidence_smoke",
+        "replanner_proof_policy_smoke",
+        "security_smoke",
+        "tests_smoke"
+      ],
+      "failed_agent_ids": [],
+      "broker_thread_id": "adaptive_v220_replanner_real_20260606b",
+      "stop_reason": "max_rounds",
+      "replan_trigger_records": [
+        {
+          "round_index": 0,
+          "replan_triggers": [
+            {
+              "kind": "missing_coverage",
+              "lanes": [
+                "replanner-proof"
+              ],
+              "reason": "Required coverage lanes were not represented by completed planner agents."
+            }
+          ],
+          "missing_coverage": [
+            "replanner-proof"
+          ],
+          "low_score_agents": [],
+          "failed_agents": [],
+          "open_questions": [
+            "No review responses were recorded; consider adding a reviewer agent for high-risk changes."
+          ],
+          "followup_agent_budget": 2
+        }
+      ],
+      "_source_path": ".orchestry/checkpoints/adaptive_v220_replanner_real_20260606b.json"
+    }
+  ],
+  "checkpoint": {
+    "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+    "run_id": "adaptive_v220_replanner_real_20260606b",
+    "rounds": [
+      {
+        "round_index": 0,
+        "agent_ids": [
+          "security_smoke",
+          "architecture_smoke",
+          "tests_smoke",
+          "broker_smoke",
+          "observability_smoke",
+          "evidence_quality_smoke",
+          "release_readiness_smoke",
+          "docs_install_smoke"
+        ],
+        "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
+        "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
+        "completed": 8,
+        "failed": 0,
+        "duration_s": 428.1020658016205
+      },
+      {
+        "round_index": 1,
+        "agent_ids": [
+          "replanner_proof_policy_smoke",
+          "replanner_proof_evidence_smoke"
+        ],
+        "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
+        "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
+        "completed": 2,
+        "failed": 0,
+        "duration_s": 181.82233786582947
+      }
+    ],
+    "planned_agents": [
+      {
+        "id": "security_smoke",
+        "role": "security",
+        "goal": "Read-only release smoke for security regressions in oh-my-Dynamic v2.2; inspect auth boundaries, command execution surfaces, file access, dependency risk signals, and secret-handling paths; return compact evidence with file/symbol references only, no secrets or raw logs.",
+        "context": "Initial planner round only. Do not create follow-up or coverage-proof agents. Keep work read-only.",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "architecture_smoke",
+        "role": "architecture",
+        "goal": "Read-only architecture smoke for v2.2; verify main control flow, planner/broker/replanner boundaries, agent lifecycle assumptions, and module coupling risks; return compact evidence with concrete code references.",
+        "context": "Initial planner round only. Focus on structural risks and release blockers, not broad refactors.",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "tests_smoke",
+        "role": "tests",
+        "goal": "Read-only test smoke for v2.2; inspect available tests, release-critical coverage around planner, broker, replan triggers, and read-only constraints; identify missing high-risk tests with compact evidence.",
+        "context": "Initial planner round only. Do not run destructive commands or mutate files.",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "broker_smoke",
+        "role": "broker",
+        "goal": "Read-only broker smoke for v2.2; inspect broker evidence contracts, trigger-policy inputs, round-0 result handling, and failure propagation; return compact evidence needed by later deterministic replanner policy.",
+        "context": "Initial planner round only. Do not add replanner agents here.",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "observability_smoke",
+        "role": "observability",
+        "goal": "Read-only observability smoke for v2.2; inspect logging, metrics, trace IDs, status events, redaction, and release-debuggability around planner/broker/replanner paths; return compact evidence and risks.",
+        "context": "Avoid secrets/raw logs. Quote only short sanitized snippets if necessary.",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "evidence_quality_smoke",
+        "role": "evidence_quality",
+        "goal": "Read-only evidence quality smoke for v2.2; inspect whether agent outputs, broker summaries, and release proofs are specific, attributable, compact, non-secret, and sufficient for deterministic replanning.",
+        "context": "Initial planner round only. Focus on evidence shape and verification gaps.",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "release_readiness_smoke",
+        "role": "release_readiness",
+        "goal": "Read-only release readiness smoke for oh-my-Dynamic v2.2; inspect versioning, changelog/release notes, packaging assumptions, CI/release scripts, and obvious blockers; return compact release-gate evidence.",
+        "context": "Do not publish, tag, install, or modify anything.",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "docs_install_smoke",
+        "role": "docs_adjacent_install_review",
+        "goal": "Read-only docs-adjacent install review for v2.2; inspect install/setup docs, plugin/skill wiring notes, required commands, prerequisites, and mismatch risks between docs and code; return compact evidence.",
+        "context": "Docs-adjacent only, not a broad documentation rewrite. No file edits.",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "replanner_proof_policy_smoke",
+        "role": "replanner-proof",
+        "goal": "Read-only v2.2 replanner-proof smoke. Verify the deterministic replan trigger path for missing coverage lane 'replanner-proof': where triggers are detected, how followup_agent_budget=2 is passed, and whether runtime/broker/replanner contracts enforce or only request exactly 2 focused follow-up agents. Return compact evidence with file/function references only. Do not read secrets or raw logs; do not modify files.",
+        "context": "",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      },
+      {
+        "id": "replanner_proof_evidence_smoke",
+        "role": "replanner-proof",
+        "goal": "Read-only v2.2 replanner-proof evidence smoke. Inspect docs/evidence, release checklist, tests, and broker/reducer artifacts expectations for committed or generated proof that round 0 has exactly 8 planner agents and replanner adds exactly 2 forced replanner-proof follow-ups. Identify the smallest release-blocking evidence gap, if any. Return compact evidence with paths and assertions only. Do not read secrets or raw logs; do not modify files.",
+        "context": "",
+        "dependencies": [],
+        "workspace_mode": "shared",
+        "write_intent": "none",
+        "base_ref": "HEAD",
+        "sandbox": "read-only",
+        "extra_args": []
+      }
+    ],
+    "pending_agents": [],
+    "completed_agent_ids": [
+      "architecture_smoke",
+      "broker_smoke",
+      "docs_install_smoke",
+      "evidence_quality_smoke",
+      "observability_smoke",
+      "release_readiness_smoke",
+      "replanner_proof_evidence_smoke",
+      "replanner_proof_policy_smoke",
+      "security_smoke",
+      "tests_smoke"
+    ],
+    "failed_agent_ids": [],
+    "broker_thread_id": "adaptive_v220_replanner_real_20260606b",
+    "stop_reason": "max_rounds",
+    "replan_trigger_records": [
+      {
+        "round_index": 0,
+        "replan_triggers": [
+          {
+            "kind": "missing_coverage",
+            "lanes": [
+              "replanner-proof"
+            ],
+            "reason": "Required coverage lanes were not represented by completed planner agents."
+          }
+        ],
+        "missing_coverage": [
+          "replanner-proof"
+        ],
+        "low_score_agents": [],
+        "failed_agents": [],
+        "open_questions": [
+          "No review responses were recorded; consider adding a reviewer agent for high-risk changes."
+        ],
+        "followup_agent_budget": 2
+      }
+    ],
+    "_source_path": ".orchestry/checkpoints/adaptive_v220_replanner_real_20260606b.json"
+  },
+  "rounds": [
+    {
+      "round_index": 0,
+      "source": "planner",
+      "agent_ids": [
+        "security_smoke",
+        "architecture_smoke",
+        "tests_smoke",
+        "broker_smoke",
+        "observability_smoke",
+        "evidence_quality_smoke",
+        "release_readiness_smoke",
+        "docs_install_smoke"
+      ],
+      "agent_count": 8,
+      "completed": 8,
+      "failed": 0,
+      "duration_s": 428.1020658016205,
+      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json"
+    },
+    {
+      "round_index": 1,
+      "source": "replanner",
+      "agent_ids": [
+        "replanner_proof_policy_smoke",
+        "replanner_proof_evidence_smoke"
+      ],
+      "agent_count": 2,
+      "completed": 2,
+      "failed": 0,
+      "duration_s": 181.82233786582947,
+      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json"
+    }
+  ],
+  "replan_triggers": [
+    {
+      "round_index": 0,
+      "replan_triggers": [
+        {
+          "kind": "missing_coverage",
+          "lanes": [
+            "replanner-proof"
+          ],
+          "reason": "Required coverage lanes were not represented by completed planner agents."
+        }
+      ],
+      "missing_coverage": [
+        "replanner-proof"
+      ],
+      "low_score_agents": [],
+      "failed_agents": [],
+      "open_questions": [
+        "No review responses were recorded; consider adding a reviewer agent for high-risk changes."
+      ],
+      "followup_agent_budget": 2
+    }
+  ],
+  "summary": {
+    "event_count": 50,
+    "artifact_count": 11,
+    "trace_count": 6,
+    "round_count": 2,
+    "workflow_round_count": 2,
+    "agent_count": 11,
+    "failed_count": 0,
+    "low_score_count": 0,
+    "review_response_count": 0,
+    "checkpoint": true
+  }
+};
+document.getElementById("raw").textContent = JSON.stringify(DATA, null, 2);
+</script>
+</body>
+</html>

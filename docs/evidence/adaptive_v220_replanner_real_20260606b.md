@@ -1,0 +1,159 @@
+# Adaptive Dynamic Workflow Evidence: adaptive_v220_replanner_real_20260606b
+
+Compact JSON: `adaptive_v220_replanner_real_20260606b.json`
+
+```json
+{
+  "run_id": "adaptive_v220_replanner_real_20260606b",
+  "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
+  "commit_sha": "03ee1a9b03d1391a57aa4c879f2cc67f466d7d78",
+  "dry_run": false,
+  "workflow_kind": "adaptive_dynamic_workflow",
+  "agents_requested": 12,
+  "agents_completed": 10,
+  "agents_failed": 0,
+  "agents_total": 10,
+  "rounds": [
+    {
+      "round_index": 0,
+      "source": "planner",
+      "agent_ids": [
+        "security_smoke",
+        "architecture_smoke",
+        "tests_smoke",
+        "broker_smoke",
+        "observability_smoke",
+        "evidence_quality_smoke",
+        "release_readiness_smoke",
+        "docs_install_smoke"
+      ],
+      "agent_count": 8,
+      "completed": 8,
+      "failed": 0,
+      "duration_s": 428.1,
+      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json"
+    },
+    {
+      "round_index": 1,
+      "source": "replanner",
+      "agent_ids": [
+        "replanner_proof_policy_smoke",
+        "replanner_proof_evidence_smoke"
+      ],
+      "agent_count": 2,
+      "completed": 2,
+      "failed": 0,
+      "duration_s": 181.82,
+      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json"
+    }
+  ],
+  "replan_triggers": [
+    {
+      "kind": "missing_coverage",
+      "lanes": [
+        "replanner-proof"
+      ],
+      "reason": "Required coverage lanes were not represented by completed planner agents."
+    }
+  ],
+  "missing_coverage": [
+    "replanner-proof"
+  ],
+  "low_score_agents": [],
+  "followup_agents_requested": 2,
+  "followup_agents_generated": 2,
+  "replan_trigger_records": [
+    {
+      "round_index": 0,
+      "replan_triggers": [
+        {
+          "kind": "missing_coverage",
+          "lanes": [
+            "replanner-proof"
+          ],
+          "reason": "Required coverage lanes were not represented by completed planner agents."
+        }
+      ],
+      "missing_coverage": [
+        "replanner-proof"
+      ],
+      "low_score_agents": [],
+      "failed_agents": [],
+      "open_questions": [
+        "No review responses were recorded; consider adding a reviewer agent for high-risk changes."
+      ],
+      "followup_agent_budget": 2
+    }
+  ],
+  "planner_generated_agents": 8,
+  "replanner_generated_agents": 2,
+  "duration_s": 854.85,
+  "max_rounds": 2,
+  "max_agents": 12,
+  "max_parallel": 4,
+  "sandbox": "read-only",
+  "planner_sandbox": "read-only",
+  "codex_extra_args": [
+    "-c",
+    "service_tier=\"fast\"",
+    "-c",
+    "model_reasoning_effort=\"low\""
+  ],
+  "required_coverage": [
+    "security",
+    "architecture",
+    "tests",
+    "broker",
+    "observability",
+    "evidence",
+    "release",
+    "replanner-proof"
+  ],
+  "force_missing_coverage": [
+    "replanner-proof"
+  ],
+  "broker_thread_id": "adaptive_v220_replanner_real_20260606b",
+  "stop_reason": "max_rounds",
+  "terminal_state": "completed",
+  "reducer_recommended_next_agents": [],
+  "reducer_artifact_ids": [
+    "artifact_4f051c4df668",
+    "artifact_14ed8f99dfa7",
+    "artifact_a5340a2a5e0f",
+    "artifact_24554fa6a54e",
+    "artifact_eeca706c94a8",
+    "artifact_5c994635bf38",
+    "artifact_29c0d12d9ca5",
+    "artifact_c2577811a46a",
+    "artifact_b2807d4a9212",
+    "artifact_e3db6bcbb5a6"
+  ],
+  "dynamic_trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/dynamic_trace.json",
+  "known_limitations": [
+    "Manual smoke evidence; not part of default CI.",
+    "Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.",
+    "This is Codex CLI process-swarm fan-out, not App-native isolated subagents."
+  ]
+}
+```
+
+## Round Timeline
+
+- round 0 (planner): 8/8 completed, 0 failed, agents=security_smoke, architecture_smoke, tests_smoke, broker_smoke, observability_smoke, evidence_quality_smoke, release_readiness_smoke, docs_install_smoke
+- round 1 (replanner): 2/2 completed, 0 failed, agents=replanner_proof_policy_smoke, replanner_proof_evidence_smoke
+
+## Replan Triggers
+
+- missing_coverage: replanner-proof
+- follow-up requested: 2
+- follow-up generated: 2
+
+## Reducer Recommendations
+
+- No recommended next agents.
+
+## Known Limitations
+
+- Manual smoke evidence; not part of default CI.
+- Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.
+- This is Codex CLI process-swarm fan-out, not App-native isolated subagents.
