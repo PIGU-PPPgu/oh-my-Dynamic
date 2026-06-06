@@ -1,5 +1,9 @@
 # v2.0 Productization Plan
 
+Historical note: this document is the v2.0 baseline plan. For the current v2.1+
+entrypoints, use `README.md`, `docs/evidence/README.md`, GitHub Release notes,
+and the committed evidence records as the source of truth.
+
 ## Summary
 
 v2.0 moves oh-my-Dynamic from "dynamic workflow runtime prototype" to a

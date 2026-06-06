@@ -1,12 +1,17 @@
 # oh-my-Dynamic 🔄
 
-**多 Agent 编排引擎 / Codex Native Dynamic Workflows 提案原型** —— 对齐 Anthropic Dynamic Workflows + VMAO 论文架构（arXiv 2603.11445），支持所有主流大模型。
+**多 Agent 编排引擎 / Codex Dynamic Workflows 原型** —— 对齐 Anthropic Dynamic Workflows + VMAO 论文架构（arXiv 2603.11445），支持 Codex App skill、Codex CLI swarm、adaptive planner/replanner 和主流大模型。
 
-> Codex App 默认：当 App 内部 subagent tools/runtime 可用时，插件/skill 应默认走 **Codex App internal subagent backend**，使用真实 Codex subagents。
-> LLM 继承：这些 App-native subagents 默认继承当前 Codex App 内部 LLM，不需要 `OPENAI_API_KEY` 或其他外部模型 key。
-> 当前项目边界：提供插件级编排与本地 Python runtime 原型；真正 App-native isolated sandboxes、tool permissions、DAG scheduler 和 trace 仍由 Codex runtime 提供。
->
-> **oh-my-Dynamic bridges plugin-level orchestration, local runtime prototypes, and Codex App-native subagents.**
+> 核心边界：App-native isolated subagents 取决于 Codex App runtime 是否暴露该能力；当前可验证的大规模真实能力是 **Codex CLI process swarm**，默认 read-only，并通过 broker/evidence/dashboard 留证。
+
+## Use It Now
+
+| 入口 | 命令 / 触发句 | 用途 |
+|------|---------------|------|
+| Codex App skill | `[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。` | App 内零配置编排；native subagent runtime 可用时继承 App 内部 LLM |
+| CLI adaptive workflow | `python scripts/record_adaptive_workflow_evidence.py --goal "..." --max-agents 50 --max-parallel 5 --dashboard` | planner/replanner 自动派生 agents，输出 round-aware compact evidence |
+| CLI fixed swarm | `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20` | 固定 shard 的 20/50/100+ Codex CLI fan-out evidence |
+| Releases | <https://github.com/PIGU-PPPgu/oh-my-Dynamic/releases/latest> | Latest release、CI 状态、真实 evidence 链接 |
 
 ## ✨ 特性
 
@@ -24,15 +29,6 @@
 - 🧬 **TEA 工具进化**：LLM 驱动的工具自动分析、改进和回滚
 - 📊 **可视化**：自动生成 DAG 的 DOT/SVG 图
 - 🛡️ **安全**：TEA 工具 AST 校验 + 子进程隔离、线程安全消息总线、循环超时保护
-
-## 最新可用能力
-
-| 入口 | 命令 / 触发句 | 用途 |
-|------|---------------|------|
-| Codex App skill | `[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。` | App 内零配置编排；native subagent runtime 可用时优先继承 App 内部 LLM |
-| CLI adaptive workflow | `python scripts/record_adaptive_workflow_evidence.py --goal "..." --max-agents 50 --max-parallel 5 --dashboard` | planner/replanner 自动派生 agents，并输出 round-aware compact evidence |
-| CLI fixed swarm | `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20` | 固定 shard 的大规模 Codex CLI fan-out 证据 |
-| Releases | <https://github.com/PIGU-PPPgu/oh-my-Dynamic/releases/latest> | 查看 Latest release、CI 状态和 compact evidence 指引 |
 
 ## 能力状态
 
@@ -158,9 +154,9 @@ python -m json.tool ~/.agents/plugins/marketplace.json >/dev/null
 [$oh-my-dynamic:multi-agent-run] 用 Codex CLI swarm 启动 20 个真实 Codex agents，max_parallel=5，审查这个仓库。
 ```
 
-默认模式会优先使用 **Codex App internal subagent backend**：只要 Codex App 当前环境提供 subagent tools/runtime，插件/skill 就应启动真实 Codex subagents 来执行拆解、worker 分析、review、replan 和 synthesis。这些 subagents 默认继承当前 Codex App 内部 LLM，不需要配置 `.env`，也不需要 `OPENAI_API_KEY`、`DEEPSEEK_API_KEY` 或其他外部模型 key。
+默认模式会优先使用 **Codex App internal subagent backend**：只要 Codex App 当前环境提供 subagent tools/runtime，插件/skill 就应启动真实 Codex subagents 来执行拆解、worker 分析、review、replan 和 synthesis。这些 subagents 默认继承当前 Codex App 内部 LLM，不需要配置 `.env`，也不需要外部 provider API key。
 
-如果当前 Codex App 环境没有暴露 subagent tools/runtime，则退回到插件级 dynamic-workflow-style 编排：仍使用当前 Codex App 会话的内部 LLM 进行结构化拆解、分 lane 分析和汇总，但这不是 runtime 级 isolated subagents。
+如果当前 Codex App 环境没有暴露 subagent tools/runtime，则退回到插件级 dynamic-workflow-style 编排：仍使用当前 Codex App 会话做结构化拆解、分 lane 分析和汇总，但这不是 runtime 级 isolated subagents。需要几十/几百真实 workers 时，使用 Codex CLI swarm。
 
 只有当你明确要运行本地 Python engine、接外部模型、生成 dashboard 文件时，才需要下面的可选配置。
 
@@ -192,7 +188,7 @@ python examples/real_repo_review.py --agents 5 --max-parallel 3 \
 | 本地 `native_runtime.py` fan-out | 调用传入的 `llm_fn`，demo 默认 mock | 否（mock）/ 是（真实外部模型） | 是本地 isolated worker runtime：独立 sandbox 目录、独立 context、tool grants、trace |
 | 本地 Python engine + 外部模型 | `llm_client.py` 路由到配置的 provider | 是 | 可并发 worker，但不是 Codex App 内部 subagents |
 
-也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 但这不表示本地 Python 进程可以直接调用 Codex App 内部 LLM。本地 `native_runtime.py` 只能调用传入的 `llm_fn`：demo 默认 mock，真实模型需要你配置外部 provider。若你明确要求几十/几百个真实 Codex agents，可切到 `codex_cli_swarm.py`：它通过本机 `codex exec` 批量启动独立 Codex CLI worker，并把 JSON envelope 写入 `AgentBroker`。App-native isolated sandboxes、tool permissions、scheduler 和 trace 仍由 Codex runtime 提供，不由本地 Python 原型伪造。
+也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 本地 Python runtime 不会伪造 App-native runtime；真实大规模 evidence 由本机 `codex exec` process swarm 提供。
 
 Dynamic Workflow v2.1 可直接运行：
 

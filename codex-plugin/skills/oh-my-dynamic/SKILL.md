@@ -42,6 +42,13 @@ replanner-generated agents, and reducer recommendations. `eval_runner.py` adds
 deterministic quality evals so agent outputs can be scored without model
 credentials.
 
+Use It Now:
+
+- App: `[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。`
+- CLI adaptive: `python scripts/record_adaptive_workflow_evidence.py --goal "..." --max-agents 50 --max-parallel 5 --dashboard`
+- CLI fixed swarm: `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20`
+- Observability: `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`
+
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
 runtime mode still uses the `llm_fn` passed into it, or external provider APIs

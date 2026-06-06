@@ -34,12 +34,33 @@ Recommended manual smoke commands:
 
 ```bash
 python scripts/record_adaptive_workflow_evidence.py --dry-run --run-id adaptive-demo
-python scripts/record_adaptive_workflow_evidence.py --max-agents 50 --max-parallel 5 --dashboard
 python examples/real_repo_review.py --agents 5 --max-parallel 3
 python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
 python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 python scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md
+```
+
+`--dry-run` evidence is only a deterministic shape check. It can prove that the
+markdown/JSON/dashboard schema renders, but it does not prove real agents,
+planner quality, replanner behavior, Codex CLI login health, or sandbox
+behavior.
+
+The v2.1 real adaptive smoke can be reproduced with:
+
+```bash
+python scripts/record_adaptive_workflow_evidence.py \
+  --run-id adaptive_v210_real_$(date +%Y%m%d_%H%M%S) \
+  --goal "Release smoke for oh-my-Dynamic: run a real adaptive planner/replanner repo review with read-only Codex CLI agents, compact evidence, and no raw output committed." \
+  --max-rounds 3 \
+  --max-agents 20 \
+  --max-parallel 5 \
+  --planner-timeout-s 300 \
+  --timeout-s 600 \
+  --total-timeout-s 3600 \
+  --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' \
+  --codex-extra-arg=-c --codex-extra-arg='model_reasoning_effort="low"' \
+  --dashboard
 ```
 
 For Codex CLI installations that require explicit config overrides, pass the
@@ -50,3 +71,8 @@ python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5 \
   --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' \
   --codex-extra-arg=-c --codex-extra-arg='model_reasoning_effort="low"'
 ```
+
+Dashboards may embed compact broker snapshots, event previews, artifact
+previews, trace paths, and checkpoint paths. Before publishing dashboard HTML,
+scan it for secrets, credentials, personal data, raw prompts, stdout/stderr, and
+environment-specific paths that should not be public.

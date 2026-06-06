@@ -1319,7 +1319,7 @@ if "MALFORMED" in prompt:
     out.write_text("{not-json", encoding="utf-8")
     sys.exit(0)
 if "TIMEOUT" in prompt:
-    time.sleep(5)
+    time.sleep(8)
 payload = {
     "agent_id": agent_id,
     "status": "completed",
@@ -1345,7 +1345,7 @@ sys.exit(0)
             codex_cwd=d,
             workspace_root=str(Path(d) / "swarm"),
             max_parallel=3,
-            timeout_s=1,
+            timeout_s=2,
             keep_workdirs=False,
             broker=broker,
         )

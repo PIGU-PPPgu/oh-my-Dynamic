@@ -13,7 +13,7 @@ One-line trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
 ```
 
-Current v2.1.0 status:
+Current v2.1.x status:
 
 - Stable: Codex CLI swarm, adaptive dynamic workflow planner/replanner,
   broker reducer, `examples/real_repo_review.py`, static observability

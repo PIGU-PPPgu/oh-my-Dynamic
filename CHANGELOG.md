@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.1 - 2026-06-06
+
+- Shortened the README first screen with a `Use It Now` entry table for App skill, CLI adaptive workflow, fixed swarm, and GitHub Releases.
+- Clarified the core App-native boundary: Codex App native isolated subagents depend on Codex App runtime exposure, while the current proven large-scale path is Codex CLI process swarm.
+- Fixed the 20-agent Codex CLI smoke command and documented the fixed swarm versus adaptive workflow distinction.
+- Expanded evidence docs with a reproducible real adaptive workflow command, dry-run limitations, and dashboard sensitivity guidance.
+- Marked the v2 productization plan as historical so reviewers use README, evidence docs, and release notes for current v2.1+ entrypoints.
+
 ## 2.1.0 - 2026-06-06
 
 - Added adaptive dynamic workflow evidence recording via `scripts/record_adaptive_workflow_evidence.py`, with dry-run and real Codex CLI modes.
