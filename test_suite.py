@@ -2125,6 +2125,8 @@ def test_real_repo_review_dry_run_evidence():
         summary = json.loads(json_path.read_text(encoding="utf-8"))
         assert '"dry_run": true' in body
         assert summary["broker_thread_id"] == "dry-evidence"
+        assert summary["sanitized"] is True
+        assert summary["repo_root_label"] == "$REPO_ROOT"
         assert "dynamic workflow alignment" in body
     finally:
         shutil.rmtree(d, ignore_errors=True)
@@ -2164,6 +2166,8 @@ def test_adaptive_workflow_dry_run_evidence():
         summary = json.loads(json_path.read_text(encoding="utf-8"))
         assert "Round Timeline" in body
         assert summary["dry_run"] is True
+        assert summary["sanitized"] is True
+        assert summary["repo_root_label"] == "$REPO_ROOT"
         assert summary["planner_generated_agents"] == 5
         assert summary["replanner_generated_agents"] == 2
         assert summary["replan_triggers"][0]["kind"] == "missing_coverage"
@@ -2172,6 +2176,61 @@ def test_adaptive_workflow_dry_run_evidence():
         assert summary["followup_agents_generated"] == 2
         assert summary["rounds"][0]["source"] == "planner"
         assert summary["rounds"][1]["source"] == "replanner"
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("EvidenceSanitizer: replaces local paths and marks payloads")
+def test_evidence_sanitizer_replaces_local_paths():
+    from evidence_sanitizer import sanitize_payload, sanitize_text
+
+    root = str(Path(__file__).resolve().parent)
+    payload = sanitize_payload({
+        "trace_path": f"{root}/.orchestry/run/trace.json",
+        "home_path": f"{Path.home()}/.agents/plugins/marketplace.json",
+    })
+    assert payload["sanitized"] is True
+    assert payload["repo_root_label"] == "$REPO_ROOT"
+    assert "/Users/iguppp" not in json.dumps(payload)
+    assert "$REPO_ROOT/.orchestry/run/trace.json" == payload["trace_path"]
+    assert "$HOME/.agents/plugins/marketplace.json" == payload["home_path"]
+    assert sanitize_text(f"{root}/README.md") == "$REPO_ROOT/README.md"
+
+
+@test("Doctor: JSON checks expose pass warn fail states")
+def test_doctor_json_checks():
+    import argparse, shutil, tempfile
+    from doctor import run_doctor
+
+    d = tempfile.mkdtemp()
+    try:
+        marketplace = Path(d) / "marketplace.json"
+        marketplace.write_text('{"plugins":[{"name":"oh-my-dynamic"}]}', encoding="utf-8")
+        skill = Path(d) / "skill"
+        skill.mkdir()
+        output = Path(d) / "evidence"
+        output.mkdir()
+        args = argparse.Namespace(
+            codex_bin="definitely-not-codex",
+            cd=str(Path(__file__).resolve().parent),
+            marketplace_json=str(marketplace),
+            skill_path=str(skill),
+            orchestry_dir=str(Path(d) / ".orchestry"),
+            gateway_host="127.0.0.1",
+            gateway_token="",
+            evidence_glob=str(output / "*"),
+        )
+        result = run_doctor(args)
+        assert result["status"] == "warn"
+        checks = {check["name"]: check for check in result["checks"]}
+        assert checks["codex_cli"]["status"] == "warn"
+        assert checks["git_repo"]["status"] == "pass"
+
+        args.gateway_host = "0.0.0.0"
+        result = run_doctor(args)
+        checks = {check["name"]: check for check in result["checks"]}
+        assert result["status"] == "fail"
+        assert checks["gateway_auth"]["status"] == "fail"
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -2194,6 +2253,41 @@ def test_evidence_cli_extra_args_and_marketplace_policy():
     plugin = next(item for item in marketplace["plugins"] if item["name"] == "oh-my-dynamic")
     assert plugin["policy"]["authentication"] == "ON_USE"
     assert plugin["source"]["path"] == "./plugins/oh-my-dynamic"
+
+
+@test("Benchmark: dry run compares single fixed adaptive modes")
+def test_benchmark_dry_run():
+    import shutil, tempfile, subprocess
+
+    d = tempfile.mkdtemp()
+    try:
+        output_path = Path(d) / "benchmark.json"
+        result = subprocess.run(
+            [
+                sys.executable,
+                "scripts/run_benchmark.py",
+                "--suite",
+                "benchmarks/repo_review.json",
+                "--mode",
+                "single,fixed,adaptive",
+                "--output",
+                str(output_path),
+            ],
+            cwd=Path(__file__).resolve().parent,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        payload = json.loads(output_path.read_text(encoding="utf-8"))
+        assert payload["dry_run"] is True
+        assert payload["sanitized"] is True
+        assert payload["task_count"] >= 12
+        assert payload["mode_summaries"]["single"]["agent_count"] == 1
+        assert payload["mode_summaries"]["fixed"]["agent_count"] == 5
+        assert payload["mode_summaries"]["adaptive"]["replanner_count"] == 2
+        assert output_path.with_suffix(".md").exists()
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
 
 
 @test("WorkflowObserver: renders static dashboard evidence")
@@ -2371,6 +2465,8 @@ def test_cli_help_entrypoints():
         [sys.executable, "scripts/record_adaptive_workflow_evidence.py", "--help"],
         [sys.executable, "scripts/render_workflow_observability.py", "--help"],
         [sys.executable, "scripts/run_quality_eval.py", "--help"],
+        [sys.executable, "scripts/run_benchmark.py", "--help"],
+        [sys.executable, "-m", "doctor", "--help"],
         [sys.executable, "examples/real_repo_review.py", "--help"],
     ]
     for command in commands:
@@ -2888,7 +2984,10 @@ if __name__ == "__main__":
         test_dynamic_workflow_planner_timeout_records_evidence,
         test_real_repo_review_dry_run_evidence,
         test_adaptive_workflow_dry_run_evidence,
+        test_evidence_sanitizer_replaces_local_paths,
+        test_doctor_json_checks,
         test_evidence_cli_extra_args_and_marketplace_policy,
+        test_benchmark_dry_run,
         test_workflow_observer_static_dashboard,
         test_quality_eval_runner,
         test_cli_help_entrypoints,

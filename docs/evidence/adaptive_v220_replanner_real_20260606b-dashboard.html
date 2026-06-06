@@ -90,8 +90,8 @@ small { color:#667085; }
 <div class="row"><span class="kind">trace</span>workflow_completed<br><small>2026-06-06T14:48:49.616360+00:00 · from orchestrator to None</small><div># Broker Reduction
 
 Goal: Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. </div></div></section>
-<aside class="panel"><h2>Round Timeline</h2><div class="row"><span class="kind">round 0</span>planner · 8/8 completed · 0 failed<br><small>428.1020658016205s · /Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json</small><div>security_smoke, architecture_smoke, tests_smoke, broker_smoke, observability_smoke, evidence_quality_smoke, release_readiness_smoke, docs_install_smoke</div></div>
-<div class="row"><span class="kind">round 1</span>replanner · 2/2 completed · 0 failed<br><small>181.82233786582947s · /Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json</small><div>replanner_proof_policy_smoke, replanner_proof_evidence_smoke</div></div><h2>Replan Triggers</h2><div class="row"><span class="kind">after round 0</span>missing_coverage: replanner-proof<br><small>missing=replanner-proof · low_score=none · follow-up budget=2</small></div></aside>
+<aside class="panel"><h2>Round Timeline</h2><div class="row"><span class="kind">round 0</span>planner · 8/8 completed · 0 failed<br><small>428.1020658016205s · $REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json</small><div>security_smoke, architecture_smoke, tests_smoke, broker_smoke, observability_smoke, evidence_quality_smoke, release_readiness_smoke, docs_install_smoke</div></div>
+<div class="row"><span class="kind">round 1</span>replanner · 2/2 completed · 0 failed<br><small>181.82233786582947s · $REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json</small><div>replanner_proof_policy_smoke, replanner_proof_evidence_smoke</div></div><h2>Replan Triggers</h2><div class="row"><span class="kind">after round 0</span>missing_coverage: replanner-proof<br><small>missing=replanner-proof · low_score=none · follow-up budget=2</small></div></aside>
 </div>
 <div class="grid" style="margin-top:16px">
 <aside class="panel"><h2>Checkpoint</h2><p><strong>.orchestry/checkpoints/adaptive_v220_replanner_real_20260606b.json</strong><br><small>stop=max_rounds · completed=10 · failed=0</small></p><h2>Traces</h2><div class="row"><strong>.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/dynamic_trace.json</strong><br><small>max_rounds</small></div>
@@ -180,9 +180,9 @@ const DATA = {
       "status": "recorded",
       "parent_id": "",
       "metadata": {
-        "worker_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526",
-        "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/prompt.md",
-        "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/last_message.txt",
+        "worker_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526",
+        "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/prompt.md",
+        "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/last_message.txt",
         "timeout_s": 300,
         "sandbox": "read-only"
       },
@@ -202,8 +202,8 @@ const DATA = {
       "status": "recorded",
       "parent_id": "",
       "metadata": {
-        "worker_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526",
-        "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/last_message.txt"
+        "worker_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526",
+        "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/planner_18592526/last_message.txt"
       },
       "created_at": "2026-06-06T14:36:38.846104+00:00",
       "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
@@ -223,7 +223,7 @@ const DATA = {
       "metadata": {
         "agents": 8,
         "max_parallel": 4,
-        "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic"
+        "codex_cwd": "$REPO_ROOT"
       },
       "created_at": "2026-06-06T14:36:38.852749+00:00",
       "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
@@ -242,9 +242,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "security",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:36:38.861662+00:00",
@@ -264,9 +264,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "architecture",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:36:38.861955+00:00",
@@ -286,9 +286,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "broker",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:36:38.861993+00:00",
@@ -308,9 +308,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "tests",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:36:38.862049+00:00",
@@ -570,9 +570,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "docs_adjacent_install_review",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:40:26.910129+00:00",
@@ -592,9 +592,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "release_readiness",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:40:26.910177+00:00",
@@ -614,9 +614,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "evidence_quality",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:40:26.910194+00:00",
@@ -636,9 +636,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "observability",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:40:26.910219+00:00",
@@ -933,9 +933,9 @@ const DATA = {
       "status": "recorded",
       "parent_id": "",
       "metadata": {
-        "worker_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed",
-        "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/prompt.md",
-        "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/last_message.txt",
+        "worker_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed",
+        "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/prompt.md",
+        "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/last_message.txt",
         "timeout_s": 300,
         "sandbox": "read-only"
       },
@@ -955,8 +955,8 @@ const DATA = {
       "status": "recorded",
       "parent_id": "",
       "metadata": {
-        "worker_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed",
-        "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/last_message.txt"
+        "worker_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed",
+        "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/replanner_1752b9ed/last_message.txt"
       },
       "created_at": "2026-06-06T14:45:47.787578+00:00",
       "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
@@ -976,7 +976,7 @@ const DATA = {
       "metadata": {
         "agents": 2,
         "max_parallel": 4,
-        "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic"
+        "codex_cwd": "$REPO_ROOT"
       },
       "created_at": "2026-06-06T14:45:47.791876+00:00",
       "_source_path": ".orchestry/agent_broker_adaptive/events.jsonl"
@@ -995,9 +995,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "replanner-proof",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:45:47.795487+00:00",
@@ -1017,9 +1017,9 @@ const DATA = {
       "parent_id": "",
       "metadata": {
         "role": "replanner-proof",
-        "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke",
+        "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke",
         "workspace_mode": "shared",
-        "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+        "agent_cwd": "$REPO_ROOT",
         "worktree_branch": ""
       },
       "created_at": "2026-06-06T14:45:47.795516+00:00",
@@ -1203,7 +1203,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:39:21.526144+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_4f051c4df668.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_4f051c4df668.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1219,7 +1219,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:39:41.030926+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_14ed8f99dfa7.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_14ed8f99dfa7.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1235,7 +1235,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:40:01.765452+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_a5340a2a5e0f.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_a5340a2a5e0f.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1251,7 +1251,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:40:26.907006+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_24554fa6a54e.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_24554fa6a54e.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1267,7 +1267,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:43:02.328166+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_eeca706c94a8.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_eeca706c94a8.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1283,7 +1283,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:43:19.783351+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_5c994635bf38.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_5c994635bf38.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1299,7 +1299,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:43:23.605711+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_29c0d12d9ca5.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_29c0d12d9ca5.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1315,7 +1315,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:43:46.947802+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_c2577811a46a.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_c2577811a46a.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1331,7 +1331,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:48:48.593820+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_b2807d4a9212.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_b2807d4a9212.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1347,7 +1347,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:48:49.608441+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_e3db6bcbb5a6.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_e3db6bcbb5a6.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     },
     {
@@ -1364,7 +1364,7 @@ const DATA = {
       "thread_id": "adaptive_v220_replanner_real_20260606b",
       "task_id": "",
       "created_at": "2026-06-06T14:48:49.615386+00:00",
-      "blob_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_41972ebb4bd6.txt",
+      "blob_path": "$REPO_ROOT/.orchestry/agent_broker_adaptive/artifact_blobs/artifact_41972ebb4bd6.txt",
       "_source_path": ".orchestry/agent_broker_adaptive/artifacts.jsonl"
     }
   ],
@@ -1389,7 +1389,7 @@ const DATA = {
             "docs_install_smoke"
           ],
           "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
-          "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
+          "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
           "completed": 8,
           "failed": 0,
           "duration_s": 428.1020658016205
@@ -1401,7 +1401,7 @@ const DATA = {
             "replanner_proof_evidence_smoke"
           ],
           "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
-          "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
+          "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
           "completed": 2,
           "failed": 0,
           "duration_s": 181.82233786582947
@@ -1462,9 +1462,9 @@ const DATA = {
       "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
       "started_at": "2026-06-06T22:36:38.850097",
       "codex_bin": "codex",
-      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
-      "workspace_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0",
-      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b",
+      "codex_cwd": "$REPO_ROOT",
+      "workspace_root": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0",
+      "swarm_root": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b",
       "max_parallel": 4,
       "timeout_s": 600,
       "total_timeout_s": 3600,
@@ -1660,11 +1660,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:40:26.908943",
           "duration_s": 228.04756426811218,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/security_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_24554fa6a54e"
           },
@@ -1672,7 +1672,7 @@ const DATA = {
             "message_23e47aaae5da"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
@@ -1686,11 +1686,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:39:41.033448",
           "duration_s": 182.1718819141388,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/architecture_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_14ed8f99dfa7"
           },
@@ -1698,7 +1698,7 @@ const DATA = {
             "message_36734fc1404b"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
@@ -1712,11 +1712,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:39:21.530410",
           "duration_s": 162.66870784759521,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/tests_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_4f051c4df668"
           },
@@ -1724,7 +1724,7 @@ const DATA = {
             "message_b72a07477fd6"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
@@ -1738,11 +1738,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:40:01.767646",
           "duration_s": 202.9060161113739,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/broker_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_a5340a2a5e0f"
           },
@@ -1750,7 +1750,7 @@ const DATA = {
             "message_4f9df8697763"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
@@ -1764,11 +1764,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:43:23.608367",
           "duration_s": 176.69860005378723,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/observability_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_29c0d12d9ca5"
           },
@@ -1776,7 +1776,7 @@ const DATA = {
             "message_4134d42fbcfa"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
@@ -1790,11 +1790,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:43:02.330273",
           "duration_s": 155.4203917980194,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/evidence_quality_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_eeca706c94a8"
           },
@@ -1802,7 +1802,7 @@ const DATA = {
             "message_09dd25c250c2"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
@@ -1816,11 +1816,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:43:19.785340",
           "duration_s": 172.87553095817566,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/release_readiness_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_5c994635bf38"
           },
@@ -1828,7 +1828,7 @@ const DATA = {
             "message_991c0694a2ff"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
@@ -1842,11 +1842,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:43:46.950409",
           "duration_s": 200.0404498577118,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/docs_install_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_c2577811a46a"
           },
@@ -1854,14 +1854,14 @@ const DATA = {
             "message_e167b63c39d1"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
         }
       ],
-      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b",
-      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+      "swarm_root": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b",
+      "codex_cwd": "$REPO_ROOT",
       "topological_layers": [
         [
           "security_smoke",
@@ -1890,8 +1890,8 @@ const DATA = {
       ],
       "broker_thread_id": "adaptive_v220_replanner_real_20260606b",
       "broker_event_count": 36,
-      "manifest_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/manifest.json",
-      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
+      "manifest_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/manifest.json",
+      "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
       "_source_path": ".orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json"
     },
     {
@@ -1899,9 +1899,9 @@ const DATA = {
       "goal": "Release smoke for oh-my-Dynamic v2.2: create exactly 8 narrow initial planner agents for security, architecture, tests, broker, observability, evidence quality, release readiness, and docs-adjacent install review. Do not create follow-up agents in the planner round. After round 0, use the deterministic replan trigger policy to add exactly 2 focused replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only, avoid secrets/raw logs, and return compact evidence only.",
       "started_at": "2026-06-06T22:45:47.790122",
       "codex_bin": "codex",
-      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
-      "workspace_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1",
-      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b",
+      "codex_cwd": "$REPO_ROOT",
+      "workspace_root": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1",
+      "swarm_root": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b",
       "max_parallel": 4,
       "timeout_s": 600,
       "total_timeout_s": 3600,
@@ -1975,11 +1975,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:48:48.596245",
           "duration_s": 180.80093693733215,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_policy_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_b2807d4a9212"
           },
@@ -1987,7 +1987,7 @@ const DATA = {
             "message_e43cbe1c8fc0"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
@@ -2001,11 +2001,11 @@ const DATA = {
           "completed_at": "2026-06-06T22:48:49.610638",
           "duration_s": 181.81527400016785,
           "returncode": 0,
-          "work_dir": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke",
-          "prompt_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/prompt.md",
-          "output_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/last_message.txt",
-          "stdout_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/stdout.txt",
-          "stderr_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/stderr.txt",
+          "work_dir": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke",
+          "prompt_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/prompt.md",
+          "output_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/last_message.txt",
+          "stdout_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/stdout.txt",
+          "stderr_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/replanner_proof_evidence_smoke/stderr.txt",
           "artifact_ids": {
             "result": "artifact_e3db6bcbb5a6"
           },
@@ -2013,14 +2013,14 @@ const DATA = {
             "message_fdef7feead4c"
           ],
           "workspace_mode": "shared",
-          "agent_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+          "agent_cwd": "$REPO_ROOT",
           "worktree_branch": "",
           "worktree_path": "",
           "error": ""
         }
       ],
-      "swarm_root": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b",
-      "codex_cwd": "/Users/iguppp/Desktop/oh-my-Dynamic",
+      "swarm_root": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b",
+      "codex_cwd": "$REPO_ROOT",
       "topological_layers": [
         [
           "replanner_proof_policy_smoke",
@@ -2035,8 +2035,8 @@ const DATA = {
       ],
       "broker_thread_id": "adaptive_v220_replanner_real_20260606b",
       "broker_event_count": 48,
-      "manifest_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/manifest.json",
-      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
+      "manifest_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/manifest.json",
+      "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
       "_source_path": ".orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json"
     },
     {
@@ -2056,7 +2056,7 @@ const DATA = {
             "docs_install_smoke"
           ],
           "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
-          "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
+          "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
           "completed": 8,
           "failed": 0,
           "duration_s": 428.1020658016205
@@ -2068,7 +2068,7 @@ const DATA = {
             "replanner_proof_evidence_smoke"
           ],
           "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
-          "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
+          "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
           "completed": 2,
           "failed": 0,
           "duration_s": 181.82233786582947
@@ -2255,7 +2255,7 @@ const DATA = {
           "docs_install_smoke"
         ],
         "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
-        "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
+        "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json",
         "completed": 8,
         "failed": 0,
         "duration_s": 428.1020658016205
@@ -2267,7 +2267,7 @@ const DATA = {
           "replanner_proof_evidence_smoke"
         ],
         "swarm_run_id": "adaptive_v220_replanner_real_20260606b",
-        "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
+        "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json",
         "completed": 2,
         "failed": 0,
         "duration_s": 181.82233786582947
@@ -2454,7 +2454,7 @@ const DATA = {
       "completed": 8,
       "failed": 0,
       "duration_s": 428.1020658016205,
-      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json"
+      "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json"
     },
     {
       "round_index": 1,
@@ -2467,7 +2467,7 @@ const DATA = {
       "completed": 2,
       "failed": 0,
       "duration_s": 181.82233786582947,
-      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json"
+      "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json"
     }
   ],
   "replan_triggers": [

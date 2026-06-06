@@ -32,7 +32,7 @@ transport surface is needed.
 prompts, structured JSON envelopes, and AgentBroker ingestion.
 `codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
 process-level fan-out.
-`dynamic_workflow.py` defines the v2.2 planner/replanner runtime: start with a
+`dynamic_workflow.py` defines the v2.4 planner/replanner runtime: start with a
 planner, fan out Codex CLI workers, let a replanner add follow-up agents, then
 run a broker-aware reducer over artifacts, failures, dependency graph, review
 responses, optional worktree diff artifacts, checkpoint/resume state, and
@@ -40,9 +40,11 @@ streaming workflow events. A deterministic `ReplanTriggerPolicy` can ask the
 replanner for follow-up agents when required coverage is missing, low-score
 outputs appear, or workers fail. `scripts/record_adaptive_workflow_evidence.py`
 records round-aware compact evidence that separates planner-generated agents,
-replanner-generated agents, trigger reasons, and reducer recommendations. `eval_runner.py` adds
-deterministic quality evals so agent outputs can be scored without model
-credentials.
+replanner-generated agents, trigger reasons, and reducer recommendations.
+`eval_runner.py` adds deterministic quality evals so agent outputs can be
+scored without model credentials. `doctor.py`, `evidence_sanitizer.py`, and
+`scripts/run_benchmark.py` add adoption checks, public evidence redaction, and
+single/fixed/adaptive benchmark shape checks.
 
 Use It Now:
 
@@ -51,6 +53,8 @@ Use It Now:
 - CLI replanner proof: add `--force-missing-coverage replanner-proof --max-rounds 2`
 - CLI fixed swarm: `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20`
 - Observability: `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`
+- Doctor: `python -m doctor --json`
+- Benchmark: `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v240.json`
 
 Boundary: the local Python `native_runtime.py` cannot directly call the Codex
 App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python

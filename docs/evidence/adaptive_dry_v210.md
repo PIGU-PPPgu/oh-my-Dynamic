@@ -68,7 +68,9 @@ Compact JSON: `adaptive_dry_v210.json`
   "known_limitations": [
     "Dry run only; no Codex CLI workers were launched.",
     "Use a real run for release evidence."
-  ]
+  ],
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
 }
 ```
 

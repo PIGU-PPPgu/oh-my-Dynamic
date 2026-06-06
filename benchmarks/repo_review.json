@@ -1,0 +1,101 @@
+{
+  "name": "repo_review_productization_v1",
+  "tasks": [
+    {
+      "id": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "expected_keywords": ["subprocess", "sandbox", "secret", "auth"],
+      "required_evidence": ["file", "line", "risk"],
+      "min_score": 0.65,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "security_broker_poisoning",
+      "goal": "Review broker artifact poisoning and malformed envelope risks.",
+      "expected_keywords": ["broker", "artifact", "envelope", "validation"],
+      "required_evidence": ["file", "line", "recommendation"],
+      "min_score": 0.65,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "expected_keywords": ["install", "README", "dry-run", "command"],
+      "required_evidence": ["command", "expected", "gap"],
+      "min_score": 0.65,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "expected_keywords": ["App-native", "Codex CLI", "process swarm", "boundary"],
+      "required_evidence": ["README", "risk", "recommendation"],
+      "min_score": 0.65,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "expected_keywords": ["planner", "replanner", "trigger", "reducer"],
+      "required_evidence": ["test", "coverage", "gap"],
+      "min_score": 0.70,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "tests_failure_modes",
+      "goal": "Review failure-mode coverage for worker timeout, malformed JSON, and dependency failure.",
+      "expected_keywords": ["timeout", "malformed", "dependency", "failed"],
+      "required_evidence": ["test", "risk", "recommendation"],
+      "min_score": 0.65,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "expected_keywords": ["evidence", "sanitize", "secret", "path"],
+      "required_evidence": ["file", "scan", "recommendation"],
+      "min_score": 0.70,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "dashboard_observability",
+      "goal": "Review dashboard observability for timeline, rounds, triggers, and artifacts.",
+      "expected_keywords": ["dashboard", "timeline", "round", "artifact"],
+      "required_evidence": ["trace", "agent", "gap"],
+      "min_score": 0.65,
+      "allowed_modes": ["fixed", "adaptive"]
+    },
+    {
+      "id": "release_gates",
+      "goal": "Review release gates, CI, coverage, security scans, and checklist completeness.",
+      "expected_keywords": ["CI", "coverage", "bandit", "release"],
+      "required_evidence": ["command", "expected", "gap"],
+      "min_score": 0.70,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "benchmark_claims",
+      "goal": "Review whether benchmark evidence proves quality improvement over a single agent.",
+      "expected_keywords": ["benchmark", "single", "fixed", "adaptive"],
+      "required_evidence": ["score", "comparison", "recommendation"],
+      "min_score": 0.70,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    },
+    {
+      "id": "worktree_write_isolation",
+      "goal": "Review write-capable swarm isolation and no-auto-merge behavior.",
+      "expected_keywords": ["worktree", "patch", "merge", "isolation"],
+      "required_evidence": ["file", "risk", "recommendation"],
+      "min_score": 0.65,
+      "allowed_modes": ["fixed", "adaptive"]
+    },
+    {
+      "id": "llm_provider_docs",
+      "goal": "Review model-provider routing docs and Chinese model support clarity.",
+      "expected_keywords": ["GLM", "Qwen", "DeepSeek", "provider"],
+      "required_evidence": ["README", "command", "gap"],
+      "min_score": 0.65,
+      "allowed_modes": ["single", "fixed", "adaptive"]
+    }
+  ]
+}

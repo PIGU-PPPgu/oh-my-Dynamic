@@ -8,21 +8,28 @@ Use this checklist before tagging or pushing a public release.
 git status --short
 python3 -m pip install -e ".[dev]"
 bash -n install_plugin.sh
+test -f LICENSE
 python3 -m json.tool .agents/plugins/marketplace.json >/dev/null
 python3 -m py_compile *.py examples/*.py scripts/*.py
 python3 test_suite.py
+python3 -m pytest tests -q
 python3 -m coverage run test_suite.py
 python3 -m coverage report --fail-under=70
+python3 -m bandit -r . -c pyproject.toml
 python3 -m dynamic_workflow --help >/dev/null
 python3 -m codex_cli_swarm --help >/dev/null
 python3 -m codex_swarm_cli --help >/dev/null
+python3 -m doctor --json >/dev/null
 python3 scripts/record_swarm_evidence.py --help >/dev/null
 python3 scripts/record_adaptive_workflow_evidence.py --help >/dev/null
 python3 scripts/render_workflow_observability.py --help >/dev/null
 python3 scripts/run_quality_eval.py --help >/dev/null
+python3 scripts/run_benchmark.py --help >/dev/null
 python3 scripts/run_quality_eval.py --sample --output /tmp/ohmy-quality-eval.md
+python3 scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/ohmy-benchmark.json
 python3 examples/codex_cli_swarm_review.py --help >/dev/null
 python3 examples/real_repo_review.py --help >/dev/null
+! grep -R "/Users/" docs/evidence
 ```
 
 ## Optional Stress Gates
@@ -36,6 +43,7 @@ python3 scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 python3 scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
 python3 scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 python3 scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md
+python3 scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v240.json
 ```
 
 ## Version And Tag

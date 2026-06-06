@@ -18,13 +18,15 @@ Compact JSON: `swarm_100_agents_codex_cli_run_98b78a645c.json`
     "-c",
     "model_reasoning_effort=\"low\""
   ],
-  "trace_manifest_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/evidence_swarm/codex_cli_run_98b78a645c/manifest.json",
-  "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/evidence_swarm/codex_cli_run_98b78a645c/trace.json",
+  "trace_manifest_path": "$REPO_ROOT/.orchestry/evidence_swarm/codex_cli_run_98b78a645c/manifest.json",
+  "trace_path": "$REPO_ROOT/.orchestry/evidence_swarm/codex_cli_run_98b78a645c/trace.json",
   "known_limitations": [
     "Manual smoke evidence; not part of default CI.",
     "Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.",
     "Sample summaries are truncated and may omit detailed findings."
-  ]
+  ],
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
 }
 ```
 

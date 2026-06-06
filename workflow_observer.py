@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 import json
 
 from workflow_config import REPLAN_COMPLETENESS_THRESHOLD
+from evidence_sanitizer import sanitize_value
 
 
 def render_observability_dashboard(
@@ -19,7 +20,7 @@ def render_observability_dashboard(
     if not run_id.strip():
         raise ValueError("run_id is required")
     source_path = Path(source)
-    data = collect_observability_data(run_id, source_path)
+    data = sanitize_value(collect_observability_data(run_id, source_path))
     output_path = Path(output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(_render_html(data), encoding="utf-8")
@@ -105,10 +106,11 @@ def _collect_traces(source: Path, run_id: str) -> List[Dict[str, Any]]:
     for path in sorted(source.rglob("*.json")):
         if path.name in {"agents.json"}:
             continue
+        payload = None
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
-        except Exception:
-            continue
+        except (OSError, json.JSONDecodeError):
+            payload = None
         if not isinstance(payload, dict):
             continue
         if str(payload.get("run_id", "")) == run_id:

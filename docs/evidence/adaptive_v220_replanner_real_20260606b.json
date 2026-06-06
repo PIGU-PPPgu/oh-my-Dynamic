@@ -26,7 +26,7 @@
       "completed": 8,
       "failed": 0,
       "duration_s": 428.1,
-      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json"
+      "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_0/adaptive_v220_replanner_real_20260606b/trace.json"
     },
     {
       "round_index": 1,
@@ -39,7 +39,7 @@
       "completed": 2,
       "failed": 0,
       "duration_s": 181.82,
-      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json"
+      "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/round_1/adaptive_v220_replanner_real_20260606b/trace.json"
     }
   ],
   "replan_triggers": [
@@ -123,10 +123,12 @@
     "artifact_b2807d4a9212",
     "artifact_e3db6bcbb5a6"
   ],
-  "dynamic_trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/dynamic_trace.json",
+  "dynamic_trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v220_replanner_real_20260606b/dynamic_trace.json",
   "known_limitations": [
     "Manual smoke evidence; not part of default CI.",
     "Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.",
     "This is Codex CLI process-swarm fan-out, not App-native isolated subagents."
-  ]
+  ],
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
 }

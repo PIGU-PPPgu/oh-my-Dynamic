@@ -19,6 +19,13 @@ machine-readable `{run_id}.json`. Together they should include:
 - top findings
 - human follow-up
 - known limitations
+- `sanitized: true`
+- `repo_root_label: "$REPO_ROOT"`
+
+Public evidence must not contain local absolute paths such as a real home
+directory. Evidence writers normalize repository paths to
+`$REPO_ROOT/...`, home paths to `$HOME/...`, and raw trace locations to compact
+`.orchestry/...` references when possible.
 
 Quality eval reports are deterministic and can be committed when they are
 generated from sample or redacted responses. They should include:
@@ -40,6 +47,7 @@ python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
 python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 python scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md
+python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v240.json
 ```
 
 `--dry-run` evidence is only a deterministic shape check. It can prove that the
@@ -97,3 +105,10 @@ Dashboards may embed compact broker snapshots, event previews, artifact
 previews, trace paths, and checkpoint paths. Before publishing dashboard HTML,
 scan it for secrets, credentials, personal data, raw prompts, stdout/stderr, and
 environment-specific paths that should not be public.
+
+Recommended scan before committing evidence:
+
+```bash
+! grep -R "$HOME" docs/evidence
+python -m doctor --json
+```

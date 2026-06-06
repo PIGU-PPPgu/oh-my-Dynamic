@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.4.0 - 2026-06-06
+
+- Added public evidence sanitization with `$REPO_ROOT` / `$HOME` normalization and `sanitized: true` metadata for compact evidence outputs and dashboards.
+- Added `oh-my-dynamic-doctor` / `python -m doctor` for local install, Codex CLI, marketplace, writable workspace, gateway auth, and evidence redaction checks.
+- Added MIT `LICENSE`, `docs/THREAT_MODEL.md`, README trust gates, and release checklist gates for Bandit, doctor, benchmark dry-run, LICENSE, and evidence path scans.
+- Added deterministic benchmark fixtures and `scripts/run_benchmark.py` to compare single, fixed swarm, and adaptive workflow modes without launching Codex CLI in CI.
+- Added pytest smoke tests under `tests/` while keeping `python test_suite.py` as the compatibility test entrypoint.
+- CI now runs pytest smoke, Bandit, benchmark dry-run, doctor, and evidence redaction scans in addition to existing test, coverage, help, and quality eval gates.
+
 ## 2.2.0 - 2026-06-06
 
 - Added `ReplanTriggerPolicy`, a deterministic replanner trigger layer for missing coverage, low-score agents, and failed agents.

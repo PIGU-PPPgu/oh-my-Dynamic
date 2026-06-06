@@ -1,0 +1,358 @@
+{
+  "benchmark": "repo_review_productization_v1",
+  "dry_run": true,
+  "created_at": 1780760053,
+  "duration_s": 0.0,
+  "modes": [
+    "single",
+    "fixed",
+    "adaptive"
+  ],
+  "task_count": 12,
+  "mode_summaries": {
+    "single": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "avg_score": 1.0,
+      "terminal_state": "passed",
+      "agent_count": 1,
+      "replanner_count": 0,
+      "failure_rate": 0.0
+    },
+    "fixed": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "avg_score": 1.0,
+      "terminal_state": "passed",
+      "agent_count": 5,
+      "replanner_count": 0,
+      "failure_rate": 0.0
+    },
+    "adaptive": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "avg_score": 1.0,
+      "terminal_state": "passed",
+      "agent_count": 7,
+      "replanner_count": 2,
+      "failure_rate": 0.0
+    }
+  },
+  "task_results": [
+    {
+      "mode": "single",
+      "task_id": "security_command_surface",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "security_broker_poisoning",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "install_five_minute",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "docs_boundary_claims",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "tests_dynamic_workflow",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "tests_failure_modes",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "evidence_redaction",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "release_gates",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "benchmark_claims",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "single",
+      "task_id": "llm_provider_docs",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "security_command_surface",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "security_broker_poisoning",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "install_five_minute",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "docs_boundary_claims",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "tests_dynamic_workflow",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "tests_failure_modes",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "evidence_redaction",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "dashboard_observability",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "release_gates",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "benchmark_claims",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "worktree_write_isolation",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "fixed",
+      "task_id": "llm_provider_docs",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "security_command_surface",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "security_broker_poisoning",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "install_five_minute",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "docs_boundary_claims",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "tests_dynamic_workflow",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "tests_failure_modes",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "evidence_redaction",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "dashboard_observability",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "release_gates",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "benchmark_claims",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "worktree_write_isolation",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    },
+    {
+      "mode": "adaptive",
+      "task_id": "llm_provider_docs",
+      "score": 1.0,
+      "passed": true,
+      "agent_count": 7,
+      "replanner_count": 2,
+      "duration_s": 0.0
+    }
+  ],
+  "known_limitations": [
+    "Dry-run benchmark validates scoring shape only; it does not launch Codex CLI.",
+    "Manual real benchmark evidence should be committed separately."
+  ],
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
+}

@@ -43,7 +43,7 @@ Compact JSON: `adaptive_v210_real_20260606.json`
       "completed": 20,
       "failed": 0,
       "duration_s": 757.81,
-      "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v210_real_20260606/round_0/adaptive_v210_real_20260606/trace.json"
+      "trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v210_real_20260606/round_0/adaptive_v210_real_20260606/trace.json"
     }
   ],
   "planner_generated_agents": 20,
@@ -86,12 +86,14 @@ Compact JSON: `adaptive_v210_real_20260606.json`
     "artifact_f9ec33178892",
     "artifact_2a09d9225d04"
   ],
-  "dynamic_trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/adaptive_workflow/adaptive_v210_real_20260606/dynamic_trace.json",
+  "dynamic_trace_path": "$REPO_ROOT/.orchestry/adaptive_workflow/adaptive_v210_real_20260606/dynamic_trace.json",
   "known_limitations": [
     "Manual smoke evidence; not part of default CI.",
     "Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.",
     "This is Codex CLI process-swarm fan-out, not App-native isolated subagents."
-  ]
+  ],
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
 }
 ```
 

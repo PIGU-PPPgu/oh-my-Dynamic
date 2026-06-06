@@ -1,17 +1,40 @@
 # oh-my-Dynamic 🔄
 
+[![tests](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
+[![coverage](https://img.shields.io/badge/coverage-81%25-brightgreen)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
+[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 **多 Agent 编排引擎 / Codex Dynamic Workflows 原型** —— 对齐 Anthropic Dynamic Workflows + VMAO 论文架构（arXiv 2603.11445），支持 Codex App skill、Codex CLI swarm、adaptive planner/replanner 和主流大模型。
 
-> 核心边界：App-native isolated subagents 取决于 Codex App runtime 是否暴露该能力；当前可验证的大规模真实能力是 **Codex CLI process swarm**，默认 read-only，并通过 broker/evidence/dashboard 留证。
+> 核心边界：当前可验证的大规模真实能力是 **Codex CLI process swarm**，不是 Codex App-native isolated subagents；App-native isolated subagents 仍取决于 Codex App runtime 是否暴露该能力。默认 read-only，并通过 broker/evidence/dashboard 留证。
 
 ## Use It Now
 
-| 入口 | 命令 / 触发句 | 用途 |
-|------|---------------|------|
-| Codex App skill | `[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。` | App 内零配置编排；native subagent runtime 可用时继承 App 内部 LLM |
-| CLI adaptive workflow | `python scripts/record_adaptive_workflow_evidence.py --goal "..." --required-coverage security,tests,docs --force-missing-coverage docs --max-agents 50 --max-parallel 5 --dashboard` | planner/replanner 自动派生 agents，输出 round-aware compact evidence 和 replan trigger proof |
-| CLI fixed swarm | `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20` | 固定 shard 的 20/50/100+ Codex CLI fan-out evidence |
-| Releases | <https://github.com/PIGU-PPPgu/oh-my-Dynamic/releases/latest> | Latest release、CI 状态、真实 evidence 链接 |
+| 入口 | 命令 | 证明什么 |
+|------|------|----------|
+| 5 分钟 dry-run | `python examples/real_repo_review.py --dry-run --run-id five-minute-demo` | 安装、JSON/Markdown evidence 形状、无 API key 路径 |
+| 真实 5-agent repo review | `python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard` | 真实 Codex CLI workers、broker reducer、dashboard |
+| v2.2 adaptive replanner proof | `python scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs,replanner-proof --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dashboard` | planner 生成 agents，trigger policy 发现缺口，replanner 追加 follow-up agents |
+
+Latest release and committed evidence: <https://github.com/PIGU-PPPgu/oh-my-Dynamic/releases/latest>
+
+Codex App skill 触发句仍可用：
+
+```text
+[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
+```
+
+## Trust Gates
+
+| Gate | Command |
+|------|---------|
+| Test + coverage | `python test_suite.py && python -m coverage run test_suite.py && python -m coverage report --fail-under=70` |
+| Security scan | `python -m bandit -r . -c pyproject.toml` |
+| Local install doctor | `python -m doctor --json` |
+| Deterministic benchmark | `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark.json` |
+| Evidence redaction | `! grep -R "/Users/" docs/evidence` |
+
+Committed benchmark baseline: [`docs/evidence/benchmark_v240.md`](docs/evidence/benchmark_v240.md). It is a deterministic dry-run shape check, not a real Codex CLI quality benchmark.
 
 ## ✨ 特性
 

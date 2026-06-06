@@ -22,6 +22,7 @@ if str(ROOT) not in sys.path:
 from agent_broker import AgentBroker
 from broker_reducer import reduce_broker_thread
 from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+from evidence_sanitizer import sanitize_payload
 from workflow_observer import render_observability_dashboard
 
 
@@ -41,6 +42,7 @@ def _commit_sha(cwd: str) -> str:
 
 def _write_evidence(path: Path, payload: Dict[str, object], samples: List[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    payload = sanitize_payload(payload)
     json_path = path.with_suffix(".json")
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     lines = [

@@ -21,6 +21,7 @@ if str(ROOT) not in sys.path:
 
 from agent_broker import AgentBroker
 from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+from evidence_sanitizer import sanitize_payload
 
 
 def _commit_sha() -> str:
@@ -106,6 +107,7 @@ def main() -> None:
             "Sample summaries are truncated and may omit detailed findings.",
         ],
     }
+    payload = sanitize_payload(payload)
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     lines = [
         f"# Codex CLI Swarm Evidence: {args.agents} agents",

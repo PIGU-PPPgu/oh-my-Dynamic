@@ -8,10 +8,12 @@
   "duration_s": 383.92,
   "max_parallel": 3,
   "broker_thread_id": "real_repo_review_v2_clean_20260606",
-  "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/trace.json",
+  "trace_path": "$REPO_ROOT/.orchestry/real_repo_review/real_repo_review_v2_clean_20260606/trace.json",
   "checkpoint_path": "",
   "dry_run": false,
   "reducer_state": "completed",
   "risk_summary": "No failed agents in Codex CLI trace.",
-  "reducer_risk_summary": "No reducer-detected blocking risks."
+  "reducer_risk_summary": "No reducer-detected blocking risks.",
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
 }

@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from dynamic_workflow import DynamicWorkflowRuntime, DynamicWorkflowTrace
+from evidence_sanitizer import sanitize_payload
 from replan_trigger_policy import ReplanTriggerPolicy
 from workflow_observer import render_observability_dashboard
 
@@ -182,6 +183,7 @@ def _dry_payload(args: argparse.Namespace) -> Dict[str, Any]:
 def _write_evidence(output_dir: str, payload: Dict[str, Any]) -> Path:
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    payload = sanitize_payload(payload)
     md_path = out_dir / f"{payload['run_id']}.md"
     json_path = md_path.with_suffix(".json")
     json_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

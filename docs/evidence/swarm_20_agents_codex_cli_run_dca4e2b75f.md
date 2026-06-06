@@ -11,8 +11,8 @@ Compact JSON: `swarm_20_agents_codex_cli_run_dca4e2b75f.json`
   "agents_failed": 0,
   "duration_s": 620.52,
   "max_parallel": 5,
-  "trace_manifest_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/evidence_swarm/codex_cli_run_dca4e2b75f/manifest.json",
-  "trace_path": "/Users/iguppp/Desktop/oh-my-Dynamic/.orchestry/evidence_swarm/codex_cli_run_dca4e2b75f/trace.json",
+  "trace_manifest_path": "$REPO_ROOT/.orchestry/evidence_swarm/codex_cli_run_dca4e2b75f/manifest.json",
+  "trace_path": "$REPO_ROOT/.orchestry/evidence_swarm/codex_cli_run_dca4e2b75f/trace.json",
   "known_limitations": [
     "Manual smoke evidence; not part of default CI.",
     "Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.",
@@ -24,7 +24,9 @@ Compact JSON: `swarm_20_agents_codex_cli_run_dca4e2b75f.json`
     "service_tier=\"fast\"",
     "-c",
     "model_reasoning_effort=\"low\""
-  ]
+  ],
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
 }
 ```
 
