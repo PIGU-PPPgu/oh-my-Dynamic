@@ -34,6 +34,7 @@ Recommended manual smoke commands:
 
 ```bash
 python scripts/record_adaptive_workflow_evidence.py --dry-run --run-id adaptive-demo
+python scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dashboard
 python examples/real_repo_review.py --agents 5 --max-parallel 3
 python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
@@ -55,6 +56,26 @@ python scripts/record_adaptive_workflow_evidence.py \
   --max-rounds 3 \
   --max-agents 20 \
   --max-parallel 5 \
+  --planner-timeout-s 300 \
+  --timeout-s 600 \
+  --total-timeout-s 3600 \
+  --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' \
+  --codex-extra-arg=-c --codex-extra-arg='model_reasoning_effort="low"' \
+  --dashboard
+```
+
+The v2.2 real replanner proof should leave a controlled coverage gap and verify
+`replanner_generated_agents > 0`:
+
+```bash
+python scripts/record_adaptive_workflow_evidence.py \
+  --run-id adaptive_v220_replanner_real_$(date +%Y%m%d_%H%M%S) \
+  --goal "Release smoke for oh-my-Dynamic v2.2: create 8 narrow planner agents for security, architecture, tests, broker, observability, evidence, release, and docs-adjacent review; then use the deterministic trigger policy to add 2 to 5 replanner follow-up agents for the forced replanner-proof coverage lane. Keep all work read-only and return compact evidence only." \
+  --required-coverage security,architecture,tests,broker,observability,evidence,release,replanner-proof \
+  --force-missing-coverage replanner-proof \
+  --max-rounds 2 \
+  --max-agents 12 \
+  --max-parallel 4 \
   --planner-timeout-s 300 \
   --timeout-s 600 \
   --total-timeout-s 3600 \

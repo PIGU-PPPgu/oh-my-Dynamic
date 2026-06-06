@@ -29,7 +29,7 @@ python3 examples/real_repo_review.py --help >/dev/null
 
 ```bash
 python3 test_suite.py --stress
-python3 scripts/record_adaptive_workflow_evidence.py --dry-run --run-id adaptive-release-demo --output-dir /tmp/ohmy-evidence
+python3 scripts/record_adaptive_workflow_evidence.py --dry-run --run-id adaptive-release-demo --required-coverage security,tests,docs --force-missing-coverage docs --output-dir /tmp/ohmy-evidence
 python3 examples/codex_cli_swarm_review.py --agents 20 --max-parallel 5 --total-timeout-s 3600
 python3 examples/real_repo_review.py --agents 5 --max-parallel 3
 python3 scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
@@ -46,15 +46,15 @@ python3 scripts/run_quality_eval.py --sample --output docs/evidence/sample_quali
 4. Tag the exact commit:
 
 ```bash
-git tag v2.1.0
+git tag vX.Y.Z
 git push origin main --tags
 ```
 
 5. Create or update the GitHub Release and mark the newest stable tag as Latest:
 
 ```bash
-gh release create v2.1.0 --latest --title "v2.1.0 - Adaptive Dynamic Workflow" --notes-file /tmp/ohmy-v2.1.0-release.md
-gh release view v2.1.0
+gh release create vX.Y.Z --latest --title "vX.Y.Z - Release Title" --notes-file /tmp/ohmy-release.md
+gh release view vX.Y.Z
 ```
 
 ## Codex App Install Check

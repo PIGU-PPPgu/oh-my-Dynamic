@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from dynamic_workflow import DynamicWorkflowRuntime, DynamicWorkflowTrace
+from replan_trigger_policy import ReplanTriggerPolicy
 from workflow_observer import render_observability_dashboard
 
 
@@ -43,6 +44,8 @@ def _round_rows(trace: DynamicWorkflowTrace) -> List[Dict[str, Any]]:
 def _payload_from_trace(args: argparse.Namespace, trace: DynamicWorkflowTrace, duration_s: float) -> Dict[str, Any]:
     summary = trace.summary()
     rounds = _round_rows(trace)
+    trigger_summary = _trigger_summary(trace.replan_trigger_records)
+    trigger_summary["followup_agents_generated"] = sum(round_item["agent_count"] for round_item in rounds[1:])
     return {
         "run_id": trace.run_id,
         "goal": args.goal,
@@ -54,6 +57,7 @@ def _payload_from_trace(args: argparse.Namespace, trace: DynamicWorkflowTrace, d
         "agents_failed": summary["failed"],
         "agents_total": summary["agents"],
         "rounds": rounds,
+        **trigger_summary,
         "planner_generated_agents": rounds[0]["agent_count"] if rounds else 0,
         "replanner_generated_agents": sum(round_item["agent_count"] for round_item in rounds[1:]),
         "duration_s": round(duration_s, 2),
@@ -63,6 +67,8 @@ def _payload_from_trace(args: argparse.Namespace, trace: DynamicWorkflowTrace, d
         "sandbox": args.sandbox,
         "planner_sandbox": args.planner_sandbox,
         "codex_extra_args": args.codex_extra_arg,
+        "required_coverage": _csv_items(args.required_coverage),
+        "force_missing_coverage": _csv_items(args.force_missing_coverage),
         "broker_thread_id": trace.broker_thread_id,
         "stop_reason": trace.stop_reason,
         "terminal_state": trace.reducer_result.terminal_state,
@@ -119,6 +125,34 @@ def _dry_payload(args: argparse.Namespace) -> Dict[str, Any]:
                 "trace_path": "",
             },
         ],
+        "replan_triggers": [
+            {
+                "kind": "missing_coverage",
+                "lanes": _csv_items(args.force_missing_coverage) or ["docs"],
+                "reason": "Dry-run controlled trigger fixture.",
+            }
+        ],
+        "missing_coverage": _csv_items(args.force_missing_coverage) or ["docs"],
+        "low_score_agents": [],
+        "followup_agents_requested": 2,
+        "followup_agents_generated": len(replanner_agents),
+        "replan_trigger_records": [
+            {
+                "round_index": 0,
+                "replan_triggers": [
+                    {
+                        "kind": "missing_coverage",
+                        "lanes": _csv_items(args.force_missing_coverage) or ["docs"],
+                        "reason": "Dry-run controlled trigger fixture.",
+                    }
+                ],
+                "missing_coverage": _csv_items(args.force_missing_coverage) or ["docs"],
+                "low_score_agents": [],
+                "failed_agents": [],
+                "open_questions": [],
+                "followup_agent_budget": 2,
+            }
+        ],
         "planner_generated_agents": len(planner_agents),
         "replanner_generated_agents": len(replanner_agents),
         "duration_s": 0.0,
@@ -128,6 +162,8 @@ def _dry_payload(args: argparse.Namespace) -> Dict[str, Any]:
         "sandbox": args.sandbox,
         "planner_sandbox": args.planner_sandbox,
         "codex_extra_args": args.codex_extra_arg,
+        "required_coverage": _csv_items(args.required_coverage),
+        "force_missing_coverage": _csv_items(args.force_missing_coverage),
         "broker_thread_id": run_id,
         "stop_reason": "dry_run",
         "terminal_state": "completed",
@@ -169,6 +205,22 @@ def _write_evidence(output_dir: str, payload: Dict[str, Any]) -> Path:
                 **round_item,
             )
         )
+    triggers = payload.get("replan_triggers", [])
+    lines.extend([
+        "",
+        "## Replan Triggers",
+        "",
+    ])
+    if triggers:
+        for trigger in triggers:
+            detail = trigger.get("lanes") or trigger.get("agents") or []
+            lines.append(f"- {trigger.get('kind', 'trigger')}: {', '.join(str(item) for item in detail)}")
+    else:
+        lines.append("- No deterministic replan triggers recorded.")
+    lines.extend([
+        f"- follow-up requested: {payload.get('followup_agents_requested', 0)}",
+        f"- follow-up generated: {payload.get('followup_agents_generated', payload.get('replanner_generated_agents', 0))}",
+    ])
     recommendations = [
         f"- {item.get('id', item.get('role', 'agent'))}: {item.get('goal', item)}"
         for item in payload.get("reducer_recommended_next_agents", [])
@@ -186,6 +238,30 @@ def _write_evidence(output_dir: str, payload: Dict[str, Any]) -> Path:
     ])
     md_path.write_text("\n".join(lines), encoding="utf-8")
     return md_path
+
+
+def _csv_items(value: str) -> List[str]:
+    return [item.strip().lower() for item in str(value or "").split(",") if item.strip()]
+
+
+def _trigger_summary(records: List[Dict[str, Any]]) -> Dict[str, Any]:
+    triggers: List[Dict[str, Any]] = []
+    missing: List[str] = []
+    low_score: List[str] = []
+    requested = 0
+    for record in records:
+        triggers.extend(record.get("replan_triggers", []) or [])
+        missing.extend(str(item) for item in record.get("missing_coverage", []) or [])
+        low_score.extend(str(item) for item in record.get("low_score_agents", []) or [])
+        requested += int(record.get("followup_agent_budget", 0) or 0)
+    return {
+        "replan_triggers": triggers,
+        "missing_coverage": sorted(set(missing)),
+        "low_score_agents": sorted(set(low_score)),
+        "followup_agents_requested": requested,
+        "followup_agents_generated": 0,
+        "replan_trigger_records": records,
+    }
 
 
 def main() -> None:
@@ -206,6 +282,16 @@ def main() -> None:
     parser.add_argument("--planner-timeout-s", type=int, default=None)
     parser.add_argument("--sandbox", default="read-only")
     parser.add_argument("--planner-sandbox", default="read-only")
+    parser.add_argument(
+        "--required-coverage",
+        default="",
+        help="Comma-separated coverage lanes that completed planner agents should represent.",
+    )
+    parser.add_argument(
+        "--force-missing-coverage",
+        default="",
+        help="Comma-separated lanes treated as missing for controlled replanner smoke runs.",
+    )
     parser.add_argument(
         "--codex-extra-arg",
         action="append",
@@ -234,6 +320,10 @@ def main() -> None:
             sandbox=args.sandbox,
             planner_sandbox=args.planner_sandbox,
             codex_extra_args=args.codex_extra_arg,
+            replan_trigger_policy=ReplanTriggerPolicy(
+                required_coverage=_csv_items(args.required_coverage),
+                force_missing_coverage=_csv_items(args.force_missing_coverage),
+            ),
         )
         started = time.time()
         trace = runtime.run(args.goal, run_id=args.run_id or None)

@@ -1537,6 +1537,46 @@ def test_dynamic_workflow_planner_json_validation():
     else:
         raise AssertionError("replanner should reject duplicate existing agent ids")
 
+    repaired = parse_replan_decision({
+        "agents": [{"id": "followup", "role": "reviewer", "prompt": "Inspect missing docs coverage."}]
+    })
+    assert repaired.agents[0].goal == "Inspect missing docs coverage."
+
+
+@test("ReplanTriggerPolicy: missing coverage and no-gap decisions")
+def test_replan_trigger_policy_missing_coverage():
+    from broker_reducer import BrokerReductionResult
+    from replan_trigger_policy import ReplanTriggerPolicy
+
+    reduction = BrokerReductionResult(
+        final_answer="ok",
+        risk_summary="none",
+        open_questions=[],
+        terminal_state="completed",
+    )
+    policy = ReplanTriggerPolicy(required_coverage=["security", "tests", "docs"])
+    decision = policy.evaluate(
+        reduction,
+        [
+            {"id": "security_review", "role": "reviewer", "goal": "Security review"},
+            {"id": "tests_review", "role": "reviewer", "goal": "Tests review"},
+        ],
+        completed_agent_ids=["security_review", "tests_review"],
+        failed_agent_ids=[],
+    )
+    assert decision.should_replan
+    assert decision.missing_coverage == ["docs"]
+    assert decision.followup_agent_budget == 2
+
+    no_gap = policy.evaluate(
+        reduction,
+        [{"id": "security_tests_docs_review", "role": "reviewer", "goal": "Security tests docs review"}],
+        completed_agent_ids=["security_tests_docs_review"],
+        failed_agent_ids=[],
+    )
+    assert not no_gap.should_replan
+    assert no_gap.followup_agent_budget == 0
+
 
 @test("DynamicWorkflow: fake planner, replanner, reducer")
 def test_dynamic_workflow_fake_planner_replanner_reducer():
@@ -1618,6 +1658,7 @@ sys.exit(0)
 def test_dynamic_workflow_adaptive_fake_planner_replanner():
     import shutil, tempfile
     from dynamic_workflow import DynamicWorkflowRuntime
+    from replan_trigger_policy import ReplanTriggerPolicy
 
     d = tempfile.mkdtemp()
     try:
@@ -1657,8 +1698,11 @@ sys.exit(0)
         def planner(goal):
             return {
                 "agents": [
-                    {"id": f"planner_{index}", "role": "reviewer", "goal": f"Planner agent {index}"}
-                    for index in range(5)
+                    {"id": "security_review", "role": "reviewer", "goal": "Security review"},
+                    {"id": "tests_review", "role": "reviewer", "goal": "Tests review"},
+                    {"id": "architecture_review", "role": "reviewer", "goal": "Architecture review"},
+                    {"id": "broker_review", "role": "reviewer", "goal": "Broker review"},
+                    {"id": "observability_review", "role": "reviewer", "goal": "Observability review"},
                 ],
                 "max_parallel": 5,
             }
@@ -1668,6 +1712,9 @@ sys.exit(0)
         def replanner(goal, snapshot):
             replan_calls["count"] += 1
             if replan_calls["count"] == 1:
+                policy = snapshot["replan_trigger_policy"]
+                assert policy["missing_coverage"] == ["docs"]
+                assert policy["followup_agent_budget"] == 2
                 return {
                     "agents": [
                         {"id": "replanner_0", "role": "followup", "goal": "Follow up 0"},
@@ -1689,14 +1736,85 @@ sys.exit(0)
             planner_fn=planner,
             replanner_fn=replanner,
             codex_extra_args=["-c", 'service_tier="fast"'],
+            replan_trigger_policy=ReplanTriggerPolicy(required_coverage=["security", "tests", "docs"]),
         )
         trace = runtime.run("adaptive fake")
         assert trace.summary()["completed"] == 7
         assert trace.summary()["failed"] == 0
         assert len(trace.rounds) == 2
-        assert trace.rounds[0].agent_ids == [f"planner_{index}" for index in range(5)]
+        assert trace.rounds[0].agent_ids == ["security_review", "tests_review", "architecture_review", "broker_review", "observability_review"]
         assert trace.rounds[1].agent_ids == ["replanner_0", "replanner_1"]
+        assert trace.replan_trigger_records[0]["missing_coverage"] == ["docs"]
+        assert trace.replan_trigger_records[0]["followup_agent_budget"] == 2
         assert trace.reducer_result.terminal_state == "completed"
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+@test("DynamicWorkflow: trigger policy no-gap stops without follow-up agents")
+def test_dynamic_workflow_replan_trigger_no_gap_stop():
+    import shutil, tempfile
+    from dynamic_workflow import DynamicWorkflowRuntime
+    from replan_trigger_policy import ReplanTriggerPolicy
+
+    d = tempfile.mkdtemp()
+    try:
+        fake_codex = Path(d) / "codex"
+        fake_codex.write_text(
+            """#!/usr/bin/env python3
+import json
+import pathlib
+import re
+import sys
+
+args = sys.argv[1:]
+out = pathlib.Path(args[args.index("--output-last-message") + 1])
+agent_id = re.search(r"Agent id: ([^\\n]+)", sys.stdin.read()).group(1).strip()
+out.write_text(json.dumps({
+    "agent_id": agent_id,
+    "status": "completed",
+    "summary": f"completed {agent_id}",
+    "artifacts": [],
+    "messages": [],
+    "handoffs": [],
+    "review_requests": [],
+    "review_responses": [],
+    "metadata": {"completeness_score": 0.9},
+    "error": ""
+}), encoding="utf-8")
+sys.exit(0)
+""",
+            encoding="utf-8",
+        )
+        fake_codex.chmod(0o755)
+
+        def planner(goal):
+            return {
+                "agents": [{"id": "security_tests_docs_review", "role": "reviewer", "goal": "Security tests docs review"}],
+                "max_parallel": 1,
+            }
+
+        def replanner(goal, snapshot):
+            assert snapshot["replan_trigger_policy"]["replan_triggers"] == []
+            return {"agents": [], "stop_reason": "ready_for_reducer"}
+
+        runtime = DynamicWorkflowRuntime(
+            codex_bin=str(fake_codex),
+            codex_cwd=d,
+            workspace_root=str(Path(d) / "dynamic"),
+            broker_dir=str(Path(d) / "broker"),
+            max_rounds=3,
+            max_agents=5,
+            max_parallel=1,
+            timeout_s=5,
+            planner_fn=planner,
+            replanner_fn=replanner,
+            replan_trigger_policy=ReplanTriggerPolicy(required_coverage=["security", "tests", "docs"]),
+        )
+        trace = runtime.run("no gap fake")
+        assert len(trace.rounds) == 1
+        assert trace.replan_trigger_records[0]["replan_triggers"] == []
+        assert trace.stop_reason == "ready_for_reducer"
     finally:
         shutil.rmtree(d, ignore_errors=True)
 
@@ -2048,6 +2166,10 @@ def test_adaptive_workflow_dry_run_evidence():
         assert summary["dry_run"] is True
         assert summary["planner_generated_agents"] == 5
         assert summary["replanner_generated_agents"] == 2
+        assert summary["replan_triggers"][0]["kind"] == "missing_coverage"
+        assert summary["missing_coverage"] == ["docs"]
+        assert summary["followup_agents_requested"] == 2
+        assert summary["followup_agents_generated"] == 2
         assert summary["rounds"][0]["source"] == "planner"
         assert summary["rounds"][1]["source"] == "replanner"
     finally:
@@ -2142,6 +2264,17 @@ def test_workflow_observer_static_dashboard():
         (trace_dir / "dynamic_trace.json").write_text(json.dumps({
             "run_id": run_id,
             "stop_reason": "ready_for_reducer",
+            "replan_trigger_records": [
+                {
+                    "round_index": 0,
+                    "replan_triggers": [{"kind": "missing_coverage", "lanes": ["docs"]}],
+                    "missing_coverage": ["docs"],
+                    "low_score_agents": ["builder"],
+                    "failed_agents": [],
+                    "open_questions": [],
+                    "followup_agent_budget": 2,
+                }
+            ],
             "rounds": [
                 {
                     "round_index": 0,
@@ -2179,6 +2312,9 @@ def test_workflow_observer_static_dashboard():
         assert "diff --git" in body
         assert "Low Scores" in body
         assert "Round Timeline" in body
+        assert "Replan Triggers" in body
+        assert "missing_coverage" in body
+        assert "missing=docs" in body
         assert "round 1" in body
         assert "checkpoint" in body.lower()
     finally:
@@ -2740,8 +2876,10 @@ if __name__ == "__main__":
         test_codex_cli_swarm_worktree_mode_patch_artifacts,
         test_codex_cli_swarm_worktree_failure_preserves_diff,
         test_dynamic_workflow_planner_json_validation,
+        test_replan_trigger_policy_missing_coverage,
         test_dynamic_workflow_fake_planner_replanner_reducer,
         test_dynamic_workflow_adaptive_fake_planner_replanner,
+        test_dynamic_workflow_replan_trigger_no_gap_stop,
         test_dynamic_workflow_limits,
         test_workflow_event_and_dag_streaming_capability_routing,
         test_dynamic_replan_low_score_trigger,

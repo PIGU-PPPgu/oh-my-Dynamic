@@ -22,6 +22,8 @@ from agent_broker import AgentBroker, validate_agent_id
 from broker_reducer import BrokerReductionResult, reduce_broker_thread
 from checkpoint import checkpoint_path, load_checkpoint, save_checkpoint
 from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime, CodexCliSwarmTrace
+from replan_trigger_policy import ReplanTriggerDecision, ReplanTriggerPolicy
+from workflow_config import REPLAN_COMPLETENESS_THRESHOLD
 from workflow_events import WorkflowEvent
 
 
@@ -98,6 +100,7 @@ class DynamicWorkflowTrace:
     stop_reason: str
     started_at: float
     completed_at: float
+    replan_trigger_records: List[Dict[str, Any]] = field(default_factory=list)
 
     def summary(self) -> Dict[str, Any]:
         completed = sum(round_trace.completed for round_trace in self.rounds)
@@ -113,6 +116,7 @@ class DynamicWorkflowTrace:
             "terminal_state": self.reducer_result.terminal_state,
             "broker_thread_id": self.broker_thread_id,
             "duration_s": self.completed_at - self.started_at,
+            "replan_triggers": [record for record in self.replan_trigger_records if record.get("replan_triggers")],
         }
 
     def to_dict(self) -> Dict[str, Any]:
@@ -148,6 +152,7 @@ class DynamicWorkflowRuntime:
         sandbox: str = "read-only",
         codex_extra_args: Optional[List[str]] = None,
         planner_sandbox: str = "read-only",
+        replan_trigger_policy: Optional[ReplanTriggerPolicy] = None,
     ) -> None:
         if max_rounds < 1:
             raise ValueError("max_rounds must be at least 1")
@@ -173,6 +178,7 @@ class DynamicWorkflowRuntime:
         self.sandbox = sandbox
         self.codex_extra_args = list(codex_extra_args or [])
         self.planner_sandbox = planner_sandbox
+        self.replan_trigger_policy = replan_trigger_policy
 
     def run(
         self,
@@ -224,6 +230,7 @@ class DynamicWorkflowRuntime:
             if not pending:
                 pending = [planned[agent_id] for agent_id in checkpoint_payload.get("failed_agent_ids", []) if agent_id in planned]
             rounds = [DynamicWorkflowRound(**item) for item in checkpoint_payload.get("rounds", [])]
+            replan_trigger_records = list(checkpoint_payload.get("replan_trigger_records", []))
             stop_reason = str(checkpoint_payload.get("stop_reason", "resumed"))
             planner = PlannerDecision(agents=list(planned.values()), max_parallel=self.max_parallel)
         else:
@@ -233,8 +240,9 @@ class DynamicWorkflowRuntime:
             completed_ids = set()
             failed_ids = set()
             rounds = []
+            replan_trigger_records = []
             stop_reason = planner.stop_reason or "planner_ready"
-            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason)
+            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason, replan_trigger_records)
 
         for round_index in range(len(rounds), self.max_rounds):
             if not pending:
@@ -282,7 +290,7 @@ class DynamicWorkflowRuntime:
                 status="completed",
                 metadata={"round_index": round_index, "completed_agent_ids": sorted(completed_ids), "failed_agent_ids": sorted(failed_ids)},
             ))
-            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason)
+            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason, replan_trigger_records)
 
             if round_index >= self.max_rounds - 1:
                 stop_reason = "max_rounds"
@@ -292,7 +300,18 @@ class DynamicWorkflowRuntime:
                 break
 
             reduction = reduce_broker_thread(self.broker, run_id, goal)
-            replanner = self._replan_decision(goal, reduction, planned, run_id)
+            trigger_decision = self._replan_trigger_decision(reduction, planned, completed_ids, failed_ids, run_id)
+            trigger_record = {"round_index": round_index, **trigger_decision.to_dict()}
+            replan_trigger_records.append(trigger_record)
+            if trigger_decision.should_replan:
+                self.broker.trace(
+                    "orchestrator",
+                    "replan_trigger_policy",
+                    "Deterministic replan trigger policy requested follow-up agents.",
+                    thread_id=run_id,
+                    metadata=trigger_record,
+                )
+            replanner = self._replan_decision(goal, reduction, planned, run_id, trigger_decision)
             if replanner.stop_reason == "ready_for_reducer":
                 stop_reason = "ready_for_reducer"
                 break
@@ -304,7 +323,7 @@ class DynamicWorkflowRuntime:
                 planned[agent.id] = agent
             pending.extend(new_agents)
             stop_reason = replanner.stop_reason or "replanned"
-            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason)
+            self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason, replan_trigger_records)
 
         reducer_result = reduce_broker_thread(self.broker, run_id, goal)
         self._emit_event(callback, WorkflowEvent(
@@ -351,11 +370,12 @@ class DynamicWorkflowRuntime:
             stop_reason=stop_reason,
             started_at=started_at,
             completed_at=completed_at,
+            replan_trigger_records=replan_trigger_records,
         )
         trace_path = self.workspace_root / run_id / "dynamic_trace.json"
         trace_path.parent.mkdir(parents=True, exist_ok=True)
         trace_path.write_text(json.dumps(trace.to_dict(), ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
-        self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason)
+        self._save_checkpoint(run_id, goal, planned, pending, completed_ids, failed_ids, rounds, stop_reason, replan_trigger_records)
         return trace
 
     def _planner_decision(self, goal: str, run_id: str) -> PlannerDecision:
@@ -368,10 +388,12 @@ class DynamicWorkflowRuntime:
         reduction: BrokerReductionResult,
         planned: Dict[str, DynamicAgentPlan],
         run_id: str,
+        trigger_decision: Optional[ReplanTriggerDecision] = None,
     ) -> ReplanDecision:
         snapshot = {
             "reducer": reduction.to_dict(),
             "planned_agent_ids": sorted(planned),
+            "replan_trigger_policy": trigger_decision.to_dict() if trigger_decision else {},
         }
         payload = (
             self.replanner_fn(goal, snapshot)
@@ -379,6 +401,35 @@ class DynamicWorkflowRuntime:
             else self._run_codex_json_worker("replanner", _replanner_prompt(goal, snapshot), run_id)
         )
         return parse_replan_decision(payload, existing_agent_ids=set(planned))
+
+    def _replan_trigger_decision(
+        self,
+        reduction: BrokerReductionResult,
+        planned: Dict[str, DynamicAgentPlan],
+        completed_ids: Set[str],
+        failed_ids: Set[str],
+        run_id: str,
+    ) -> ReplanTriggerDecision:
+        if self.replan_trigger_policy is None:
+            return ReplanTriggerDecision()
+        return self.replan_trigger_policy.evaluate(
+            reduction,
+            [asdict(agent) for agent in planned.values()],
+            completed_ids,
+            failed_ids,
+            low_score_agents=self._low_score_agents(run_id),
+        )
+
+    def _low_score_agents(self, run_id: str) -> List[str]:
+        agents: List[str] = []
+        for event in self.broker.list_events(thread_id=run_id):
+            try:
+                score = float(event.metadata.get("completeness_score", 1.0) or 1.0)
+            except (TypeError, ValueError):
+                score = 1.0
+            if score < REPLAN_COMPLETENESS_THRESHOLD and event.from_agent:
+                agents.append(event.from_agent)
+        return sorted(set(agents))
 
     def _run_codex_json_worker(self, role: str, prompt: str, run_id: str) -> Dict[str, Any]:
         self.workspace_root.mkdir(parents=True, exist_ok=True)
@@ -500,6 +551,7 @@ class DynamicWorkflowRuntime:
         failed_ids: Set[str],
         rounds: List[DynamicWorkflowRound],
         stop_reason: str,
+        replan_trigger_records: Optional[List[Dict[str, Any]]] = None,
     ) -> str:
         payload = {
             "goal": goal,
@@ -511,6 +563,7 @@ class DynamicWorkflowRuntime:
             "failed_agent_ids": sorted(failed_ids),
             "broker_thread_id": run_id,
             "stop_reason": stop_reason,
+            "replan_trigger_records": list(replan_trigger_records or []),
         }
         return save_checkpoint(str(checkpoint_path(self.checkpoint_dir, run_id)), payload)
 
@@ -549,7 +602,7 @@ def parse_planner_decision(payload: Any) -> PlannerDecision:
 def parse_replan_decision(payload: Any, existing_agent_ids: Optional[Set[str]] = None) -> ReplanDecision:
     existing_agent_ids = existing_agent_ids or set()
     data = _ensure_object(payload)
-    agents = _parse_agents(data.get("agents", []), existing_agent_ids=existing_agent_ids)
+    agents = _parse_agents(_repair_replanner_agents(data.get("agents", [])), existing_agent_ids=existing_agent_ids)
     deps = _dependencies_from(data, agents, existing_agent_ids=existing_agent_ids)
     return ReplanDecision(
         agents=agents,
@@ -557,6 +610,23 @@ def parse_replan_decision(payload: Any, existing_agent_ids: Optional[Set[str]] =
         stop_reason=str(data.get("stop_reason", "")),
         confidence=float(data.get("confidence", 0.0) or 0.0),
     )
+
+
+def _repair_replanner_agents(raw_agents: Any) -> Any:
+    if not isinstance(raw_agents, list):
+        return raw_agents
+    repaired = []
+    for raw in raw_agents:
+        if not isinstance(raw, dict):
+            repaired.append(raw)
+            continue
+        item = dict(raw)
+        if not str(item.get("goal", "")).strip() and str(item.get("prompt", "")).strip():
+            item["goal"] = str(item["prompt"])
+        if not str(item.get("role", "")).strip() and str(item.get("lane", "")).strip():
+            item["role"] = str(item["lane"])
+        repaired.append(item)
+    return repaired
 
 
 def _parse_agents(raw_agents: Any, existing_agent_ids: Set[str]) -> List[DynamicAgentPlan]:
@@ -699,6 +769,7 @@ def _plans_from_payload(payload: Any) -> List[DynamicAgentPlan]:
 def _planner_prompt(goal: str) -> str:
     return (
         "You are the oh-my-Dynamic planner. Return exactly one JSON object.\n"
+        "Create only the initial planner round agents. Do not create replanner, follow-up, retry, or coverage-proof agents; those are added later by the replanner after broker evidence and trigger policy are available.\n"
         "Schema: {\"agents\":[{\"id\":\"agent_id\",\"role\":\"role\",\"goal\":\"goal\","
         "\"context\":\"optional\",\"dependencies\":[]}],\"dependencies\":{},"
         "\"max_parallel\":5,\"stop_reason\":\"\",\"confidence\":0.0}\n\n"
@@ -710,6 +781,7 @@ def _replanner_prompt(goal: str, snapshot: Dict[str, Any]) -> str:
     return (
         "You are the oh-my-Dynamic replanner. Return exactly one JSON object.\n"
         "Return new agents only, or stop_reason=\"ready_for_reducer\" when the broker evidence is enough.\n"
+        "If replan_trigger_policy.replan_triggers is non-empty, do not return ready_for_reducer; add targeted follow-up agents for those triggers. Respect followup_agent_budget when present.\n"
         "Schema: {\"agents\":[],\"dependencies\":{},\"stop_reason\":\"ready_for_reducer\",\"confidence\":0.0}\n\n"
         f"Goal:\n{goal}\n\n"
         f"Broker snapshot:\n{json.dumps(snapshot, ensure_ascii=False, indent=2)}\n"

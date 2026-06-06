@@ -32,20 +32,23 @@ transport surface is needed.
 prompts, structured JSON envelopes, and AgentBroker ingestion.
 `codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
 process-level fan-out.
-`dynamic_workflow.py` defines the v2.1 planner/replanner runtime: start with a
+`dynamic_workflow.py` defines the v2.2 planner/replanner runtime: start with a
 planner, fan out Codex CLI workers, let a replanner add follow-up agents, then
 run a broker-aware reducer over artifacts, failures, dependency graph, review
 responses, optional worktree diff artifacts, checkpoint/resume state, and
-streaming workflow events. `scripts/record_adaptive_workflow_evidence.py`
+streaming workflow events. A deterministic `ReplanTriggerPolicy` can ask the
+replanner for follow-up agents when required coverage is missing, low-score
+outputs appear, or workers fail. `scripts/record_adaptive_workflow_evidence.py`
 records round-aware compact evidence that separates planner-generated agents,
-replanner-generated agents, and reducer recommendations. `eval_runner.py` adds
+replanner-generated agents, trigger reasons, and reducer recommendations. `eval_runner.py` adds
 deterministic quality evals so agent outputs can be scored without model
 credentials.
 
 Use It Now:
 
 - App: `[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。`
-- CLI adaptive: `python scripts/record_adaptive_workflow_evidence.py --goal "..." --max-agents 50 --max-parallel 5 --dashboard`
+- CLI adaptive: `python scripts/record_adaptive_workflow_evidence.py --goal "..." --required-coverage security,tests,docs --max-agents 50 --max-parallel 5 --dashboard`
+- CLI replanner proof: add `--force-missing-coverage replanner-proof --max-rounds 2`
 - CLI fixed swarm: `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20`
 - Observability: `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`
 

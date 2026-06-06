@@ -32,6 +32,7 @@ def collect_observability_data(run_id: str, source: Path) -> Dict[str, Any]:
     traces = _collect_traces(source, run_id)
     checkpoint = _load_checkpoint(source, run_id)
     rounds = _collect_rounds(traces, checkpoint)
+    replan_triggers = _collect_replan_triggers(traces, checkpoint)
     return {
         "run_id": run_id,
         "source": str(source),
@@ -40,6 +41,7 @@ def collect_observability_data(run_id: str, source: Path) -> Dict[str, Any]:
         "traces": traces,
         "checkpoint": checkpoint,
         "rounds": rounds,
+        "replan_triggers": replan_triggers,
         "summary": _summary(events, artifacts, traces, checkpoint),
     }
 
@@ -52,6 +54,17 @@ def _collect_rounds(traces: List[Dict[str, Any]], checkpoint: Dict[str, Any]) ->
     raw_rounds = checkpoint.get("rounds") if isinstance(checkpoint, dict) else []
     if isinstance(raw_rounds, list):
         return [_round_record(item) for item in raw_rounds if isinstance(item, dict)]
+    return []
+
+
+def _collect_replan_triggers(traces: List[Dict[str, Any]], checkpoint: Dict[str, Any]) -> List[Dict[str, Any]]:
+    for trace in traces:
+        records = trace.get("replan_trigger_records")
+        if isinstance(records, list):
+            return [record for record in records if isinstance(record, dict)]
+    records = checkpoint.get("replan_trigger_records") if isinstance(checkpoint, dict) else []
+    if isinstance(records, list):
+        return [record for record in records if isinstance(record, dict)]
     return []
 
 
@@ -182,6 +195,7 @@ def _render_html(data: Dict[str, Any]) -> str:
     )
     timeline = "\n".join(_event_row(event) for event in data["events"][:300])
     rounds = "\n".join(_round_row(round_item) for round_item in data["rounds"])
+    triggers = "\n".join(_replan_trigger_row(record) for record in data["replan_triggers"])
     artifacts = "\n".join(_artifact_row(artifact) for artifact in data["artifacts"][:100])
     traces = "\n".join(_trace_row(trace) for trace in data["traces"])
     checkpoint = _checkpoint_block(data["checkpoint"])
@@ -220,7 +234,7 @@ small {{ color:#667085; }}
 <div class="cards">{card_html}</div>
 <div class="grid">
 <section class="panel"><h2>Timeline</h2>{timeline or '<p>No events found.</p>'}</section>
-<aside class="panel"><h2>Round Timeline</h2>{rounds or '<p>No dynamic rounds found.</p>'}</aside>
+<aside class="panel"><h2>Round Timeline</h2>{rounds or '<p>No dynamic rounds found.</p>'}<h2>Replan Triggers</h2>{triggers or '<p>No deterministic replan triggers found.</p>'}</aside>
 </div>
 <div class="grid" style="margin-top:16px">
 <aside class="panel"><h2>Checkpoint</h2>{checkpoint}<h2>Traces</h2>{traces or '<p>No traces found.</p>'}</aside>
@@ -274,6 +288,23 @@ def _round_row(round_item: Dict[str, Any]) -> str:
         f'{escape(str(round_item.get("failed", 0)))} failed<br>'
         f'<small>{escape(str(round_item.get("duration_s", 0.0)))}s · {escape(str(round_item.get("trace_path", "")))}</small>'
         f'<div>{escape(agents)}</div></div>'
+    )
+
+
+def _replan_trigger_row(record: Dict[str, Any]) -> str:
+    trigger_parts = []
+    for trigger in record.get("replan_triggers", []) or []:
+        detail = trigger.get("lanes") or trigger.get("agents") or []
+        trigger_parts.append(f"{trigger.get('kind', 'trigger')}: {', '.join(str(item) for item in detail)}")
+    if not trigger_parts:
+        trigger_parts.append("no trigger")
+    missing = ", ".join(str(item) for item in record.get("missing_coverage", []) or [])
+    low_score = ", ".join(str(item) for item in record.get("low_score_agents", []) or [])
+    return (
+        f'<div class="row"><span class="kind">after round {escape(str(record.get("round_index", "")))}</span>'
+        f'{escape("; ".join(trigger_parts))}<br>'
+        f'<small>missing={escape(missing or "none")} · low_score={escape(low_score or "none")} · '
+        f'follow-up budget={escape(str(record.get("followup_agent_budget", 0)))}</small></div>'
     )
 
 

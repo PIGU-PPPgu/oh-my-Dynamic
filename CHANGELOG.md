@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.2.0 - 2026-06-06
+
+- Added `ReplanTriggerPolicy`, a deterministic replanner trigger layer for missing coverage, low-score agents, and failed agents.
+- Extended `DynamicWorkflowRuntime` traces and checkpoints with `replan_trigger_records` so replanner prompts receive structured trigger evidence.
+- Added `--required-coverage` and `--force-missing-coverage` to `scripts/record_adaptive_workflow_evidence.py` for controlled real replanner smoke runs.
+- Extended adaptive evidence JSON/Markdown with `replan_triggers`, `missing_coverage`, `low_score_agents`, `followup_agents_requested`, and `followup_agents_generated`.
+- Enhanced static observability dashboards with replan trigger summaries, missing coverage, low-score agents, and follow-up budgets.
+- Added fake coverage-gap and no-gap regression tests for adaptive replanning behavior.
+
 ## 2.1.1 - 2026-06-06
 
 - Shortened the README first screen with a `Use It Now` entry table for App skill, CLI adaptive workflow, fixed swarm, and GitHub Releases.

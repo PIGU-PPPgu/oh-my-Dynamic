@@ -9,7 +9,7 @@
 | 入口 | 命令 / 触发句 | 用途 |
 |------|---------------|------|
 | Codex App skill | `[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。` | App 内零配置编排；native subagent runtime 可用时继承 App 内部 LLM |
-| CLI adaptive workflow | `python scripts/record_adaptive_workflow_evidence.py --goal "..." --max-agents 50 --max-parallel 5 --dashboard` | planner/replanner 自动派生 agents，输出 round-aware compact evidence |
+| CLI adaptive workflow | `python scripts/record_adaptive_workflow_evidence.py --goal "..." --required-coverage security,tests,docs --force-missing-coverage docs --max-agents 50 --max-parallel 5 --dashboard` | planner/replanner 自动派生 agents，输出 round-aware compact evidence 和 replan trigger proof |
 | CLI fixed swarm | `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20` | 固定 shard 的 20/50/100+ Codex CLI fan-out evidence |
 | Releases | <https://github.com/PIGU-PPPgu/oh-my-Dynamic/releases/latest> | Latest release、CI 状态、真实 evidence 链接 |
 
@@ -18,7 +18,7 @@
 - 🎯 **明确目标**：不是只做 prompt 技巧，而是为 Codex Native Dynamic Workflows 提供可验证原型和接口提案
 - 🧠 **Codex App internal subagent backend**：在 Codex App 暴露 subagent tools/runtime 时，默认使用真实 Codex subagents，并继承当前 App 内部 LLM；无需 API key
 - 📨 **A2A / Agent Broker**：受控 message、artifact、handoff、review request/response 和 audit trace，让 subagents 不只是并行跑，还能有证据链地协作
-- 🧭 **Dynamic Workflow v2.1**：Codex CLI planner/replanner 先拆任务、运行后继续派生 agents，并由 broker-aware reducer 汇总 evidence；支持 round-aware adaptive evidence、流式事件、checkpoint/resume、coverage gate、质量 eval 和静态 observability dashboard
+- 🧭 **Dynamic Workflow v2.2**：Codex CLI planner/replanner 先拆任务、运行后由 deterministic trigger policy 发现 missing coverage / low score / failed agents 并继续派生 follow-up agents；由 broker-aware reducer 汇总 evidence，支持 round-aware dashboard、流式事件、checkpoint/resume、coverage gate 和质量 eval
 - 🌿 **Worktree 写入隔离**：显式开启写代码并发时，每个 Codex CLI worker 使用独立 git worktree，默认只产出 patch/diff artifacts，不自动 merge
 - 🤖 **多模型支持**：GLM、OpenAI GPT、Claude、Gemini、DeepSeek、通义千问/Qwen、Moonshot/Kimi、硅基流动…… 自动识别模型名选择对应 provider
 - 🔗 **串行编排**（Orchestrator）：Planner → Builder → Reviewer 流水线，含自动重试和 review 打回
@@ -40,7 +40,7 @@
 
 主线产品路径是 **Codex CLI dynamic workflow**。Codex App bridge、A2A gateway 和 TEA protocol 保留为 experimental contract / research track，不作为当前默认落地路径。
 
-## v2.1 结构边界
+## v2.2 结构边界
 
 ```text
 dynamic_workflow.py
@@ -190,7 +190,7 @@ python examples/real_repo_review.py --agents 5 --max-parallel 3 \
 
 也就是说：**装上插件后，在 Codex App 里默认不需要 API Key；当 App-native subagent backend 可用时，应使用真实 Codex subagents。** 本地 Python runtime 不会伪造 App-native runtime；真实大规模 evidence 由本机 `codex exec` process swarm 提供。
 
-Dynamic Workflow v2.1 可直接运行：
+Dynamic Workflow v2.2 可直接运行：
 
 ```bash
 python -m dynamic_workflow "review and improve this repo" \
@@ -205,9 +205,22 @@ python -m dynamic_workflow "review and improve this repo" \
 # 记录 adaptive planner/replanner compact evidence，可选 dashboard
 python scripts/record_adaptive_workflow_evidence.py \
   --goal "review and improve this repo with adaptive planner/replanner agents" \
+  --required-coverage security,tests,docs,observability \
   --max-agents 50 \
   --max-parallel 5 \
   --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' \
+  --dashboard
+
+# 控制型 replanner proof：故意留下 required coverage 缺口，让 replanner 追加 follow-up agents
+python scripts/record_adaptive_workflow_evidence.py \
+  --goal "Prove real planner plus replanner follow-up generation for this repo." \
+  --required-coverage security,tests,docs,replanner-proof \
+  --force-missing-coverage replanner-proof \
+  --max-rounds 2 \
+  --max-agents 12 \
+  --max-parallel 4 \
+  --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' \
+  --codex-extra-arg=-c --codex-extra-arg='model_reasoning_effort="low"' \
   --dashboard
 
 # 从 checkpoint 续跑
