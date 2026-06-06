@@ -11,11 +11,14 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from eval_runner import EvalTask, score_response, summarize_results
-from evidence_sanitizer import sanitize_payload
+from oh_my_dynamic.evals.eval_runner import EvalTask, score_response, summarize_results
+from oh_my_dynamic.evals.evidence_sanitizer import sanitize_payload
 
 
 MODE_AGENT_COUNTS = {

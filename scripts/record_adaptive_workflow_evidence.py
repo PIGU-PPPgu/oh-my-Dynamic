@@ -11,13 +11,16 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from dynamic_workflow import DynamicWorkflowRuntime, DynamicWorkflowTrace
-from evidence_sanitizer import sanitize_payload
-from replan_trigger_policy import ReplanTriggerPolicy
-from workflow_observer import render_observability_dashboard
+from oh_my_dynamic.runtime.dynamic_workflow import DynamicWorkflowRuntime, DynamicWorkflowTrace
+from oh_my_dynamic.evals.evidence_sanitizer import sanitize_payload
+from oh_my_dynamic.runtime.replan_trigger_policy import ReplanTriggerPolicy
+from oh_my_dynamic.evals.workflow_observer import render_observability_dashboard
 
 
 def _commit_sha(cwd: str) -> str:

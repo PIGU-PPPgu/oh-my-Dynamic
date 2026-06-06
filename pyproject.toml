@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oh-my-dynamic"
-version = "2.4.0"
+version = "3.0.0"
 description = "Multi-agent orchestration engine with DAG execution, dynamic replan, TEA protocol, and model-provider routing."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -30,62 +30,25 @@ dev = [
 ]
 
 [project.scripts]
-oh-my-dynamic-gateway = "broker_gateway:main"
-oh-my-dynamic-codex-swarm = "codex_cli_swarm:main"
-oh-my-dynamic-dynamic-workflow = "dynamic_workflow:main"
-oh-my-dynamic-quality-eval = "eval_runner:main"
-oh-my-dynamic-doctor = "doctor:main"
+oh-my-dynamic-gateway = "oh_my_dynamic.cli.gateway:main"
+oh-my-dynamic-codex-swarm = "oh_my_dynamic.cli.codex_swarm:main"
+oh-my-dynamic-dynamic-workflow = "oh_my_dynamic.cli.dynamic_workflow:main"
+oh-my-dynamic-quality-eval = "oh_my_dynamic.cli.quality_eval:main"
+oh-my-dynamic-doctor = "oh_my_dynamic.cli.doctor:main"
 
 [tool.setuptools]
-py-modules = [
-  "agent_broker",
-  "broker_gateway",
-  "broker_reducer",
-  "capability_registry",
-  "checkpoint",
-  "codex_cli_swarm",
-  "codex_swarm_artifacts",
-  "codex_swarm_cli",
-  "codex_swarm_models",
-  "codex_swarm_process",
-  "codex_swarm_scheduler",
-  "codex_worker",
-  "codex_app_bridge",
-  "agents",
-  "dag",
-  "dynamic_workflow",
-  "dynamic_replan",
-  "doctor",
-  "eval_runner",
-  "evidence_sanitizer",
-  "llm_client",
-  "message_bus",
-  "native_runtime",
-  "orchestrator",
-  "pipeline",
-  "protocol_adapters",
-  "prompt_kit",
-  "replan_trigger_policy",
-  "stop_conditions",
-  "synthesis",
-  "task",
-  "tea_protocol",
-  "team_engine",
-  "token_tracker",
-  "validator",
-  "visualize",
-  "workflow_events",
-  "workflow_config",
-  "workflow_observer",
-  "worktree",
-]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["oh_my_dynamic*"]
 
 [tool.bandit]
 exclude_dirs = [".git", ".codegraph", ".orchestry", "__pycache__", ".venv", "venv", "tests", "test_suite.py", "docs/evidence"]
 skips = ["B101", "B110", "B404", "B603", "B607"]
 
 [tool.coverage.run]
-source = ["."]
+source = ["src/oh_my_dynamic"]
 omit = [
   ".codegraph/*",
   ".orchestry/*",

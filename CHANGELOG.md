@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.0 - 2026-06-07
+
+- Migrated implementation modules from root-level `py-modules` into the standard `src/oh_my_dynamic/` package layout.
+- Grouped package modules by responsibility: `broker`, `codex`, `runtime`, `protocol`, `evals`, `core`, and `cli`.
+- Preserved root-level compatibility facades so imports like `from dynamic_workflow import DynamicWorkflowRuntime` and commands like `python -m dynamic_workflow` keep working for one major version.
+- Updated console scripts to point at package CLI entrypoints and moved coverage source tracking to `src/oh_my_dynamic`.
+- Added package import/facade compatibility checks, package module help checks, and install-from-target smoke gates for release validation.
+- Updated README, skills, CI, and release checklist to document preferred package imports and deprecated root-level shims.
+
 ## 2.4.0 - 2026-06-06
 
 - Added public evidence sanitization with `$REPO_ROOT` / `$HOME` normalization and `sanitized: true` metadata for compact evidence outputs and dashboards.

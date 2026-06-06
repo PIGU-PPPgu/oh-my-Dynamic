@@ -1,44 +1,28 @@
-"""Small Codex CLI worker lifecycle helpers used by the swarm executor."""
+"""Compatibility facade for ``oh_my_dynamic.codex.codex_worker``.
+
+Prefer importing from ``oh_my_dynamic.codex.codex_worker`` in new code.
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence
-import os
+import sys
+
+_SRC = Path(__file__).resolve().parent / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+from oh_my_dynamic.codex.codex_worker import *  # noqa: F401,F403
 
 
-def build_codex_exec_command(
-    codex_bin: str,
-    agent_cwd: Path,
-    sandbox: str,
-    output_path: Path,
-    extra_args: Sequence[str],
-) -> List[str]:
-    """Build the argv for one `codex exec` worker."""
-    return [
-        codex_bin,
-        "exec",
-        "--cd",
-        str(agent_cwd),
-        "--sandbox",
-        sandbox,
-        "--skip-git-repo-check",
-        "--ephemeral",
-        "--output-last-message",
-        str(output_path),
-        *extra_args,
-        "-",
-    ]
+def _run_module_main() -> int:
+    try:
+        from oh_my_dynamic.codex.codex_worker import main as _main
+    except ImportError as exc:
+        raise SystemExit(f"codex_worker has no module entrypoint: {exc}") from exc
+    result = _main()
+    return result if isinstance(result, int) else 0
 
 
-def build_worker_env(inherited_env: Dict[str, str]) -> Dict[str, str]:
-    """Return the environment inherited by a Codex CLI worker."""
-    env = os.environ.copy()
-    env.update(inherited_env)
-    return env
-
-
-def clamp_worker_timeout(default_timeout_s: int, requested_timeout_s: Optional[int]) -> int:
-    """Clamp per-worker timeout to a positive value no larger than the runtime default."""
-    worker_timeout_s = requested_timeout_s if requested_timeout_s is not None else default_timeout_s
-    return max(1, min(default_timeout_s, worker_timeout_s))
+if __name__ == "__main__":
+    raise SystemExit(_run_module_main())

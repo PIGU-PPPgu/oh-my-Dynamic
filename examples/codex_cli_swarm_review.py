@@ -5,8 +5,8 @@ from __future__ import annotations
 import argparse
 
 import _bootstrap  # noqa: F401
-from agent_broker import AgentBroker
-from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+from oh_my_dynamic.broker.agent_broker import AgentBroker
+from oh_my_dynamic.codex.codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
 
 
 REVIEW_SHARDS = [

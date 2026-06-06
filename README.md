@@ -14,7 +14,7 @@
 |------|------|----------|
 | 5 分钟 dry-run | `python examples/real_repo_review.py --dry-run --run-id five-minute-demo` | 安装、JSON/Markdown evidence 形状、无 API key 路径 |
 | 真实 5-agent repo review | `python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard` | 真实 Codex CLI workers、broker reducer、dashboard |
-| v2.2 adaptive replanner proof | `python scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs,replanner-proof --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dashboard` | planner 生成 agents，trigger policy 发现缺口，replanner 追加 follow-up agents |
+| v2.2+ adaptive replanner proof | `python scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs,replanner-proof --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dashboard` | planner 生成 agents，trigger policy 发现缺口，replanner 追加 follow-up agents |
 
 Latest release and committed evidence: <https://github.com/PIGU-PPPgu/oh-my-Dynamic/releases/latest>
 
@@ -63,25 +63,48 @@ Committed benchmark baseline: [`docs/evidence/benchmark_v240.md`](docs/evidence/
 
 主线产品路径是 **Codex CLI dynamic workflow**。Codex App bridge、A2A gateway 和 TEA protocol 保留为 experimental contract / research track，不作为当前默认落地路径。
 
-## v2.2 结构边界
+## v3.0 Package Structure
+
+Preferred imports now live under `oh_my_dynamic.*`:
+
+```python
+from oh_my_dynamic.runtime.dynamic_workflow import DynamicWorkflowRuntime
+from oh_my_dynamic.codex.codex_cli_swarm import CodexCliSwarmRuntime, CodexCliAgentSpec
+from oh_my_dynamic.broker.agent_broker import AgentBroker
+from oh_my_dynamic.evals.evidence_sanitizer import sanitize_payload
+```
+
+Existing root-level imports and module commands remain for one major version:
+
+```python
+from dynamic_workflow import DynamicWorkflowRuntime
+from codex_cli_swarm import CodexCliSwarmRuntime
+from agent_broker import AgentBroker
+```
+
+`python -m dynamic_workflow`, `python -m codex_cli_swarm`, and `python -m doctor`
+still work. New code should prefer package imports; root-level modules are
+deprecated compatibility shims.
+
+## v3.0 结构边界
 
 ```text
-dynamic_workflow.py
+src/oh_my_dynamic/runtime/dynamic_workflow.py
   planner / replanner / checkpoint / reducer / stream events
         │
         ▼
-codex_cli_swarm.py
+src/oh_my_dynamic/codex/codex_cli_swarm.py
   public facade + runtime coordinator
         │
-        ├─ codex_swarm_cli.py         CLI parsing / default shard specs
-        ├─ codex_swarm_models.py      dataclasses / public trace shape
-        ├─ codex_swarm_process.py     single codex exec worker lifecycle
-        ├─ codex_swarm_scheduler.py   dependency validation / layers / batches
-        ├─ codex_swarm_artifacts.py   prompts / manifests / traces / broker artifacts
-        └─ codex_worker.py            codex exec argv / env / timeout
+        ├─ src/oh_my_dynamic/codex/codex_swarm_cli.py         CLI parsing / default shard specs
+        ├─ src/oh_my_dynamic/codex/codex_swarm_models.py      dataclasses / public trace shape
+        ├─ src/oh_my_dynamic/codex/codex_swarm_process.py     single codex exec worker lifecycle
+        ├─ src/oh_my_dynamic/codex/codex_swarm_scheduler.py   dependency validation / layers / batches
+        ├─ src/oh_my_dynamic/codex/codex_swarm_artifacts.py   prompts / manifests / traces / broker artifacts
+        └─ src/oh_my_dynamic/codex/codex_worker.py            codex exec argv / env / timeout
 ```
 
-新增调度策略优先进入 `dynamic_workflow.py`；新增 worker 生命周期、trace、artifact 或 process 细节优先进入 swarm 执行层 helper。
+新增调度策略优先进入 `src/oh_my_dynamic/runtime/`；新增 worker 生命周期、trace、artifact 或 process 细节优先进入 `src/oh_my_dynamic/codex/`。根目录同名文件只保留兼容导出。
 
 ## 架构
 

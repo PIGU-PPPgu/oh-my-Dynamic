@@ -13,7 +13,9 @@ One-line trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
 ```
 
-Current v2.4.0 status:
+Current v3.0.0 status:
+
+- Preferred developer imports now use `oh_my_dynamic.*`; root-level files such as `dynamic_workflow.py`, `codex_cli_swarm.py`, and `agent_broker.py` are compatibility shims.
 
 - Stable: Codex CLI swarm, adaptive dynamic workflow planner/replanner,
   broker reducer, `examples/real_repo_review.py`, static observability
@@ -43,7 +45,7 @@ When triggered inside Codex App, this skill must work immediately after installa
 - If the user asks whether adaptive workflow is better than a baseline, use `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v240.json` for a deterministic benchmark shape check; real Codex CLI benchmark evidence remains manual.
 - If the user asks whether installation is healthy, use `python -m doctor --json`.
 - If the user asks for streaming progress or resume, use `python -m dynamic_workflow "goal" --stream-events --checkpoint-dir .orchestry/checkpoints` and resume with `python -m dynamic_workflow --resume RUN_ID`.
-- Treat `dynamic_workflow.py` as the planner/replanner/reducer orchestration layer and `codex_cli_swarm.py` plus `codex_swarm_*` helpers as the Codex CLI worker execution layer.
+- Treat `src/oh_my_dynamic/runtime/dynamic_workflow.py` as the planner/replanner/reducer orchestration layer and `src/oh_my_dynamic/codex/codex_cli_swarm.py` plus `codex_swarm_*` helpers as the Codex CLI worker execution layer. Root-level modules are deprecated compatibility shims for one major version.
 - If the user explicitly asks for concurrent code writing, use worktree mode: `workspace_mode="worktree"` and `write_intent="patch"`. Do not auto-merge agent worktrees.
 - If the user has not clearly granted write intent, stay read-only review by default.
 - Use the Codex App bridge contract for real subagents: dispatch plan, per-subagent prompt, structured JSON envelope, and AgentBroker ingestion.

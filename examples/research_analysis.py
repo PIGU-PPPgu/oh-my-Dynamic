@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import _bootstrap  # noqa: F401
-from pipeline import DynamicPipeline
+from oh_my_dynamic.runtime.pipeline import DynamicPipeline
 from examples.mock_llm import mock_llm
 
 

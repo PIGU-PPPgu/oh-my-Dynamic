@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import _bootstrap  # noqa: F401
 
-from native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
+from oh_my_dynamic.runtime.native_runtime import AgentSpec, SandboxedFanoutRuntime, ToolGrant
 
 
 def mock_worker_llm(system_prompt: str, user_prompt: str) -> str:

@@ -16,14 +16,17 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from agent_broker import AgentBroker
-from broker_reducer import reduce_broker_thread
-from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
-from evidence_sanitizer import sanitize_payload
-from workflow_observer import render_observability_dashboard
+from oh_my_dynamic.broker.agent_broker import AgentBroker
+from oh_my_dynamic.broker.broker_reducer import reduce_broker_thread
+from oh_my_dynamic.codex.codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+from oh_my_dynamic.evals.evidence_sanitizer import sanitize_payload
+from oh_my_dynamic.evals.workflow_observer import render_observability_dashboard
 
 
 REVIEW_LANES = [

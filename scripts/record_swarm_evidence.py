@@ -16,12 +16,15 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from agent_broker import AgentBroker
-from codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
-from evidence_sanitizer import sanitize_payload
+from oh_my_dynamic.broker.agent_broker import AgentBroker
+from oh_my_dynamic.codex.codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+from oh_my_dynamic.evals.evidence_sanitizer import sanitize_payload
 
 
 def _commit_sha() -> str:

@@ -30,9 +30,9 @@ inboxes, and audit traces.
 transport surface is needed.
 `codex_app_bridge.py` defines the App-native bridge: dispatch specs, subagent
 prompts, structured JSON envelopes, and AgentBroker ingestion.
-`codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
+`src/oh_my_dynamic/codex/codex_cli_swarm.py` defines the Codex CLI swarm backend for large-scale
 process-level fan-out.
-`dynamic_workflow.py` defines the v2.4 planner/replanner runtime: start with a
+`src/oh_my_dynamic/runtime/dynamic_workflow.py` defines the v3 planner/replanner runtime: start with a
 planner, fan out Codex CLI workers, let a replanner add follow-up agents, then
 run a broker-aware reducer over artifacts, failures, dependency graph, review
 responses, optional worktree diff artifacts, checkpoint/resume state, and
@@ -41,8 +41,8 @@ replanner for follow-up agents when required coverage is missing, low-score
 outputs appear, or workers fail. `scripts/record_adaptive_workflow_evidence.py`
 records round-aware compact evidence that separates planner-generated agents,
 replanner-generated agents, trigger reasons, and reducer recommendations.
-`eval_runner.py` adds deterministic quality evals so agent outputs can be
-scored without model credentials. `doctor.py`, `evidence_sanitizer.py`, and
+`src/oh_my_dynamic/evals/eval_runner.py` adds deterministic quality evals so agent outputs can be
+scored without model credentials. `src/oh_my_dynamic/evals/doctor.py`, `src/oh_my_dynamic/evals/evidence_sanitizer.py`, and
 `scripts/run_benchmark.py` add adoption checks, public evidence redaction, and
 single/fixed/adaptive benchmark shape checks.
 

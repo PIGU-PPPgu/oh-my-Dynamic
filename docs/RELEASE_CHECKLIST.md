@@ -2,6 +2,10 @@
 
 Use this checklist before tagging or pushing a public release.
 
+Run the gates inside a virtual environment when using macOS system Python; older
+system pip builds can fail editable installs because site-packages is not
+writable.
+
 ## Required Gates
 
 ```bash
@@ -10,7 +14,7 @@ python3 -m pip install -e ".[dev]"
 bash -n install_plugin.sh
 test -f LICENSE
 python3 -m json.tool .agents/plugins/marketplace.json >/dev/null
-python3 -m py_compile *.py examples/*.py scripts/*.py
+python3 -m py_compile *.py examples/*.py scripts/*.py $(find src -name '*.py' -print)
 python3 test_suite.py
 python3 -m pytest tests -q
 python3 -m coverage run test_suite.py
@@ -20,6 +24,8 @@ python3 -m dynamic_workflow --help >/dev/null
 python3 -m codex_cli_swarm --help >/dev/null
 python3 -m codex_swarm_cli --help >/dev/null
 python3 -m doctor --json >/dev/null
+PYTHONPATH=src python3 -m oh_my_dynamic.runtime.dynamic_workflow --help >/dev/null
+PYTHONPATH=src python3 -m oh_my_dynamic.codex.codex_cli_swarm --help >/dev/null
 python3 scripts/record_swarm_evidence.py --help >/dev/null
 python3 scripts/record_adaptive_workflow_evidence.py --help >/dev/null
 python3 scripts/render_workflow_observability.py --help >/dev/null
@@ -30,6 +36,7 @@ python3 scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode sing
 python3 examples/codex_cli_swarm_review.py --help >/dev/null
 python3 examples/real_repo_review.py --help >/dev/null
 ! grep -R "/Users/" docs/evidence
+tmpdir="$(mktemp -d)" && python3 -m pip install . --target "$tmpdir" && (cd /tmp && PYTHONPATH="$tmpdir" python3 -c "from oh_my_dynamic.runtime.dynamic_workflow import DynamicWorkflowRuntime; from oh_my_dynamic.codex.codex_cli_swarm import CodexCliSwarmRuntime; from oh_my_dynamic.broker.agent_broker import AgentBroker")
 ```
 
 ## Optional Stress Gates

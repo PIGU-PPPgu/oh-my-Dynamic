@@ -1223,6 +1223,27 @@ def test_codex_swarm_scheduler_and_import_compatibility():
         raise AssertionError("cycle should be rejected")
 
 
+@test("Package: v3 imports and root facade compatibility")
+def test_package_imports_and_root_facades():
+    from agent_broker import AgentBroker as OldBroker
+    from codex_cli_swarm import CodexCliAgentSpec as OldSpec
+    from codex_cli_swarm import CodexCliSwarmRuntime as OldSwarmRuntime
+    from dynamic_workflow import DynamicWorkflowRuntime as OldDynamicRuntime
+    from evidence_sanitizer import sanitize_payload as old_sanitize_payload
+
+    from oh_my_dynamic.broker.agent_broker import AgentBroker
+    from oh_my_dynamic.codex.codex_cli_swarm import CodexCliAgentSpec, CodexCliSwarmRuntime
+    from oh_my_dynamic.evals.evidence_sanitizer import sanitize_payload
+    from oh_my_dynamic.runtime.dynamic_workflow import DynamicWorkflowRuntime
+
+    assert AgentBroker is OldBroker
+    assert CodexCliAgentSpec is OldSpec
+    assert CodexCliSwarmRuntime is OldSwarmRuntime
+    assert DynamicWorkflowRuntime is OldDynamicRuntime
+    assert sanitize_payload is old_sanitize_payload
+    assert sanitize_payload({"path": "/tmp/example"})["sanitized"] is True
+
+
 @test("CodexCliSwarm: dependency failure blocks downstream")
 def test_codex_cli_swarm_dependency_failure():
     import shutil, tempfile
@@ -2455,8 +2476,10 @@ def test_quality_eval_runner():
 def test_cli_help_entrypoints():
     import contextlib
     import io
+    import os
     import subprocess
 
+    root = Path(__file__).resolve().parent
     commands = [
         [sys.executable, "-m", "dynamic_workflow", "--help"],
         [sys.executable, "-m", "codex_cli_swarm", "--help"],
@@ -2470,7 +2493,18 @@ def test_cli_help_entrypoints():
         [sys.executable, "examples/real_repo_review.py", "--help"],
     ]
     for command in commands:
-        result = subprocess.run(command, cwd=Path(__file__).resolve().parent, capture_output=True, text=True)
+        result = subprocess.run(command, cwd=root, capture_output=True, text=True)
+        assert result.returncode == 0, f"{command} failed: {result.stderr}"
+        assert "usage:" in result.stdout.lower()
+
+    env = dict(os.environ)
+    env["PYTHONPATH"] = str(root / "src") + (os.pathsep + env["PYTHONPATH"] if env.get("PYTHONPATH") else "")
+    package_commands = [
+        [sys.executable, "-m", "oh_my_dynamic.runtime.dynamic_workflow", "--help"],
+        [sys.executable, "-m", "oh_my_dynamic.codex.codex_cli_swarm", "--help"],
+    ]
+    for command in package_commands:
+        result = subprocess.run(command, cwd=root, env=env, capture_output=True, text=True)
         assert result.returncode == 0, f"{command} failed: {result.stderr}"
         assert "usage:" in result.stdout.lower()
 
@@ -2967,6 +3001,7 @@ if __name__ == "__main__":
         test_codex_cli_swarm_fake_exec,
         test_codex_worker_helpers,
         test_codex_swarm_scheduler_and_import_compatibility,
+        test_package_imports_and_root_facades,
         test_codex_cli_swarm_dependency_failure,
         test_codex_cli_swarm_failure_modes,
         test_codex_cli_swarm_worktree_mode_patch_artifacts,

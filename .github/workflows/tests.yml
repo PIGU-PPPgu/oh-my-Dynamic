@@ -20,28 +20,27 @@ jobs:
           bash -n install_plugin.sh
           python -m json.tool .agents/plugins/marketplace.json >/dev/null
           test -f LICENSE
+      - name: Install dev package
+        run: python -m pip install -e ".[dev]"
       - name: Compile
-        run: python -m py_compile *.py examples/*.py scripts/*.py
+        run: python -m py_compile *.py examples/*.py scripts/*.py $(find src -name '*.py' -print)
       - name: Test
         run: python test_suite.py
       - name: Pytest smoke
-        run: |
-          python -m pip install 'pytest>=8.0.0'
-          python -m pytest tests -q
+        run: python -m pytest tests -q
       - name: Coverage
         run: |
-          python -m pip install 'coverage[toml]>=7.4.0'
           python -m coverage run test_suite.py
           python -m coverage report --fail-under=70
       - name: Security scan
-        run: |
-          python -m pip install 'bandit>=1.7.10'
-          python -m bandit -r . -c pyproject.toml
+        run: python -m bandit -r . -c pyproject.toml
       - name: CLI help
         run: |
           python -m codex_cli_swarm --help >/dev/null
           python -m codex_swarm_cli --help >/dev/null
           python -m dynamic_workflow --help >/dev/null
+          PYTHONPATH=src python -m oh_my_dynamic.runtime.dynamic_workflow --help >/dev/null
+          PYTHONPATH=src python -m oh_my_dynamic.codex.codex_cli_swarm --help >/dev/null
           python scripts/record_swarm_evidence.py --help >/dev/null
           python scripts/record_adaptive_workflow_evidence.py --help >/dev/null
           python scripts/render_workflow_observability.py --help >/dev/null
@@ -50,6 +49,14 @@ jobs:
           python examples/codex_cli_swarm_review.py --help >/dev/null
           python examples/real_repo_review.py --help >/dev/null
           python -m doctor --json >/dev/null
+      - name: Package install smoke
+        run: |
+          tmpdir="$(mktemp -d)"
+          python -m pip install . --target "$tmpdir"
+          (
+            cd /tmp
+            PYTHONPATH="$tmpdir" python -c "from oh_my_dynamic.runtime.dynamic_workflow import DynamicWorkflowRuntime; from oh_my_dynamic.codex.codex_cli_swarm import CodexCliSwarmRuntime; from oh_my_dynamic.broker.agent_broker import AgentBroker; print(DynamicWorkflowRuntime.__name__, CodexCliSwarmRuntime.__name__, AgentBroker.__name__)"
+          )
       - name: Quality eval smoke
         run: python scripts/run_quality_eval.py --sample --output /tmp/quality_eval.md
       - name: Benchmark dry-run smoke

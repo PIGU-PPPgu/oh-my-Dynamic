@@ -1,52 +1,28 @@
-"""Lightweight capability routing for dynamic workflow agents."""
+"""Compatibility facade for ``oh_my_dynamic.runtime.capability_registry``.
+
+Prefer importing from ``oh_my_dynamic.runtime.capability_registry`` in new code.
+"""
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Callable, Dict, Iterable, List, Optional
+from pathlib import Path
+import sys
 
-from workflow_events import WorkflowEvent
+_SRC = Path(__file__).resolve().parent / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
 
-
-DEFAULT_AGENT_CAPABILITIES: Dict[str, List[str]] = {
-    "security_reviewer": ["security", "review", "code"],
-    "architecture_reviewer": ["architecture", "review", "code"],
-    "test_reviewer": ["tests", "coverage", "review"],
-    "docs_reviewer": ["docs", "install", "readme"],
-    "workflow_reviewer": ["dynamic-workflow", "broker", "orchestration"],
-    "general_reviewer": ["review", "general"],
-}
+from oh_my_dynamic.runtime.capability_registry import *  # noqa: F401,F403
 
 
-@dataclass
-class CapabilityRouter:
-    registry: Dict[str, List[str]] = field(default_factory=lambda: dict(DEFAULT_AGENT_CAPABILITIES))
-    fallback_agent: str = "general_reviewer"
+def _run_module_main() -> int:
+    try:
+        from oh_my_dynamic.runtime.capability_registry import main as _main
+    except ImportError as exc:
+        raise SystemExit(f"capability_registry has no module entrypoint: {exc}") from exc
+    result = _main()
+    return result if isinstance(result, int) else 0
 
-    def pick_agent(
-        self,
-        required_capabilities: Iterable[str],
-        run_id: str = "",
-        node_id: str = "",
-        event_callback: Optional[Callable[[WorkflowEvent], None]] = None,
-    ) -> str:
-        required = [str(item).strip() for item in required_capabilities if str(item).strip()]
-        if not required:
-            return self.fallback_agent
-        for agent_id, capabilities in self.registry.items():
-            capability_set = set(capabilities)
-            if all(capability in capability_set for capability in required):
-                return agent_id
-        if event_callback is not None:
-            event_callback(WorkflowEvent(
-                run_id=run_id,
-                kind="capability_route_miss",
-                subject="capability_route_miss",
-                body="No exact capability match; using fallback agent.",
-                node_id=node_id,
-                agent_id=self.fallback_agent,
-                status="fallback",
-                preview=", ".join(required),
-                metadata={"required_capabilities": required, "fallback_agent": self.fallback_agent},
-            ))
-        return self.fallback_agent
+
+if __name__ == "__main__":
+    raise SystemExit(_run_module_main())

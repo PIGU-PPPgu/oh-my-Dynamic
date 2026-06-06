@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import _bootstrap  # noqa: F401
-from protocol_adapters import A2ATaskStore, a2a_agent_card, mcp_tools, run_mcp_tool
+from oh_my_dynamic.protocol.protocol_adapters import A2ATaskStore, a2a_agent_card, mcp_tools, run_mcp_tool
 from examples.mock_llm import mock_llm
 
 

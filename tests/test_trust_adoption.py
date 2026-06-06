@@ -8,12 +8,15 @@ import sys
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 
 def test_evidence_sanitizer_marks_and_redacts_repo_paths():
-    from evidence_sanitizer import sanitize_payload
+    from oh_my_dynamic.evals.evidence_sanitizer import sanitize_payload
 
     payload = sanitize_payload({"trace_path": f"{ROOT}/.orchestry/run/trace.json"}, root=str(ROOT))
     assert payload["sanitized"] is True
@@ -22,7 +25,7 @@ def test_evidence_sanitizer_marks_and_redacts_repo_paths():
 
 
 def test_doctor_reports_gateway_auth_failure(tmp_path):
-    from doctor import run_doctor
+    from oh_my_dynamic.evals.doctor import run_doctor
 
     marketplace = tmp_path / "marketplace.json"
     marketplace.write_text('{"plugins":[{"name":"oh-my-dynamic"}]}', encoding="utf-8")
@@ -66,3 +69,17 @@ def test_benchmark_dry_run_writes_compact_json(tmp_path):
     assert payload["dry_run"] is True
     assert payload["mode_summaries"]["adaptive"]["replanner_count"] == 2
     assert payload["task_count"] >= 12
+
+
+def test_v3_package_imports_match_compatibility_facades():
+    from agent_broker import AgentBroker as OldBroker
+    from codex_cli_swarm import CodexCliSwarmRuntime as OldSwarmRuntime
+    from dynamic_workflow import DynamicWorkflowRuntime as OldDynamicRuntime
+
+    from oh_my_dynamic.broker.agent_broker import AgentBroker
+    from oh_my_dynamic.codex.codex_cli_swarm import CodexCliSwarmRuntime
+    from oh_my_dynamic.runtime.dynamic_workflow import DynamicWorkflowRuntime
+
+    assert AgentBroker is OldBroker
+    assert CodexCliSwarmRuntime is OldSwarmRuntime
+    assert DynamicWorkflowRuntime is OldDynamicRuntime

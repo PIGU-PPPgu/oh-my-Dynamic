@@ -1,36 +1,28 @@
-"""Unified workflow progress events."""
+"""Compatibility facade for ``oh_my_dynamic.runtime.workflow_events``.
+
+Prefer importing from ``oh_my_dynamic.runtime.workflow_events`` in new code.
+"""
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
-from typing import Any, Dict
-import uuid
+from pathlib import Path
+import sys
+
+_SRC = Path(__file__).resolve().parent / "src"
+if str(_SRC) not in sys.path:
+    sys.path.insert(0, str(_SRC))
+
+from oh_my_dynamic.runtime.workflow_events import *  # noqa: F401,F403
 
 
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+def _run_module_main() -> int:
+    try:
+        from oh_my_dynamic.runtime.workflow_events import main as _main
+    except ImportError as exc:
+        raise SystemExit(f"workflow_events has no module entrypoint: {exc}") from exc
+    result = _main()
+    return result if isinstance(result, int) else 0
 
 
-@dataclass
-class WorkflowEvent:
-    id: str = ""
-    run_id: str = ""
-    kind: str = "event"
-    subject: str = ""
-    body: str = ""
-    node_id: str = ""
-    agent_id: str = ""
-    status: str = ""
-    preview: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    created_at: str = ""
-
-    def __post_init__(self) -> None:
-        if not self.id:
-            self.id = f"event_{uuid.uuid4().hex[:12]}"
-        if not self.created_at:
-            self.created_at = _now_iso()
-
-    def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+if __name__ == "__main__":
+    raise SystemExit(_run_module_main())
