@@ -13,7 +13,7 @@ One-line trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
 ```
 
-Current v3.1.0 status:
+Current v3.1.1 status:
 
 - Preferred developer imports now use `oh_my_dynamic.*`; root-level files such as `dynamic_workflow.py`, `codex_cli_swarm.py`, and `agent_broker.py` are compatibility shims.
 

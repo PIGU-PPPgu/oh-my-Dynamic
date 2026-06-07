@@ -1,6 +1,6 @@
 # oh-my-Dynamic Docs
 
-This folder holds the long-form material that used to crowd the project README. The README is now the product entrypoint; these docs carry architecture, release, evidence, and migration detail.
+This folder holds the long-form material that used to crowd the project README. The short entrypoints are [README.md](../README.md) and [README.zh-CN.md](../README.zh-CN.md); these docs carry architecture, release, evidence, and migration detail.
 
 ## Start Here
 

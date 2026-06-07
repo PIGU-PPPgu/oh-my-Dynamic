@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.1.1 - 2026-06-07
+
+- Replaced the long README with a short English entrypoint and added
+  `README.zh-CN.md` as a matching Chinese entrypoint.
+- Added bilingual improvement measurement evidence for controlled
+  single/fixed/adaptive comparisons.
+- Documented concrete lift numbers: adaptive improves average quality score by
+  `+0.386` over single, evidence completeness by `+0.329`, and reduces missing
+  benchmark requirements by `100%`.
+- Kept detailed architecture, evidence, threat model, and migration material in
+  `docs/` instead of the README first screen.
+
 ## 3.1.0 - 2026-06-07
 
 - Added v3.1 benchmark hardening for five fixed repo-review fixtures:

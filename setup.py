@@ -5,7 +5,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="oh-my-dynamic",
-    version="3.1.0",
+    version="3.1.1",
     description="Multi-agent orchestration engine with DAG execution, dynamic replan, TEA protocol, and model-provider routing.",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
