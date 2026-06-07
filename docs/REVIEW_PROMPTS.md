@@ -5,7 +5,7 @@ Use these prompts with GPT Pro, GLM, Claude Code, Codex, or another reviewer. Co
 ## Adoption Review
 
 ```text
-Review oh-my-Dynamic v3.3 from an external adopter perspective.
+Review oh-my-Dynamic v3.4 from an external adopter perspective.
 
 Focus on:
 - installation failure points
@@ -27,7 +27,7 @@ Output:
 ## Security Boundary Review
 
 ```text
-Review oh-my-Dynamic v3.3 security boundaries.
+Review oh-my-Dynamic v3.4 security boundaries.
 
 Focus on:
 - worker environment handling
@@ -48,7 +48,7 @@ Output:
 ## Benchmark Review
 
 ```text
-Review oh-my-Dynamic v3.3 benchmark claims.
+Review oh-my-Dynamic v3.4 benchmark claims.
 
 Focus on:
 - controlled improvement measurement vs real Codex CLI evidence

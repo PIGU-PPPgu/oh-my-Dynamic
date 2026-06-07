@@ -1,6 +1,6 @@
 #!/bin/bash
 # oh-my-Dynamic Codex Plugin 安装脚本
-# 用法: bash install_plugin.sh
+# 用法: bash install_plugin.sh [--uninstall]
 
 set -e
 
@@ -10,6 +10,77 @@ SKILLS_DIR="$HOME/.agents/skills"
 
 echo "🚀 安装 oh-my-Dynamic Codex 插件..."
 echo ""
+
+MARKETPLACE_DIR="$HOME/.agents/plugins"
+MARKETPLACE_JSON="$MARKETPLACE_DIR/marketplace.json"
+
+if [ "${1:-}" = "--uninstall" ]; then
+    echo "🧹 卸载 oh-my-Dynamic Codex 插件..."
+    echo ""
+
+    remove_link() {
+        local target_dir="$1"
+        local expected_source="$2"
+        local label="$3"
+
+        if [ ! -e "$target_dir" ] && [ ! -L "$target_dir" ]; then
+            echo "  ✅ $label 未安装"
+            return
+        fi
+        if [ ! -L "$target_dir" ]; then
+            echo "  ⚠️  $label 不是符号链接，跳过: $target_dir"
+            return
+        fi
+        local current_target
+        current_target="$(readlink "$target_dir")"
+        if [ "$current_target" != "$expected_source" ]; then
+            echo "  ⚠️  $label 指向其他位置，跳过: $target_dir -> $current_target"
+            return
+        fi
+        rm "$target_dir"
+        echo "  ✅ 已移除 $label"
+    }
+
+    remove_link "$SKILLS_DIR/oh-my-dynamic" "$PLUGIN_DIR/skills/oh-my-dynamic" "oh-my-dynamic skill"
+    remove_link "$SKILLS_DIR/multi-agent-run" "$PLUGIN_DIR/skills/multi-agent-run" "multi-agent-run skill"
+    remove_link "$MARKETPLACE_DIR/plugins/oh-my-dynamic" "$PLUGIN_DIR" "marketplace plugin link"
+
+    if [ -f "$MARKETPLACE_JSON" ]; then
+        python - "$MARKETPLACE_JSON" <<'PY'
+import json
+import shutil
+import sys
+from datetime import datetime
+from pathlib import Path
+
+marketplace_path = Path(sys.argv[1])
+try:
+    data = json.loads(marketplace_path.read_text(encoding="utf-8"))
+except json.JSONDecodeError as exc:
+    raise SystemExit(f"marketplace.json JSON 无效，请先手动修复: {exc}") from exc
+
+plugins = data.get("plugins", [])
+updated_plugins = [plugin for plugin in plugins if plugin.get("name") != "oh-my-dynamic"]
+if len(updated_plugins) == len(plugins):
+    print("  ✅ marketplace.json 未包含 oh-my-dynamic")
+    raise SystemExit(0)
+
+backup_path = marketplace_path.with_name(
+    f"{marketplace_path.name}.bak.{datetime.now().strftime('%Y%m%d%H%M%S')}"
+)
+shutil.copy2(marketplace_path, backup_path)
+data["plugins"] = updated_plugins
+marketplace_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+print(f"  ✅ 已移除 marketplace 条目，并备份: {backup_path}")
+PY
+    else
+        echo "  ✅ marketplace.json 不存在"
+    fi
+
+    echo ""
+    echo "卸载完成。raw traces 如需清理，可删除项目内 .orchestry/。"
+    exit 0
+fi
 
 # 1. 创建 skills 目录
 mkdir -p "$SKILLS_DIR"
@@ -44,7 +115,6 @@ link_skill "$PLUGIN_DIR/skills/oh-my-dynamic" "$SKILLS_DIR/oh-my-dynamic" "oh-my
 link_skill "$PLUGIN_DIR/skills/multi-agent-run" "$SKILLS_DIR/multi-agent-run" "multi-agent-run"
 
 # 3. 安装 marketplace（个人级）
-MARKETPLACE_DIR="$HOME/.agents/plugins"
 mkdir -p "$MARKETPLACE_DIR"
 MARKETPLACE_PLUGIN_DIR="$MARKETPLACE_DIR/plugins/oh-my-dynamic"
 mkdir -p "$MARKETPLACE_DIR/plugins"
@@ -57,7 +127,6 @@ else
 fi
 
 # 更新 marketplace.json：保留其他插件，合并/更新 oh-my-dynamic 条目
-MARKETPLACE_JSON="$MARKETPLACE_DIR/marketplace.json"
 MARKETPLACE_TEMPLATE="$PROJECT_DIR/.agents/plugins/marketplace.json"
 
 echo "📋 更新 marketplace.json..."

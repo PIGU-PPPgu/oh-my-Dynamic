@@ -30,4 +30,5 @@
 
 - 真实 Codex CLI run 需要本地安装并登录 Codex CLI。
 - 插件安装使用指向 `~/.agents` 的 symlink；移动 clone 后需要重新运行 `install_plugin.sh`。
+- bash/symlink 安装器面向 macOS、Linux 和 WSL；原生 Windows 尚未验证。
 - 外部 provider API key 只用于本地 provider-backed Python runtime；普通 Codex App skill 使用或 Codex CLI 登录态 swarm 不需要这些 key。

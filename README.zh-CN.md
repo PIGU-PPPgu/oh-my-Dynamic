@@ -12,46 +12,66 @@
 
 ## 快速开始
 
+CLI-only 安全路径：
+
 ```bash
 git clone https://github.com/PIGU-PPPgu/oh-my-Dynamic.git
 cd oh-my-Dynamic
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
 python -m pip install -e ".[dev]"
-bash install_plugin.sh
 python -m doctor --json
+python examples/real_repo_review.py --dry-run --run-id five-minute-demo --output-dir /tmp/ohmy-evidence
 ```
+
+真实 Codex CLI workers：
+
+```bash
+python -m doctor --json --strict-real-codex
+python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard
+```
+
+Codex App 插件安装：
+
+```bash
+bash install_plugin.sh
+```
+
+插件安装会修改本地 `~/.agents` symlink 和 marketplace JSON。runtime workers 默认仍只读。
 
 Codex App skill 触发句：
 
 ```text
-[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
+[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务；App runtime 可用时使用内部 Codex subagents，否则走 in-chat fallback；大规模走 Codex CLI swarm。
 ```
 
 ## 运行
 
 ```bash
-# 5 分钟无 key 检查
-python examples/real_repo_review.py --dry-run --run-id five-minute-demo
+# Safe: 无 key、无真实 workers、写到仓库外
+python examples/real_repo_review.py --dry-run --run-id five-minute-demo --output-dir /tmp/ohmy-evidence
 
-# 真实 5-agent 仓库审查
+# Real: 启动 Codex CLI workers
 python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard
 
-# Adaptive workflow
+# 真实 adaptive workflow
 python -m dynamic_workflow "review this repo" --max-rounds 2 --max-agents 20 --max-parallel 5 --stream-events
 
-# 固定 20-agent swarm
+# 成本更高的固定 swarm
 python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 ```
 
-## 测评提升
+## 受控 Rubric 提升
 
 中英双语报告：[docs/evidence/improvement_v311.md](docs/evidence/improvement_v311.md)
+
+这是受控同题 rubric 评分，不是真实模型质量证明。涉及 runtime 能力时，应同时引用真实 Codex CLI evidence。
 
 | 对比 | 质量分 | 证据完整度 | 缺失要求 |
 |------|--------|------------|----------|
 | fixed vs single | `+0.286` / `+46.6%` | `+0.229` | `-74.3%` |
 | adaptive vs single | `+0.386` / `+62.9%` | `+0.329` | `-100%` |
-
-这是受控同题评分。涉及 runtime 能力时，应同时引用真实 Codex CLI evidence。
 
 ## 证据
 
@@ -64,23 +84,12 @@ python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 
 ## 状态
 
-| Stable | Beta | Experimental |
-|--------|------|--------------|
-| Codex CLI swarm、adaptive workflow、broker reducer、证据报告 | worktree patch mode、checkpoint/resume、streaming events | Codex App bridge、A2A gateway、TEA |
-
-## 验证
-
-```bash
-python test_suite.py
-python -m pytest tests -q
-python -m coverage run -m pytest tests -q
-python -m coverage report --fail-under=80
-python -m bandit -r . -c pyproject.toml
-```
+Stable：Codex CLI swarm、adaptive workflow、broker reducer、证据报告。Experimental：App-native bridge、A2A gateway、TEA。完整 gates 见 [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md)。
 
 ## 更多
 
 - 快速开始：[docs/QUICKSTART.zh-CN.md](docs/QUICKSTART.zh-CN.md)
+- 故障排查/卸载：[docs/TROUBLESHOOTING.zh-CN.md](docs/TROUBLESHOOTING.zh-CN.md)
 - 文档索引：[docs/README.md](docs/README.md)
 - 已知边界：[docs/KNOWN_LIMITS.zh-CN.md](docs/KNOWN_LIMITS.zh-CN.md)
 - 证据规则：[docs/evidence/README.md](docs/evidence/README.md)

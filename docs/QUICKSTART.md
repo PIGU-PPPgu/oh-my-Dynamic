@@ -1,41 +1,62 @@
 # Quickstart
 
-This path is for first-time users who want to verify installation, run a safe demo, and understand where evidence is written.
+Use this path to verify oh-my-Dynamic without changing Codex App configuration first. Supported first-run platforms are macOS, Linux, and WSL; native Windows is not verified.
 
-## 1. Install
+## 1. CLI-only safe install
 
 ```bash
 git clone https://github.com/PIGU-PPPgu/oh-my-Dynamic.git
 cd oh-my-Dynamic
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
 python -m pip install -e ".[dev]"
-bash install_plugin.sh
 python -m doctor --json
 ```
 
-Expected result: `doctor` returns `pass` or clear `warn` items. Fix `fail` items before running real Codex CLI workers.
+`doctor` may return `warn` when Codex CLI or the App plugin is not installed. That is acceptable for dry-run checks.
 
 ## 2. Five-minute no-key check
 
 ```bash
-python examples/real_repo_review.py --dry-run --run-id five-minute-demo
+python examples/real_repo_review.py \
+  --dry-run \
+  --run-id five-minute-demo \
+  --output-dir /tmp/ohmy-evidence
 ```
 
-This does not launch Codex CLI workers. It verifies compact JSON/Markdown evidence shape and sanitizer behavior.
+This does not launch Codex CLI workers and does not write public evidence into the repository.
 
-Evidence is written under `docs/evidence/` unless you pass a different output path.
-
-## 3. Real 5-agent repo review
+## 3. Real Codex CLI review
 
 Prerequisite: Codex CLI is installed and logged in.
 
 ```bash
 codex --version
+python -m doctor --json --strict-real-codex
 python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard
 ```
 
 This launches real `codex exec` workers. Raw prompts/stdout/stderr and traces stay in `.orchestry/`; only compact evidence should be committed.
 
-## 4. Adaptive replanner smoke
+## 4. Codex App plugin install
+
+Run this only if you want the App skill entrypoints:
+
+```bash
+bash install_plugin.sh
+python -m doctor --json
+```
+
+The installer creates symlinks under `~/.agents` and merges the local plugin into `~/.agents/plugins/marketplace.json`. Moving or deleting the clone requires rerunning the installer.
+
+Uninstall:
+
+```bash
+bash install_plugin.sh --uninstall
+```
+
+## 5. Adaptive replanner smoke
 
 Start with a shape check:
 
@@ -46,7 +67,8 @@ python scripts/record_adaptive_workflow_evidence.py \
   --max-rounds 2 \
   --max-agents 12 \
   --max-parallel 4 \
-  --dry-run
+  --dry-run \
+  --output-dir /tmp/ohmy-adaptive
 ```
 
 Then run the real smoke when you are ready to launch Codex CLI workers:
@@ -61,9 +83,7 @@ python scripts/record_adaptive_workflow_evidence.py \
   --dashboard
 ```
 
-The dry-run verifies evidence shape only. The real smoke proves planner/replanner flow, is slower, and may launch multiple real Codex CLI workers.
-
-## 5. Read the evidence
+## 6. Read the evidence
 
 Start here:
 

@@ -5,7 +5,7 @@
 ## 采用体验评审
 
 ```text
-请从外部采用者视角评审 oh-my-Dynamic v3.3。
+请从外部采用者视角评审 oh-my-Dynamic v3.4。
 
 重点关注：
 - 安装失败点
@@ -27,7 +27,7 @@
 ## 安全边界评审
 
 ```text
-请评审 oh-my-Dynamic v3.3 的安全边界。
+请评审 oh-my-Dynamic v3.4 的安全边界。
 
 重点关注：
 - worker environment handling
@@ -48,7 +48,7 @@
 ## Benchmark 评审
 
 ```text
-请评审 oh-my-Dynamic v3.3 的 benchmark claims。
+请评审 oh-my-Dynamic v3.4 的 benchmark claims。
 
 重点关注：
 - controlled improvement measurement 与 real Codex CLI evidence 的区别

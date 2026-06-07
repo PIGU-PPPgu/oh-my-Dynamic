@@ -178,17 +178,49 @@ def test_doctor_reports_marketplace_git_evidence_and_loopback_states(tmp_path):
         gateway_host="127.0.0.1",
         gateway_token="",
         evidence_glob=str(evidence_dir / "*"),
+        strict_real_codex=False,
+        codex_exec_timeout_s=1,
     )
     result = run_doctor(args)
     checks = {check["name"]: check for check in result["checks"]}
 
     assert result["status"] == "fail"
+    assert result["ready_for_real_codex_cli"] is False
     assert checks["codex_cli"]["status"] == "warn"
     assert checks["git_repo"]["status"] == "fail"
     assert checks["marketplace_json"]["status"] == "fail"
     assert checks["skill_link"]["status"] == "warn"
     assert checks["gateway_auth"]["status"] == "pass"
     assert checks["evidence_redaction"]["status"] == "fail"
+
+
+def test_doctor_strict_real_codex_fails_without_codex_cli(tmp_path):
+    from oh_my_dynamic.evals.doctor import run_doctor
+
+    marketplace = tmp_path / "marketplace.json"
+    marketplace.write_text('{"plugins":[{"name":"oh-my-dynamic"}]}', encoding="utf-8")
+    skill = tmp_path / "skill"
+    skill.mkdir()
+    evidence_dir = tmp_path / "evidence"
+    evidence_dir.mkdir()
+    args = argparse.Namespace(
+        codex_bin="definitely-not-codex",
+        cd=str(ROOT),
+        marketplace_json=str(marketplace),
+        skill_path=str(skill),
+        orchestry_dir=str(tmp_path / ".orchestry"),
+        gateway_host="127.0.0.1",
+        gateway_token="",
+        evidence_glob=str(evidence_dir / "*"),
+        strict_real_codex=True,
+        codex_exec_timeout_s=1,
+    )
+    result = run_doctor(args)
+    checks = {check["name"]: check for check in result["checks"]}
+    assert result["status"] == "fail"
+    assert result["strict_real_codex"] is True
+    assert result["ready_for_real_codex_cli"] is False
+    assert checks["codex_exec_smoke"]["status"] == "fail"
 
 
 def test_workflow_observer_renders_rounds_triggers_and_checkpoint(tmp_path):

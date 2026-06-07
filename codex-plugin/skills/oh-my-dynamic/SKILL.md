@@ -45,17 +45,17 @@ replanner-generated agents, trigger reasons, and reducer recommendations.
 scored without model credentials. `src/oh_my_dynamic/evals/doctor.py`, `src/oh_my_dynamic/evals/evidence_sanitizer.py`, and
 `scripts/run_benchmark.py` add adoption checks, public evidence redaction,
 single/fixed/adaptive benchmark shape checks, v3.2 real Codex CLI stability
-evidence, v3.3 adoption docs, and v3.1.1 bilingual improvement measurement
+evidence, v3.4 adoption docs, and v3.1.1 bilingual improvement measurement
 evidence.
 
 Use It Now:
 
-- App: `[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。`
+- App: `[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务；App runtime 可用时使用内部 Codex subagents，否则走 in-chat fallback；大规模走 Codex CLI swarm。`
 - CLI adaptive: `python scripts/record_adaptive_workflow_evidence.py --goal "..." --required-coverage security,tests,docs --max-agents 50 --max-parallel 5 --dashboard`
 - CLI replanner proof: add `--force-missing-coverage replanner-proof --max-rounds 2`
 - CLI fixed swarm: `python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20`
 - Observability: `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`
-- Doctor: `python -m doctor --json`
+- Doctor: `python -m doctor --json`; real Codex CLI readiness: `python -m doctor --json --strict-real-codex`
 - Benchmark dry-run: `python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v310_dry.json`
 - Benchmark real evidence: add `--real --fixtures security_command_surface,install_five_minute,tests_dynamic_workflow,evidence_redaction,docs_boundary_claims --output docs/evidence/benchmark_v310.json`
 - Improvement measurement: `python scripts/measure_improvement.py --suite benchmarks/repo_review.json --output docs/evidence/improvement_v311.json`
@@ -66,12 +66,12 @@ App internal LLM API unless Codex App/runtime exposes an explicit bridge. Python
 runtime mode still uses the `llm_fn` passed into it, or external provider APIs
 when configured.
 
-## Codex App Default: Native Subagents First
+## Codex App Default: Runtime-Gated Subagents
 
 One-line App trigger:
 
 ```text
-[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务，必要时自动 planner/replanner，默认内部 Codex，若我要求大规模则用 Codex CLI swarm。
+[$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务；App runtime 可用时使用内部 Codex subagents，否则走 in-chat fallback；大规模走 Codex CLI swarm。
 ```
 
 Current product status:
@@ -79,7 +79,7 @@ Current product status:
 - Stable: Codex CLI swarm, adaptive dynamic workflow planner/replanner, broker
   reducer, the real repo review demo, static observability dashboards,
   round-aware compact evidence, deterministic quality evals, v3.2 benchmark
-  stability evidence, v3.3 Quickstart/Known Limits docs, bilingual improvement
+  stability evidence, v3.4 Quickstart/Known Limits docs, bilingual improvement
   measurement, and pytest coverage fail-under 80.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
@@ -107,7 +107,7 @@ In App fallback/zero-config mode:
 - Do run `codex_cli_swarm.py` when the user explicitly asks for large-scale Codex CLI worker fan-out.
 - Use `python examples/real_repo_review.py --agents 5 --max-parallel 3` when
   the user asks for a real read-only repo review demo with compact evidence.
-- Use `python examples/real_repo_review.py --dry-run --run-id five-minute-demo`
+- Use `python examples/real_repo_review.py --dry-run --run-id five-minute-demo --output-dir /tmp/ohmy-evidence`
   for a zero-config demo shape check that must not launch real Codex CLI workers.
 - Use `python scripts/render_workflow_observability.py --run-id RUN_ID --source .orchestry --output docs/evidence/RUN_ID-dashboard.html`
   when the user asks to inspect broker trace, artifacts, failures, low-score

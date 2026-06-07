@@ -61,6 +61,12 @@ jobs:
         run: python scripts/run_quality_eval.py --sample --output /tmp/quality_eval.md
       - name: Benchmark dry-run smoke
         run: python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark_v320.json
+      - name: Safe example smoke
+        run: |
+          python examples/real_repo_review.py --dry-run --run-id ci-dry --output-dir /tmp/ohmy-evidence
+          python scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs,replanner-proof --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dry-run --output-dir /tmp/ohmy-adaptive
+          python examples/research_analysis.py >/tmp/ohmy-research-demo.txt
+          python examples/code_review.py >/tmp/ohmy-code-review-demo.txt
       - name: Evidence redaction scan
         run: |
           ! grep -R "/Users/" docs/evidence

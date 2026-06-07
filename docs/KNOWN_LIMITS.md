@@ -30,4 +30,5 @@ These limits are intentional and should be repeated in release notes, reviews, a
 
 - Real Codex CLI runs require local Codex CLI installation and login.
 - Plugin installation uses symlinks into `~/.agents`; moving the clone requires rerunning `install_plugin.sh`.
+- The bash/symlink installer is intended for macOS, Linux, and WSL. Native Windows is not verified.
 - External provider API keys are only needed for local provider-backed Python runtime paths, not ordinary Codex App skill usage or Codex CLI login-backed swarm usage.

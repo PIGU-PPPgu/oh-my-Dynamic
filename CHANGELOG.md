@@ -1,5 +1,23 @@
 # Changelog
 
+## 3.4.0 - 2026-06-07
+
+- Hardened external adoption flow: README and Quickstart now start with a
+  CLI-only safe path, keep Codex App plugin installation separate, and write
+  first-run dry-run evidence to `/tmp` instead of dirtying `docs/evidence`.
+- Added `python -m doctor --json --strict-real-codex`, including a minimal
+  read-only `codex exec` smoke and a `ready_for_real_codex_cli` JSON field.
+- Added `bash install_plugin.sh --uninstall` plus bilingual troubleshooting
+  docs for symlink cleanup, marketplace rollback, Codex CLI login issues,
+  generated evidence cleanup, platform boundaries, and common failures.
+- Moved benchmark wording from broad "Measured Lift" to "Controlled Rubric
+  Lift" and made the deterministic-vs-real evidence boundary visible above
+  the score table.
+- Added safe example smoke commands to CI: real repo review dry-run, adaptive
+  dry-run, and two deterministic reference demos.
+- Updated skill wording so App-native subagents are explicitly runtime-gated,
+  with in-chat fallback and Codex CLI swarm only for large-scale execution.
+
 ## 3.3.0 - 2026-06-07
 
 - Added bilingual Quickstart docs for install, doctor, dry-run, real 5-agent review, adaptive smoke, and evidence locations.

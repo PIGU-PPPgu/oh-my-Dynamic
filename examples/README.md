@@ -5,12 +5,13 @@ Start with these three paths.
 ## 1. No-key shape check
 
 ```bash
-python examples/real_repo_review.py --dry-run --run-id five-minute-demo
+python examples/real_repo_review.py --dry-run --run-id five-minute-demo --output-dir /tmp/ohmy-evidence
 ```
 
 - Does not launch Codex CLI.
 - Writes compact JSON/Markdown evidence shape.
 - Safe for install checks and CI-style demos.
+- Writes outside the repository when `--output-dir /tmp/ohmy-evidence` is used.
 
 ## 2. Real 5-agent repo review
 
@@ -31,12 +32,12 @@ python scripts/record_adaptive_workflow_evidence.py \
   --max-rounds 2 \
   --max-agents 12 \
   --max-parallel 4 \
-  --dashboard
+  --dry-run \
+  --output-dir /tmp/ohmy-adaptive
 ```
 
-- Launches planner/replanner workflow.
-- May launch multiple real Codex CLI workers.
-- Use `--dry-run` only when validating shape without real workers.
+- Uses `--dry-run` for safe shape validation.
+- Remove `--dry-run` and add `--dashboard` only when you want real planner/replanner workers.
 
 ## Reference Demos
 

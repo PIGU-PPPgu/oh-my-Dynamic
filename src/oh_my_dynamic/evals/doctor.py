@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import argparse
 import glob
 import json
@@ -24,8 +24,21 @@ class DoctorCheck:
     metadata: Dict[str, Any]
 
 
-def _run(cmd: List[str], cwd: str = ".") -> subprocess.CompletedProcess[str]:
-    return subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
+def _run(
+    cmd: List[str],
+    cwd: str = ".",
+    *,
+    input_text: Optional[str] = None,
+    timeout_s: Optional[int] = None,
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        cwd=cwd,
+        input=input_text,
+        capture_output=True,
+        text=True,
+        timeout=timeout_s,
+    )
 
 
 def _check_codex_cli(codex_bin: str) -> DoctorCheck:
@@ -36,6 +49,63 @@ def _check_codex_cli(codex_bin: str) -> DoctorCheck:
     status = "pass" if result.returncode == 0 else "warn"
     version = (result.stdout or result.stderr).strip().splitlines()[:1]
     return DoctorCheck("codex_cli", status, "Codex CLI is available", {"path": path, "version": version[0] if version else ""})
+
+
+def _check_codex_exec_smoke(codex_bin: str, cwd: str, timeout_s: int) -> DoctorCheck:
+    path = shutil.which(codex_bin)
+    if not path:
+        return DoctorCheck(
+            "codex_exec_smoke",
+            "fail",
+            f"{codex_bin!r} was not found on PATH; real Codex CLI workers cannot run",
+            {},
+        )
+    output_path = Path(cwd).resolve() / ".orchestry" / "doctor" / "codex_exec_smoke.txt"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    prompt = "Return exactly this text and nothing else: oh-my-dynamic doctor smoke"
+    cmd = [
+        codex_bin,
+        "exec",
+        "--cd",
+        str(Path(cwd).resolve()),
+        "--sandbox",
+        "read-only",
+        "--skip-git-repo-check",
+        "--ephemeral",
+        "--output-last-message",
+        str(output_path),
+        "-",
+    ]
+    try:
+        result = _run(cmd, cwd=cwd, input_text=prompt, timeout_s=timeout_s)
+    except subprocess.TimeoutExpired:
+        return DoctorCheck(
+            "codex_exec_smoke",
+            "fail",
+            f"codex exec smoke timed out after {timeout_s}s",
+            {"output_path": str(output_path)},
+        )
+    preview = ""
+    if output_path.exists():
+        preview = output_path.read_text(encoding="utf-8", errors="replace").strip()[:160]
+    if result.returncode != 0:
+        return DoctorCheck(
+            "codex_exec_smoke",
+            "fail",
+            "codex exec smoke failed; Codex CLI may be logged out or blocked by sandbox/config",
+            {
+                "returncode": result.returncode,
+                "stdout_preview": (result.stdout or "")[:160],
+                "stderr_preview": (result.stderr or "")[:160],
+                "output_path": str(output_path),
+            },
+        )
+    return DoctorCheck(
+        "codex_exec_smoke",
+        "pass",
+        "codex exec smoke completed",
+        {"output_path": str(output_path), "preview": preview},
+    )
 
 
 def _check_git_repo(cwd: str) -> DoctorCheck:
@@ -55,12 +125,15 @@ def _check_marketplace(path: str) -> DoctorCheck:
         payload = json.loads(marketplace.read_text(encoding="utf-8"))
     except Exception as exc:
         return DoctorCheck("marketplace_json", "fail", f"Marketplace JSON could not be parsed: {exc}", {"path": str(marketplace)})
-    has_plugin = "oh-my-dynamic" in json.dumps(payload)
+    plugins = payload.get("plugins", []) if isinstance(payload, dict) else []
+    plugin = next((item for item in plugins if item.get("name") == "oh-my-dynamic"), None)
+    has_plugin = plugin is not None
+    source_path = ((plugin or {}).get("source") or {}).get("path", "")
     return DoctorCheck(
         "marketplace_json",
         "pass" if has_plugin else "warn",
         "Marketplace JSON is parseable" + (" and references oh-my-dynamic" if has_plugin else ""),
-        {"path": str(marketplace), "has_oh_my_dynamic": has_plugin},
+        {"path": str(marketplace), "has_oh_my_dynamic": has_plugin, "source_path": source_path},
     )
 
 
@@ -72,7 +145,11 @@ def _check_skill_link(path: str) -> DoctorCheck:
         "skill_link",
         "pass",
         "Installed skill path exists",
-        {"path": str(skill), "is_symlink": skill.is_symlink()},
+        {
+            "path": str(skill),
+            "is_symlink": skill.is_symlink(),
+            "target": os.readlink(skill) if skill.is_symlink() else "",
+        },
     )
 
 
@@ -105,6 +182,7 @@ def _check_evidence_redaction(pattern: str) -> DoctorCheck:
 
 
 def run_doctor(args: argparse.Namespace) -> Dict[str, Any]:
+    strict_real_codex = bool(getattr(args, "strict_real_codex", False))
     checks = [
         _check_codex_cli(args.codex_bin),
         _check_git_repo(args.cd),
@@ -114,18 +192,34 @@ def run_doctor(args: argparse.Namespace) -> Dict[str, Any]:
         _check_gateway_auth(args.gateway_host, args.gateway_token or os.environ.get("OH_MY_DYNAMIC_GATEWAY_TOKEN", "")),
         _check_evidence_redaction(args.evidence_glob),
     ]
+    if strict_real_codex:
+        checks.append(_check_codex_exec_smoke(args.codex_bin, args.cd, int(getattr(args, "codex_exec_timeout_s", 60))))
+    ready_for_real_codex_cli = strict_real_codex and all(
+        check.status == "pass"
+        for check in checks
+        if check.name in {"codex_cli", "git_repo", "orchestry_writable", "codex_exec_smoke"}
+    )
+    if strict_real_codex and not any(check.name == "codex_exec_smoke" for check in checks):
+        ready_for_real_codex_cli = False
     if any(check.status == "fail" for check in checks):
         status = "fail"
     elif any(check.status == "warn" for check in checks):
         status = "warn"
     else:
         status = "pass"
-    return {"status": status, "checks": [asdict(check) for check in checks]}
+    return {
+        "status": status,
+        "ready_for_real_codex_cli": ready_for_real_codex_cli,
+        "strict_real_codex": strict_real_codex,
+        "checks": [asdict(check) for check in checks],
+    }
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check oh-my-Dynamic local installation and release-readiness.")
     parser.add_argument("--json", action="store_true", help="Print machine-readable JSON.")
+    parser.add_argument("--strict-real-codex", action="store_true", help="Run a real `codex exec` smoke and fail if real workers are not ready.")
+    parser.add_argument("--codex-exec-timeout-s", type=int, default=60)
     parser.add_argument("--codex-bin", default="codex")
     parser.add_argument("--cd", default=".")
     parser.add_argument("--marketplace-json", default="~/.agents/plugins/marketplace.json")

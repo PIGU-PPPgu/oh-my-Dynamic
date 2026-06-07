@@ -40,11 +40,14 @@ def test_doctor_reports_gateway_auth_failure(tmp_path):
         gateway_host="0.0.0.0",
         gateway_token="",
         evidence_glob=str(tmp_path / "evidence" / "*"),
+        strict_real_codex=False,
+        codex_exec_timeout_s=1,
     )
     result = run_doctor(args)
     checks = {check["name"]: check for check in result["checks"]}
     assert result["status"] == "fail"
     assert checks["gateway_auth"]["status"] == "fail"
+    assert result["ready_for_real_codex_cli"] is False
 
 
 def test_benchmark_dry_run_writes_compact_json(tmp_path):

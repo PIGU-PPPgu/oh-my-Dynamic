@@ -1,6 +1,6 @@
 {
   "name": "oh-my-dynamic",
-  "version": "3.1.0",
+  "version": "3.4.0",
   "description": "Adaptive multi-agent dynamic workflow orchestration for Codex App skills, Codex CLI swarms, broker evidence, and quality evaluation.",
   "skills": "./skills/",
   "author": {

@@ -13,30 +13,40 @@
 
 ## Checklist
 
-1. 全新 clone 和安装：
+1. 全新 clone 和 CLI-only 安装：
 
 ```bash
 git clone https://github.com/PIGU-PPPgu/oh-my-Dynamic.git
 cd oh-my-Dynamic
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
 python -m pip install -e ".[dev]"
-bash install_plugin.sh
 python -m doctor --json
 ```
 
 2. 无 key smoke：
 
 ```bash
-python examples/real_repo_review.py --dry-run --run-id adoption-dry-run
+python examples/real_repo_review.py --dry-run --run-id adoption-dry-run --output-dir /tmp/ohmy-evidence
 ```
 
 3. 真实 5-agent review：
 
 ```bash
 codex --version
+python -m doctor --json --strict-real-codex
 python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard
 ```
 
-4. Adaptive shape check：
+4. Codex App 插件安装：
+
+```bash
+bash install_plugin.sh
+python -m doctor --json
+```
+
+5. Adaptive shape check：
 
 ```bash
 python scripts/record_adaptive_workflow_evidence.py \
@@ -45,10 +55,11 @@ python scripts/record_adaptive_workflow_evidence.py \
   --max-rounds 2 \
   --max-agents 12 \
   --max-parallel 4 \
-  --dry-run
+  --dry-run \
+  --output-dir /tmp/ohmy-adaptive
 ```
 
-5. 可选真实 adaptive smoke：
+6. 可选真实 adaptive smoke：
 
 ```bash
 python scripts/record_adaptive_workflow_evidence.py \
@@ -69,6 +80,7 @@ python scripts/record_adaptive_workflow_evidence.py \
 - compact evidence 是否足够可信
 - dry-run 和 real-run evidence 是否区分清楚
 - raw `.orchestry/` traces 是否留在本地
+- `bash install_plugin.sh --uninstall` 是否能干净移除 symlink
 - 下一版最值得修的一个问题
 
 更深入的外部评审提示词见 `docs/REVIEW_PROMPTS.zh-CN.md`。

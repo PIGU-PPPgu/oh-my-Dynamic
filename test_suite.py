@@ -2240,9 +2240,12 @@ def test_doctor_json_checks():
             gateway_host="127.0.0.1",
             gateway_token="",
             evidence_glob=str(output / "*"),
+            strict_real_codex=False,
+            codex_exec_timeout_s=1,
         )
         result = run_doctor(args)
         assert result["status"] == "warn"
+        assert result["ready_for_real_codex_cli"] is False
         checks = {check["name"]: check for check in result["checks"]}
         assert checks["codex_cli"]["status"] == "warn"
         assert checks["git_repo"]["status"] == "pass"
@@ -2252,6 +2255,15 @@ def test_doctor_json_checks():
         checks = {check["name"]: check for check in result["checks"]}
         assert result["status"] == "fail"
         assert checks["gateway_auth"]["status"] == "fail"
+
+        args.gateway_host = "127.0.0.1"
+        args.strict_real_codex = True
+        result = run_doctor(args)
+        checks = {check["name"]: check for check in result["checks"]}
+        assert result["status"] == "fail"
+        assert result["strict_real_codex"] is True
+        assert result["ready_for_real_codex_cli"] is False
+        assert checks["codex_exec_smoke"]["status"] == "fail"
     finally:
         shutil.rmtree(d, ignore_errors=True)
 

@@ -33,6 +33,10 @@ python3 scripts/run_quality_eval.py --help >/dev/null
 python3 scripts/run_benchmark.py --help >/dev/null
 python3 scripts/run_quality_eval.py --sample --output /tmp/ohmy-quality-eval.md
 python3 scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/ohmy-benchmark-v310.json
+python3 examples/real_repo_review.py --dry-run --run-id ci-dry --output-dir /tmp/ohmy-evidence
+python3 scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs,replanner-proof --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dry-run --output-dir /tmp/ohmy-adaptive
+python3 examples/research_analysis.py >/tmp/ohmy-research-demo.txt
+python3 examples/code_review.py >/tmp/ohmy-code-review-demo.txt
 python3 examples/codex_cli_swarm_review.py --help >/dev/null
 python3 examples/real_repo_review.py --help >/dev/null
 ! grep -R "/Users/" docs/evidence
@@ -42,6 +46,7 @@ tmpdir="$(mktemp -d)" && python3 -m pip install . --target "$tmpdir" && (cd /tmp
 ## Optional Stress Gates
 
 ```bash
+python3 -m doctor --json --strict-real-codex >/tmp/ohmy-strict-doctor.json
 python3 test_suite.py --stress
 python3 scripts/record_adaptive_workflow_evidence.py --dry-run --run-id adaptive-release-demo --required-coverage security,tests,docs --force-missing-coverage docs --output-dir /tmp/ohmy-evidence
 python3 examples/codex_cli_swarm_review.py --agents 20 --max-parallel 5 --total-timeout-s 3600
@@ -78,6 +83,7 @@ gh release view vX.Y.Z
 ```bash
 bash install_plugin.sh
 python3 -m json.tool ~/.agents/plugins/marketplace.json >/dev/null
+bash install_plugin.sh --uninstall
 ```
 
 Restart Codex App or open a new thread before validating installed skills.
