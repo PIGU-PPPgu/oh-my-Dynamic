@@ -49,6 +49,8 @@ def test_v31_benchmark_defaults_real_to_fixed_fixtures_and_filters(tmp_path):
     assert payload["fixture_count"] == 2
     assert payload["mode_summaries"]["adaptive"]["replanner_count"] >= 2
     assert payload["mode_summaries"]["fixed"]["avg_evidence_completeness"] >= 0.9
+    assert payload["stability_profile"]["prompt_profile"] == "compact_scoreable"
+    assert payload["stability_profile"]["worker_env"] == "allowlist"
     assert all("quality_score" in row for row in payload["task_results"])
 
 
@@ -89,7 +91,38 @@ def test_v31_benchmark_real_exception_becomes_failed_row(monkeypatch):
     assert row["terminal_state"] == "failed"
     assert row["agents_failed"] == 1
     assert row["passed"] is False
+    assert row["failure_type"] == "worker_failure"
     assert "worker exploded" in row["error"]
+
+
+def test_v32_benchmark_compact_prompt_and_stability_report(tmp_path):
+    benchmark = _load_benchmark_module()
+    suite = benchmark._load_suite(str(ROOT / "benchmarks" / "repo_review.json"))
+    item = next(task for task in suite["tasks"] if task["id"] == "security_command_surface")
+
+    goal = benchmark._worker_goal(item, "security reviewer")
+    assert "Limit summary/artifact content to 450 words total." in goal
+    assert len(goal) < 600
+    assert benchmark._failure_type("codex exec timed out after 60s") == "timeout"
+    assert benchmark._failure_type("unsafe codex extra arg for worker: --cd") == "unsafe_extra_arg"
+
+    args = argparse.Namespace(
+        real=False,
+        cd=str(ROOT),
+        run_id="pytest-v32",
+        output=str(tmp_path / "benchmark.json"),
+        sandbox="read-only",
+        timeout_s=300,
+        planner_timeout_s=120,
+        total_timeout_s=900,
+        max_parallel=2,
+    )
+    payload = benchmark._run_suite(args, suite, ["single"], ["security_command_surface"])
+    output = tmp_path / "benchmark.json"
+    benchmark._write_report(payload, str(output))
+    md = output.with_suffix(".md").read_text(encoding="utf-8")
+    assert "Stability Profile" in md
+    assert "compact_scoreable" in md
 
 
 def test_evidence_sanitizer_recursive_file_and_sensitive_hits(tmp_path):
@@ -253,3 +286,39 @@ def test_package_cli_entrypoints_import_and_parse_help():
     for name in modules:
         module = __import__(name, fromlist=["main"])
         assert callable(module.main)
+
+
+def test_v32_codex_worker_env_allowlist_and_extra_arg_validation(monkeypatch, tmp_path):
+    from oh_my_dynamic.codex.codex_worker import (
+        build_codex_exec_command,
+        build_worker_env,
+        validate_codex_extra_args,
+    )
+
+    monkeypatch.setenv("OPENAI_API_KEY", "should-not-leak")
+    monkeypatch.setenv("HTTP_PROXY", "http://127.0.0.1:7897")
+    env = build_worker_env({"OH_MY_DYNAMIC_TEST": "1", "OPENAI_API_KEY": "blocked"})
+    assert env["HTTP_PROXY"] == "http://127.0.0.1:7897"
+    assert env["OH_MY_DYNAMIC_TEST"] == "1"
+    assert "OPENAI_API_KEY" not in env
+
+    assert validate_codex_extra_args(["-c", 'model_reasoning_effort="low"']) == [
+        "-c",
+        'model_reasoning_effort="low"',
+    ]
+    for blocked in ["--cd", "--sandbox=workspace-write", "--output-last-message", "--ephemeral", "-"]:
+        try:
+            validate_codex_extra_args([blocked])
+        except ValueError as exc:
+            assert "unsafe codex extra arg" in str(exc)
+        else:
+            raise AssertionError(f"expected blocked arg: {blocked}")
+
+    command = build_codex_exec_command(
+        "codex",
+        tmp_path,
+        "read-only",
+        tmp_path / "last.txt",
+        ["-c", 'service_tier="fast"'],
+    )
+    assert command[-3:] == ["-c", 'service_tier="fast"', "-"]

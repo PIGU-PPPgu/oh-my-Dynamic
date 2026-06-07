@@ -57,6 +57,7 @@ This is controlled same-fixture scoring. Pair it with real Codex CLI evidence be
 
 | Evidence | Purpose |
 |----------|---------|
+| [benchmark_v320_real_smoke.md](docs/evidence/benchmark_v320_real_smoke.md) | v3.2 real stability smoke: single `0.537`, fixed `0.838`, adaptive `1.0` |
 | [benchmark_v310.md](docs/evidence/benchmark_v310.md) | bounded real Codex CLI benchmark with failures preserved |
 | [benchmark_v310_replanner_sample.md](docs/evidence/benchmark_v310_replanner_sample.md) | real planner + replanner follow-up sample |
 | [swarm_100_agents_codex_cli_run_98b78a645c.md](docs/evidence/swarm_100_agents_codex_cli_run_98b78a645c.md) | fixed 100-agent Codex CLI swarm |

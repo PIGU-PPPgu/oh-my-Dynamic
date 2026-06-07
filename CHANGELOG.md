@@ -1,5 +1,25 @@
 # Changelog
 
+## 3.2.0 - 2026-06-07
+
+- Hardened Codex CLI worker execution for real benchmark stability:
+  allowlisted worker environments, blocked unsafe `codex exec` extra args that
+  could override isolation/output capture, and sanitized failed-worker broker
+  artifacts.
+- Shortened real benchmark worker prompts into a compact scoreable profile so
+  release smoke runs spend less time on broad prose and more reliably produce
+  evidence-oriented output.
+- Added v3.2 benchmark stability metadata to compact JSON/Markdown reports:
+  sandbox, timeouts, parallelism, prompt profile, output redaction, and worker
+  environment policy.
+- Recorded `benchmark_v320_real_smoke` evidence on one real fixture:
+  single scored `0.537`, fixed scored `0.838`, adaptive scored `1.0`, and
+  adaptive completed a real replanner-generated follow-up agent with zero worker
+  failures.
+- Added regression tests for compact benchmark prompts, failure typing,
+  stability report rendering, worker env allowlisting, and unsafe extra-arg
+  rejection.
+
 ## 3.1.1 - 2026-06-07
 
 - Replaced the long README with a short English entrypoint and added

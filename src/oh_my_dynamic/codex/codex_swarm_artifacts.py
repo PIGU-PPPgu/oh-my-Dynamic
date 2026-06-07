@@ -12,6 +12,7 @@ import time
 from oh_my_dynamic.broker.agent_broker import AgentBroker
 from oh_my_dynamic.codex.codex_app_bridge import CodexSubagentEnvelope, envelope_from_dict, ingest_subagent_envelope
 from oh_my_dynamic.codex.codex_swarm_models import CodexCliAgentResult, CodexCliAgentSpec, now_iso
+from oh_my_dynamic.evals.evidence_sanitizer import sanitize_text
 from oh_my_dynamic.runtime.workflow_events import WorkflowEvent
 
 
@@ -168,24 +169,25 @@ def build_failed_process_result(
     worktree_branch: str = "",
     worktree_path: str = "",
 ) -> Tuple[CodexCliAgentResult, WorkflowEvent]:
+    public_error = sanitize_text(str(error))
     envelope = envelope_from_dict({
         "agent_id": spec.id,
         "status": "failed",
-        "summary": error,
+        "summary": public_error,
         "artifacts": [{
             "name": "error",
             "kind": "error",
             "content_type": "text/plain",
-            "content": error,
+            "content": public_error,
         }],
         "messages": [{
             "to_agent": "orchestrator",
             "subject": f"Codex CLI worker failed: {spec.id}",
-            "body": error,
+            "body": public_error,
             "artifact_names": ["error"],
         }],
         "metadata": {"backend": "codex_cli_swarm", "returncode": returncode},
-        "error": error,
+        "error": public_error,
     })
     ingested = ingest_envelope(broker, envelope, spec, run_id)
     artifact_ids = dict(ingested.get("artifact_ids", {}))
@@ -195,7 +197,7 @@ def build_failed_process_result(
         agent_id=spec.id,
         role=spec.role,
         status="failed",
-        summary=error,
+        summary=public_error,
         started_at=started_at,
         completed_at=now_iso(),
         duration_s=time.time() - start,
@@ -211,16 +213,16 @@ def build_failed_process_result(
         agent_cwd=str(agent_cwd.resolve()) if agent_cwd is not None else str(default_cwd),
         worktree_branch=worktree_branch,
         worktree_path=str(Path(worktree_path).resolve()) if worktree_path else "",
-        error=error,
+        error=public_error,
     )
     event = WorkflowEvent(
         run_id=run_id,
         kind="agent_failed",
         subject="agent_failed",
-        body=error,
+        body=public_error,
         agent_id=spec.id,
         status="failed",
-        preview=error[:200],
+        preview=public_error[:200],
         metadata={"returncode": returncode},
     )
     return result, event

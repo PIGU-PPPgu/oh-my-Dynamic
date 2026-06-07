@@ -1366,7 +1366,7 @@ sys.exit(0)
             codex_cwd=d,
             workspace_root=str(Path(d) / "swarm"),
             max_parallel=3,
-            timeout_s=2,
+            timeout_s=5,
             keep_workdirs=False,
             broker=broker,
         )

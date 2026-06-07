@@ -19,6 +19,7 @@ Committed evidence is compact and sanitized. Raw `.orchestry/` traces, prompts, 
 
 | Evidence | Summary |
 |----------|---------|
+| [evidence/benchmark_v320_real_smoke.md](evidence/benchmark_v320_real_smoke.md) | v3.2 real stability smoke with compact prompt profile and adaptive replanner completion |
 | [evidence/benchmark_v310.md](evidence/benchmark_v310.md) | Bounded real Codex CLI benchmark across single, fixed, and adaptive modes |
 | [evidence/improvement_v311.md](evidence/improvement_v311.md) | Bilingual controlled same-fixture lift measurement for single vs fixed vs adaptive |
 | [evidence/benchmark_v310_replanner_sample.md](evidence/benchmark_v310_replanner_sample.md) | Real adaptive run with replanner-generated follow-up agents |

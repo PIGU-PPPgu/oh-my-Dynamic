@@ -1,0 +1,1655 @@
+{
+  "benchmark": "repo_review_productization_v2",
+  "run_id": "benchmark_v320_95eb8792",
+  "commit_sha": "c2fa2e4ae1e0724ce9979bf33cff904392fe7bc1",
+  "dry_run": true,
+  "created_at": 1780809824,
+  "duration_s": 0.01,
+  "modes": [
+    "single",
+    "fixed",
+    "adaptive"
+  ],
+  "fixture_count": 12,
+  "fixtures": [
+    "security_command_surface",
+    "security_broker_poisoning",
+    "install_five_minute",
+    "docs_boundary_claims",
+    "tests_dynamic_workflow",
+    "tests_failure_modes",
+    "evidence_redaction",
+    "dashboard_observability",
+    "release_gates",
+    "benchmark_claims",
+    "worktree_write_isolation",
+    "llm_provider_docs"
+  ],
+  "mode_summaries": {
+    "single": {
+      "total": 10,
+      "passed": 10,
+      "failed": 0,
+      "avg_score": 1.0,
+      "avg_evidence_completeness": 1.0,
+      "agents_completed": 10,
+      "agents_failed": 0,
+      "agent_count": 10,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "failure_rate": 0.0,
+      "terminal_state": "passed"
+    },
+    "fixed": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "avg_score": 1.0,
+      "avg_evidence_completeness": 1.0,
+      "agents_completed": 60,
+      "agents_failed": 0,
+      "agent_count": 60,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "failure_rate": 0.0,
+      "terminal_state": "passed"
+    },
+    "adaptive": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "avg_score": 1.0,
+      "avg_evidence_completeness": 1.0,
+      "agents_completed": 84,
+      "agents_failed": 0,
+      "agent_count": 84,
+      "replanner_count": 24,
+      "duration_s": 0.0,
+      "failure_rate": 0.0,
+      "terminal_state": "passed"
+    }
+  },
+  "task_results": [
+    {
+      "mode": "single",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for security_command_surface. Keywords: subprocess, sandbox, secret, auth Signals: codex exec, sandbox, environment, stderr Risk categories: security, secrets, process Evidence requirements: file, line, command, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "subprocess",
+        "sandbox",
+        "secret",
+        "auth"
+      ],
+      "signal_hits": [
+        "codex exec",
+        "sandbox",
+        "environment",
+        "stderr"
+      ],
+      "risk_hits": [
+        "security",
+        "secrets",
+        "process"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "command",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for security_command_surface. Keywords: subprocess, sandbox, secret, auth Signals: codex exec, sandbox, environment, stderr Risk categories: security, secrets, process Evidence requirements: file, line, command, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json,",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "subprocess",
+        "sandbox",
+        "secret",
+        "auth"
+      ],
+      "signal_hits": [
+        "codex exec",
+        "sandbox",
+        "environment",
+        "stderr"
+      ],
+      "risk_hits": [
+        "security",
+        "secrets",
+        "process"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "command",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for security_command_surface. Keywords: subprocess, sandbox, secret, auth Signals: codex exec, sandbox, environment, stderr Risk categories: security, secrets, process Evidence requirements: file, line, command, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.js",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "subprocess",
+        "sandbox",
+        "secret",
+        "auth"
+      ],
+      "signal_hits": [
+        "codex exec",
+        "sandbox",
+        "environment",
+        "stderr"
+      ],
+      "risk_hits": [
+        "security",
+        "secrets",
+        "process"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "command",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "security_broker_poisoning",
+      "goal": "Review broker artifact poisoning and malformed envelope risks.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for security_broker_poisoning. Keywords: broker, artifact, envelope, validation Signals: artifact, envelope, thread_id, validation Risk categories: security, protocol, data-integrity Evidence requirements: file, line, risk, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmar",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "broker",
+        "artifact",
+        "envelope",
+        "validation"
+      ],
+      "signal_hits": [
+        "artifact",
+        "envelope",
+        "thread_id",
+        "validation"
+      ],
+      "risk_hits": [
+        "security",
+        "protocol",
+        "data-integrity"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "security_broker_poisoning",
+      "goal": "Review broker artifact poisoning and malformed envelope risks.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for security_broker_poisoning. Keywords: broker, artifact, envelope, validation Signals: artifact, envelope, thread_id, validation Risk categories: security, protocol, data-integrity Evidence requirements: file, line, risk, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "broker",
+        "artifact",
+        "envelope",
+        "validation"
+      ],
+      "signal_hits": [
+        "artifact",
+        "envelope",
+        "thread_id",
+        "validation"
+      ],
+      "risk_hits": [
+        "security",
+        "protocol",
+        "data-integrity"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "security_broker_poisoning",
+      "goal": "Review broker artifact poisoning and malformed envelope risks.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for security_broker_poisoning. Keywords: broker, artifact, envelope, validation Signals: artifact, envelope, thread_id, validation Risk categories: security, protocol, data-integrity Evidence requirements: file, line, risk, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchm",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "broker",
+        "artifact",
+        "envelope",
+        "validation"
+      ],
+      "signal_hits": [
+        "artifact",
+        "envelope",
+        "thread_id",
+        "validation"
+      ],
+      "risk_hits": [
+        "security",
+        "protocol",
+        "data-integrity"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for install_five_minute. Keywords: install, README, dry-run, command Signals: Use It Now, doctor, dry-run, plugin Risk categories: adoption, docs, install Evidence requirements: README, command, expected, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent reviewer. ",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "install",
+        "README",
+        "dry-run",
+        "command"
+      ],
+      "signal_hits": [
+        "Use It Now",
+        "doctor",
+        "dry-run",
+        "plugin"
+      ],
+      "risk_hits": [
+        "adoption",
+        "docs",
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "command",
+        "expected",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for install_five_minute. Keywords: install, README, dry-run, command Signals: Use It Now, doctor, dry-run, plugin Risk categories: adoption, docs, install Evidence requirements: README, command, expected, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent reviewer. R",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "install",
+        "README",
+        "dry-run",
+        "command"
+      ],
+      "signal_hits": [
+        "Use It Now",
+        "doctor",
+        "dry-run",
+        "plugin"
+      ],
+      "risk_hits": [
+        "adoption",
+        "docs",
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "command",
+        "expected",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for install_five_minute. Keywords: install, README, dry-run, command Signals: Use It Now, doctor, dry-run, plugin Risk categories: adoption, docs, install Evidence requirements: README, command, expected, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent reviewer",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "install",
+        "README",
+        "dry-run",
+        "command"
+      ],
+      "signal_hits": [
+        "Use It Now",
+        "doctor",
+        "dry-run",
+        "plugin"
+      ],
+      "risk_hits": [
+        "adoption",
+        "docs",
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "command",
+        "expected",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for docs_boundary_claims. Keywords: App-native, Codex CLI, process swarm, boundary Signals: App-native, Codex CLI, runtime, read-only Risk categories: docs, positioning, adoption Evidence requirements: README, boundary, risk, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchm",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "App-native",
+        "Codex CLI",
+        "process swarm",
+        "boundary"
+      ],
+      "signal_hits": [
+        "App-native",
+        "Codex CLI",
+        "runtime",
+        "read-only"
+      ],
+      "risk_hits": [
+        "docs",
+        "positioning",
+        "adoption"
+      ],
+      "evidence_hits": [
+        "README",
+        "boundary",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for docs_boundary_claims. Keywords: App-native, Codex CLI, process swarm, boundary Signals: App-native, Codex CLI, runtime, read-only Risk categories: docs, positioning, adoption Evidence requirements: README, boundary, risk, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchma",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "App-native",
+        "Codex CLI",
+        "process swarm",
+        "boundary"
+      ],
+      "signal_hits": [
+        "App-native",
+        "Codex CLI",
+        "runtime",
+        "read-only"
+      ],
+      "risk_hits": [
+        "docs",
+        "positioning",
+        "adoption"
+      ],
+      "evidence_hits": [
+        "README",
+        "boundary",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for docs_boundary_claims. Keywords: App-native, Codex CLI, process swarm, boundary Signals: App-native, Codex CLI, runtime, read-only Risk categories: docs, positioning, adoption Evidence requirements: README, boundary, risk, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benc",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "App-native",
+        "Codex CLI",
+        "process swarm",
+        "boundary"
+      ],
+      "signal_hits": [
+        "App-native",
+        "Codex CLI",
+        "runtime",
+        "read-only"
+      ],
+      "risk_hits": [
+        "docs",
+        "positioning",
+        "adoption"
+      ],
+      "evidence_hits": [
+        "README",
+        "boundary",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for tests_dynamic_workflow. Keywords: planner, replanner, trigger, reducer Signals: DynamicWorkflowRuntime, ReplanTriggerPolicy, broker reducer, checkpoint Risk categories: tests, coverage, workflow Evidence requirements: test, coverage, gap, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace ",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "planner",
+        "replanner",
+        "trigger",
+        "reducer"
+      ],
+      "signal_hits": [
+        "DynamicWorkflowRuntime",
+        "ReplanTriggerPolicy",
+        "broker reducer",
+        "checkpoint"
+      ],
+      "risk_hits": [
+        "tests",
+        "coverage",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "coverage",
+        "gap",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for tests_dynamic_workflow. Keywords: planner, replanner, trigger, reducer Signals: DynamicWorkflowRuntime, ReplanTriggerPolicy, broker reducer, checkpoint Risk categories: tests, coverage, workflow Evidence requirements: test, coverage, gap, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "planner",
+        "replanner",
+        "trigger",
+        "reducer"
+      ],
+      "signal_hits": [
+        "DynamicWorkflowRuntime",
+        "ReplanTriggerPolicy",
+        "broker reducer",
+        "checkpoint"
+      ],
+      "risk_hits": [
+        "tests",
+        "coverage",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "coverage",
+        "gap",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for tests_dynamic_workflow. Keywords: planner, replanner, trigger, reducer Signals: DynamicWorkflowRuntime, ReplanTriggerPolicy, broker reducer, checkpoint Risk categories: tests, coverage, workflow Evidence requirements: test, coverage, gap, recommendation Evidence includes file README.md line 1, command python test_suite.py, trac",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "planner",
+        "replanner",
+        "trigger",
+        "reducer"
+      ],
+      "signal_hits": [
+        "DynamicWorkflowRuntime",
+        "ReplanTriggerPolicy",
+        "broker reducer",
+        "checkpoint"
+      ],
+      "risk_hits": [
+        "tests",
+        "coverage",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "coverage",
+        "gap",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "tests_failure_modes",
+      "goal": "Review failure-mode coverage for worker timeout, malformed JSON, and dependency failure.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for tests_failure_modes. Keywords: timeout, malformed, dependency, failed Signals: timeout, dependency, malformed JSON, failed envelope Risk categories: tests, resilience, workflow Evidence requirements: test, risk, failure, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchma",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "timeout",
+        "malformed",
+        "dependency",
+        "failed"
+      ],
+      "signal_hits": [
+        "timeout",
+        "dependency",
+        "malformed JSON",
+        "failed envelope"
+      ],
+      "risk_hits": [
+        "tests",
+        "resilience",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "risk",
+        "failure",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "tests_failure_modes",
+      "goal": "Review failure-mode coverage for worker timeout, malformed JSON, and dependency failure.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for tests_failure_modes. Keywords: timeout, malformed, dependency, failed Signals: timeout, dependency, malformed JSON, failed envelope Risk categories: tests, resilience, workflow Evidence requirements: test, risk, failure, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmar",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "timeout",
+        "malformed",
+        "dependency",
+        "failed"
+      ],
+      "signal_hits": [
+        "timeout",
+        "dependency",
+        "malformed JSON",
+        "failed envelope"
+      ],
+      "risk_hits": [
+        "tests",
+        "resilience",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "risk",
+        "failure",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "tests_failure_modes",
+      "goal": "Review failure-mode coverage for worker timeout, malformed JSON, and dependency failure.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for tests_failure_modes. Keywords: timeout, malformed, dependency, failed Signals: timeout, dependency, malformed JSON, failed envelope Risk categories: tests, resilience, workflow Evidence requirements: test, risk, failure, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/bench",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "timeout",
+        "malformed",
+        "dependency",
+        "failed"
+      ],
+      "signal_hits": [
+        "timeout",
+        "dependency",
+        "malformed JSON",
+        "failed envelope"
+      ],
+      "risk_hits": [
+        "tests",
+        "resilience",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "risk",
+        "failure",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for evidence_redaction. Keywords: evidence, sanitize, secret, path Signals: $REPO_ROOT, sensitive scan, raw output, dashboard Risk categories: evidence, privacy, security Evidence requirements: file, scan, path, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "evidence",
+        "sanitize",
+        "secret",
+        "path"
+      ],
+      "signal_hits": [
+        "$REPO_ROOT",
+        "sensitive scan",
+        "raw output",
+        "dashboard"
+      ],
+      "risk_hits": [
+        "evidence",
+        "privacy",
+        "security"
+      ],
+      "evidence_hits": [
+        "file",
+        "scan",
+        "path",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for evidence_redaction. Keywords: evidence, sanitize, secret, path Signals: $REPO_ROOT, sensitive scan, raw output, dashboard Risk categories: evidence, privacy, security Evidence requirements: file, scan, path, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json,",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "evidence",
+        "sanitize",
+        "secret",
+        "path"
+      ],
+      "signal_hits": [
+        "$REPO_ROOT",
+        "sensitive scan",
+        "raw output",
+        "dashboard"
+      ],
+      "risk_hits": [
+        "evidence",
+        "privacy",
+        "security"
+      ],
+      "evidence_hits": [
+        "file",
+        "scan",
+        "path",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for evidence_redaction. Keywords: evidence, sanitize, secret, path Signals: $REPO_ROOT, sensitive scan, raw output, dashboard Risk categories: evidence, privacy, security Evidence requirements: file, scan, path, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.js",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "evidence",
+        "sanitize",
+        "secret",
+        "path"
+      ],
+      "signal_hits": [
+        "$REPO_ROOT",
+        "sensitive scan",
+        "raw output",
+        "dashboard"
+      ],
+      "risk_hits": [
+        "evidence",
+        "privacy",
+        "security"
+      ],
+      "evidence_hits": [
+        "file",
+        "scan",
+        "path",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "dashboard_observability",
+      "goal": "Review dashboard observability for timeline, rounds, triggers, and artifacts.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for dashboard_observability. Keywords: dashboard, timeline, round, artifact Signals: timeline, round, trigger, checkpoint Risk categories: observability, evidence, workflow Evidence requirements: trace, agent, artifact, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, ag",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "dashboard",
+        "timeline",
+        "round",
+        "artifact"
+      ],
+      "signal_hits": [
+        "timeline",
+        "round",
+        "trigger",
+        "checkpoint"
+      ],
+      "risk_hits": [
+        "observability",
+        "evidence",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "trace",
+        "agent",
+        "artifact",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "dashboard_observability",
+      "goal": "Review dashboard observability for timeline, rounds, triggers, and artifacts.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for dashboard_observability. Keywords: dashboard, timeline, round, artifact Signals: timeline, round, trigger, checkpoint Risk categories: observability, evidence, workflow Evidence requirements: trace, agent, artifact, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json,",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "dashboard",
+        "timeline",
+        "round",
+        "artifact"
+      ],
+      "signal_hits": [
+        "timeline",
+        "round",
+        "trigger",
+        "checkpoint"
+      ],
+      "risk_hits": [
+        "observability",
+        "evidence",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "trace",
+        "agent",
+        "artifact",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "release_gates",
+      "goal": "Review release gates, CI, coverage, security scans, and checklist completeness.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for release_gates. Keywords: CI, coverage, bandit, release Signals: coverage, bandit, doctor, benchmark Risk categories: release, quality, security Evidence requirements: command, CI, coverage, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent reviewer. Risk and ga",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "CI",
+        "coverage",
+        "bandit",
+        "release"
+      ],
+      "signal_hits": [
+        "coverage",
+        "bandit",
+        "doctor",
+        "benchmark"
+      ],
+      "risk_hits": [
+        "release",
+        "quality",
+        "security"
+      ],
+      "evidence_hits": [
+        "command",
+        "CI",
+        "coverage",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "release_gates",
+      "goal": "Review release gates, CI, coverage, security scans, and checklist completeness.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for release_gates. Keywords: CI, coverage, bandit, release Signals: coverage, bandit, doctor, benchmark Risk categories: release, quality, security Evidence requirements: command, CI, coverage, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent reviewer. Risk and gap",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "CI",
+        "coverage",
+        "bandit",
+        "release"
+      ],
+      "signal_hits": [
+        "coverage",
+        "bandit",
+        "doctor",
+        "benchmark"
+      ],
+      "risk_hits": [
+        "release",
+        "quality",
+        "security"
+      ],
+      "evidence_hits": [
+        "command",
+        "CI",
+        "coverage",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "release_gates",
+      "goal": "Review release gates, CI, coverage, security scans, and checklist completeness.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for release_gates. Keywords: CI, coverage, bandit, release Signals: coverage, bandit, doctor, benchmark Risk categories: release, quality, security Evidence requirements: command, CI, coverage, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent reviewer. Risk and ",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "CI",
+        "coverage",
+        "bandit",
+        "release"
+      ],
+      "signal_hits": [
+        "coverage",
+        "bandit",
+        "doctor",
+        "benchmark"
+      ],
+      "risk_hits": [
+        "release",
+        "quality",
+        "security"
+      ],
+      "evidence_hits": [
+        "command",
+        "CI",
+        "coverage",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "benchmark_claims",
+      "goal": "Review whether benchmark evidence proves quality improvement over a single agent.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for benchmark_claims. Keywords: benchmark, single, fixed, adaptive Signals: quality_score, evidence_completeness, duration, replanner Risk categories: benchmark, evidence, quality Evidence requirements: score, comparison, mode, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benc",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "benchmark",
+        "single",
+        "fixed",
+        "adaptive"
+      ],
+      "signal_hits": [
+        "quality_score",
+        "evidence_completeness",
+        "duration",
+        "replanner"
+      ],
+      "risk_hits": [
+        "benchmark",
+        "evidence",
+        "quality"
+      ],
+      "evidence_hits": [
+        "score",
+        "comparison",
+        "mode",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "benchmark_claims",
+      "goal": "Review whether benchmark evidence proves quality improvement over a single agent.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for benchmark_claims. Keywords: benchmark, single, fixed, adaptive Signals: quality_score, evidence_completeness, duration, replanner Risk categories: benchmark, evidence, quality Evidence requirements: score, comparison, mode, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/bench",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "benchmark",
+        "single",
+        "fixed",
+        "adaptive"
+      ],
+      "signal_hits": [
+        "quality_score",
+        "evidence_completeness",
+        "duration",
+        "replanner"
+      ],
+      "risk_hits": [
+        "benchmark",
+        "evidence",
+        "quality"
+      ],
+      "evidence_hits": [
+        "score",
+        "comparison",
+        "mode",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "benchmark_claims",
+      "goal": "Review whether benchmark evidence proves quality improvement over a single agent.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for benchmark_claims. Keywords: benchmark, single, fixed, adaptive Signals: quality_score, evidence_completeness, duration, replanner Risk categories: benchmark, evidence, quality Evidence requirements: score, comparison, mode, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/be",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "benchmark",
+        "single",
+        "fixed",
+        "adaptive"
+      ],
+      "signal_hits": [
+        "quality_score",
+        "evidence_completeness",
+        "duration",
+        "replanner"
+      ],
+      "risk_hits": [
+        "benchmark",
+        "evidence",
+        "quality"
+      ],
+      "evidence_hits": [
+        "score",
+        "comparison",
+        "mode",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "worktree_write_isolation",
+      "goal": "Review write-capable swarm isolation and no-auto-merge behavior.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for worktree_write_isolation. Keywords: worktree, patch, merge, isolation Signals: worktree, patch, diff, no auto-merge Risk categories: write-isolation, git, safety Evidence requirements: file, risk, patch, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, age",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "worktree",
+        "patch",
+        "merge",
+        "isolation"
+      ],
+      "signal_hits": [
+        "worktree",
+        "patch",
+        "diff",
+        "no auto-merge"
+      ],
+      "risk_hits": [
+        "write-isolation",
+        "git",
+        "safety"
+      ],
+      "evidence_hits": [
+        "file",
+        "risk",
+        "patch",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "worktree_write_isolation",
+      "goal": "Review write-capable swarm isolation and no-auto-merge behavior.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for worktree_write_isolation. Keywords: worktree, patch, merge, isolation Signals: worktree, patch, diff, no auto-merge Risk categories: write-isolation, git, safety Evidence requirements: file, risk, patch, recommendation Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, ",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "worktree",
+        "patch",
+        "merge",
+        "isolation"
+      ],
+      "signal_hits": [
+        "worktree",
+        "patch",
+        "diff",
+        "no auto-merge"
+      ],
+      "risk_hits": [
+        "write-isolation",
+        "git",
+        "safety"
+      ],
+      "evidence_hits": [
+        "file",
+        "risk",
+        "patch",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "single",
+      "fixture": "llm_provider_docs",
+      "goal": "Review model-provider routing docs and Chinese model support clarity.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "single benchmark finding for llm_provider_docs. Keywords: GLM, Qwen, DeepSeek, provider Signals: GLM, Qwen, DeepSeek, OpenAI compatible Risk categories: docs, model-routing, adoption Evidence requirements: README, provider, command, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent reviewe",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "provider"
+      ],
+      "signal_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "OpenAI compatible"
+      ],
+      "risk_hits": [
+        "docs",
+        "model-routing",
+        "adoption"
+      ],
+      "evidence_hits": [
+        "README",
+        "provider",
+        "command",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "fixed",
+      "fixture": "llm_provider_docs",
+      "goal": "Review model-provider routing docs and Chinese model support clarity.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "fixed benchmark finding for llm_provider_docs. Keywords: GLM, Qwen, DeepSeek, provider Signals: GLM, Qwen, DeepSeek, OpenAI compatible Risk categories: docs, model-routing, adoption Evidence requirements: README, provider, command, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent reviewer",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "provider"
+      ],
+      "signal_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "OpenAI compatible"
+      ],
+      "risk_hits": [
+        "docs",
+        "model-routing",
+        "adoption"
+      ],
+      "evidence_hits": [
+        "README",
+        "provider",
+        "command",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "llm_provider_docs",
+      "goal": "Review model-provider routing docs and Chinese model support clarity.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "trace_path": "",
+      "terminal_state": "completed",
+      "response_preview": "adaptive benchmark finding for llm_provider_docs. Keywords: GLM, Qwen, DeepSeek, provider Signals: GLM, Qwen, DeepSeek, OpenAI compatible Risk categories: docs, model-routing, adoption Evidence requirements: README, provider, command, gap Evidence includes file README.md line 1, command python test_suite.py, trace .orchestry/benchmark/trace.json, agent revie",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "provider"
+      ],
+      "signal_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "OpenAI compatible"
+      ],
+      "risk_hits": [
+        "docs",
+        "model-routing",
+        "adoption"
+      ],
+      "evidence_hits": [
+        "README",
+        "provider",
+        "command",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      }
+    }
+  ],
+  "known_limitations": [
+    "Dry-run benchmark validates scoring shape only; it does not launch Codex CLI.",
+    "Use --real for release evidence backed by Codex CLI workers."
+  ],
+  "stability_profile": {
+    "version": "v3.2",
+    "sandbox": "read-only",
+    "timeout_s": 1800,
+    "planner_timeout_s": 180,
+    "total_timeout_s": null,
+    "max_parallel": 5,
+    "prompt_profile": "compact_scoreable",
+    "output_redaction": "sanitize_payload",
+    "worker_env": "allowlist"
+  },
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
+}

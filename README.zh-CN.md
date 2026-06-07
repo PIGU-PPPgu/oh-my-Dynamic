@@ -57,6 +57,7 @@ python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 
 | 证据 | 用途 |
 |------|------|
+| [benchmark_v320_real_smoke.md](docs/evidence/benchmark_v320_real_smoke.md) | v3.2 真实稳定性 smoke：single `0.537`，fixed `0.838`，adaptive `1.0` |
 | [benchmark_v310.md](docs/evidence/benchmark_v310.md) | 有失败保留的真实 Codex CLI benchmark |
 | [benchmark_v310_replanner_sample.md](docs/evidence/benchmark_v310_replanner_sample.md) | 真实 planner + replanner follow-up 样例 |
 | [swarm_100_agents_codex_cli_run_98b78a645c.md](docs/evidence/swarm_100_agents_codex_cli_run_98b78a645c.md) | 固定 100-agent Codex CLI swarm |

@@ -1,0 +1,251 @@
+{
+  "benchmark": "repo_review_productization_v2",
+  "run_id": "benchmark_v310_0ff513f7",
+  "commit_sha": "c2fa2e4ae1e0724ce9979bf33cff904392fe7bc1",
+  "dry_run": false,
+  "created_at": 1780808326,
+  "duration_s": 1359.75,
+  "modes": [
+    "single",
+    "fixed",
+    "adaptive"
+  ],
+  "fixture_count": 1,
+  "fixtures": [
+    "install_five_minute"
+  ],
+  "mode_summaries": {
+    "single": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "avg_score": 0.537,
+      "avg_evidence_completeness": 0.396,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "agent_count": 1,
+      "replanner_count": 0,
+      "duration_s": 149.09,
+      "failure_rate": 0.0,
+      "terminal_state": "failed"
+    },
+    "fixed": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "avg_score": 0.838,
+      "avg_evidence_completeness": 0.688,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "agent_count": 5,
+      "replanner_count": 0,
+      "duration_s": 489.92,
+      "failure_rate": 0.0,
+      "terminal_state": "passed"
+    },
+    "adaptive": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "avg_score": 1.0,
+      "avg_evidence_completeness": 1.0,
+      "agents_completed": 4,
+      "agents_failed": 0,
+      "agent_count": 4,
+      "replanner_count": 1,
+      "duration_s": 720.72,
+      "failure_rate": 0.0,
+      "terminal_state": "passed"
+    }
+  },
+  "task_results": [
+    {
+      "mode": "single",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": false,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 149.09,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_0ff513f7/single/benchmark_v310_0ff513f7_single_install_five_minute/trace.json",
+      "broker_thread_id": "benchmark_v310_0ff513f7_single_install_five_minute",
+      "terminal_state": "partial",
+      "quality_score": 0.537,
+      "passed": false,
+      "keyword_hits": [
+        "install",
+        "README",
+        "dry-run"
+      ],
+      "signal_hits": [
+        "doctor",
+        "dry-run",
+        "plugin"
+      ],
+      "risk_hits": [
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "gap"
+      ],
+      "evidence_completeness": 0.396,
+      "missing": {
+        "keywords": [
+          "command"
+        ],
+        "signals": [
+          "Use It Now"
+        ],
+        "risk_categories": [
+          "adoption",
+          "docs"
+        ],
+        "evidence_requirements": [
+          "command",
+          "expected"
+        ]
+      },
+      "response_preview": "Reviewed the five-minute install and dry-run path. Main gaps: README quick path omits dry-run write side effects, doctor can pass on a shallow plugin reference, and plugin/package version metadata is misaligned."
+    },
+    {
+      "mode": "fixed",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": false,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 489.92,
+      "trace_path": "$REPO_ROOT/.orchestry/benchmark/benchmark_v310_0ff513f7/fixed/benchmark_v310_0ff513f7_fixed_install_five_minute/trace.json",
+      "broker_thread_id": "benchmark_v310_0ff513f7_fixed_install_five_minute",
+      "terminal_state": "completed",
+      "quality_score": 0.838,
+      "passed": true,
+      "keyword_hits": [
+        "install",
+        "README",
+        "dry-run",
+        "command"
+      ],
+      "signal_hits": [
+        "doctor",
+        "dry-run",
+        "plugin"
+      ],
+      "risk_hits": [
+        "adoption",
+        "docs",
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "command",
+        "expected",
+        "gap"
+      ],
+      "evidence_completeness": 0.688,
+      "missing": {
+        "keywords": [],
+        "signals": [
+          "Use It Now"
+        ],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "response_preview": "Reviewed the five-minute install and dry-run path. Found three adoption/install security gaps: Quick Start uses root compatibility CLIs, dry-run writes into docs/evidence by default, and doctor/plugin checks prove only weak install presence. Reviewed README quick start, plugin install path, doctor, and dry-run docs. Found three adoption/doc gaps in the five-"
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": false,
+      "agent_count": 4,
+      "agents_completed": 4,
+      "agents_failed": 0,
+      "replanner_count": 1,
+      "duration_s": 720.72,
+      "trace_path": ".orchestry/benchmark/benchmark_v310_0ff513f7/adaptive/benchmark_v310_0ff513f7_adaptive_install_five_minute/dynamic_trace.json",
+      "broker_thread_id": "benchmark_v310_0ff513f7_adaptive_install_five_minute",
+      "terminal_state": "completed",
+      "replan_triggers": [
+        {
+          "round_index": 0,
+          "replan_triggers": [
+            {
+              "kind": "missing_coverage",
+              "lanes": [
+                "benchmark_followup"
+              ],
+              "reason": "Required coverage lanes were not represented by completed planner agents."
+            }
+          ],
+          "missing_coverage": [
+            "benchmark_followup"
+          ],
+          "low_score_agents": [],
+          "failed_agents": [],
+          "open_questions": [
+            "No review responses were recorded; consider adding a reviewer agent for high-risk changes."
+          ],
+          "followup_agent_budget": 2
+        }
+      ],
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "install",
+        "README",
+        "dry-run",
+        "command"
+      ],
+      "signal_hits": [
+        "Use It Now",
+        "doctor",
+        "dry-run",
+        "plugin"
+      ],
+      "risk_hits": [
+        "adoption",
+        "docs",
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "command",
+        "expected",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "response_preview": "# Broker Reduction  Goal: Adaptive benchmark fixture install_five_minute: Review the five-minute install and dry-run path. Planner: create 2-3 narrow read-only reviewers. Replanner: add follow-up only for missing required coverage. Signals: Use It Now, doctor, dry-run, plugin. Risks: adoption, docs, install. Evidence: README, command, expected, gap. Every wo"
+    }
+  ],
+  "known_limitations": [
+    "Manual real benchmark evidence; not part of default CI.",
+    "Raw prompts/stdout/stderr remain in .orchestry/ and are not committed.",
+    "Real runs may be intentionally bounded by timeout-s/planner-timeout-s; timeout and failure rows are preserved.",
+    "This proves Codex CLI process-swarm behavior, not App-native isolated subagents."
+  ],
+  "stability_profile": {
+    "version": "v3.2",
+    "sandbox": "read-only",
+    "timeout_s": 240,
+    "planner_timeout_s": 180,
+    "total_timeout_s": 1200,
+    "max_parallel": 2,
+    "prompt_profile": "compact_scoreable",
+    "output_redaction": "sanitize_payload",
+    "worker_env": "allowlist"
+  },
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
+}
