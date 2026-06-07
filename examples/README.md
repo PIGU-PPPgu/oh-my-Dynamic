@@ -44,6 +44,8 @@ python scripts/record_adaptive_workflow_evidence.py \
 These use deterministic mock LLMs and do not require API keys:
 
 ```bash
+python examples/frontend_build_demo.py --output /tmp/ohmy-demo-validation/frontend_build.json
+python examples/harness_engineering_demo.py --output /tmp/ohmy-demo-validation/harness_engineering.json
 python examples/research_analysis.py
 python examples/code_review.py
 python examples/data_processing.py
@@ -51,6 +53,8 @@ python examples/protocol_preview.py
 python examples/sandboxed_fanout.py
 ```
 
+- `frontend_build_demo.py`: deterministic comparison for UI build coverage, a11y, tests, docs, and replanner follow-up.
+- `harness_engineering_demo.py`: deterministic comparison for eval fixtures, scoring, redaction, CI gates, and evidence.
 - `research_analysis.py`: research-style decomposition and synthesis.
 - `code_review.py`: security/correctness/test review workflow.
 - `data_processing.py`: validation, cleaning, aggregation, reporting workflow.

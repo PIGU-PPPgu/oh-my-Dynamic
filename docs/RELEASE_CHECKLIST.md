@@ -44,10 +44,14 @@ python3 scripts/record_adaptive_workflow_evidence.py --help >/dev/null
 python3 scripts/render_workflow_observability.py --help >/dev/null
 python3 scripts/run_quality_eval.py --help >/dev/null
 python3 scripts/run_benchmark.py --help >/dev/null
+python3 scripts/run_demo_validation.py --help >/dev/null
 python3 scripts/run_quality_eval.py --sample --output /tmp/ohmy-quality-eval.md
 python3 scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/ohmy-benchmark-v310.json
+python3 scripts/run_demo_validation.py --output /tmp/ohmy-demo-validation/demo_validation_v360.json
 python3 examples/real_repo_review.py --dry-run --run-id ci-dry --output-dir /tmp/ohmy-evidence
 python3 scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs,replanner-proof --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dry-run --output-dir /tmp/ohmy-adaptive
+python3 examples/frontend_build_demo.py --output /tmp/ohmy-demo-validation/frontend_build.json
+python3 examples/harness_engineering_demo.py --output /tmp/ohmy-demo-validation/harness_engineering.json
 python3 examples/research_analysis.py >/tmp/ohmy-research-demo.txt
 python3 examples/code_review.py >/tmp/ohmy-code-review-demo.txt
 python3 examples/codex_cli_swarm_review.py --help >/dev/null

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Added v3.6 deterministic demo validation for frontend build, harness
+  engineering, repo productization, and security/trust scenarios.
+- Added `scripts/run_demo_validation.py` plus two safe example entrypoints:
+  `examples/frontend_build_demo.py` and `examples/harness_engineering_demo.py`.
+- Added bilingual demo docs and compact evidence showing workflow coverage,
+  evidence completeness, parallel speedup estimates, and replanner follow-up
+  counts without claiming live model quality.
 - Added a standalone Remotion showcase under `showcase/` with a 75-second
   official-facing video composition and a 1200x630 poster still.
 - Added the rendered showcase MP4 and poster under `assets/`, then promoted the

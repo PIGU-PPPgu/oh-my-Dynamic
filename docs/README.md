@@ -12,6 +12,7 @@ This folder holds the long-form material that used to crowd the project README. 
 | Official-facing brief | [OFFICIAL_BRIEF.md](OFFICIAL_BRIEF.md) / [OFFICIAL_BRIEF.zh-CN.md](OFFICIAL_BRIEF.zh-CN.md) |
 | Five-minute demo script | [DEMO_SCRIPT.md](DEMO_SCRIPT.md) / [DEMO_SCRIPT.zh-CN.md](DEMO_SCRIPT.zh-CN.md) |
 | Remotion video showcase | [VIDEO_SHOWCASE.md](VIDEO_SHOWCASE.md) / [VIDEO_SHOWCASE.zh-CN.md](VIDEO_SHOWCASE.zh-CN.md) |
+| Demo validation and measured adoption scenarios | [DEMOS.md](DEMOS.md) / [DEMOS.zh-CN.md](DEMOS.zh-CN.md) |
 | Outreach copy pack | [OUTREACH.md](OUTREACH.md) / [OUTREACH.zh-CN.md](OUTREACH.zh-CN.md) |
 | Current product limits and claim boundaries | [KNOWN_LIMITS.md](KNOWN_LIMITS.md) / [KNOWN_LIMITS.zh-CN.md](KNOWN_LIMITS.zh-CN.md) |
 | Evidence format, redaction rules, and reproduction notes | [evidence/README.md](evidence/README.md) |
@@ -31,6 +32,7 @@ Committed evidence is compact and sanitized. Raw `.orchestry/` traces, prompts, 
 | [evidence/benchmark_v320_real_smoke.md](evidence/benchmark_v320_real_smoke.md) | v3.2 real stability smoke with compact prompt profile and adaptive replanner completion |
 | [evidence/benchmark_v310.md](evidence/benchmark_v310.md) | Bounded real Codex CLI benchmark across single, fixed, and adaptive modes |
 | [evidence/improvement_v311.md](evidence/improvement_v311.md) | Bilingual controlled same-fixture lift measurement for single vs fixed vs adaptive |
+| [evidence/demo_validation_v360.md](evidence/demo_validation_v360.md) | Demo validation for frontend build, harness engineering, productization, and security/trust scenarios |
 | [evidence/benchmark_v310_replanner_sample.md](evidence/benchmark_v310_replanner_sample.md) | Real adaptive run with replanner-generated follow-up agents |
 | [evidence/swarm_100_agents_codex_cli_run_98b78a645c.md](evidence/swarm_100_agents_codex_cli_run_98b78a645c.md) | Fixed 100-agent Codex CLI swarm record |
 

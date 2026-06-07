@@ -1,0 +1,609 @@
+{
+  "report": "demo_validation_v360",
+  "run_id": "demo_validation_v360",
+  "created_at": 1780858138,
+  "commit_sha": "b1c97b81b84b6e77aa5ce39a54dd20028a3fb07e",
+  "dry_run": true,
+  "scenario_count": 4,
+  "scenarios": [
+    "frontend_build",
+    "harness_engineering",
+    "repo_productization",
+    "security_trust"
+  ],
+  "modes": [
+    "single",
+    "fixed",
+    "adaptive"
+  ],
+  "mode_summaries": {
+    "single": {
+      "scenarios": 4,
+      "avg_quality_score": 0.56,
+      "avg_evidence_completeness": 0.48,
+      "avg_parallel_speedup_estimate": 1.0,
+      "missing_requirement_count": 20,
+      "agent_count": 4,
+      "replanner_generated_agents": 0,
+      "terminal_state": "partial"
+    },
+    "fixed": {
+      "scenarios": 4,
+      "avg_quality_score": 0.74,
+      "avg_evidence_completeness": 0.78,
+      "avg_parallel_speedup_estimate": 3.48,
+      "missing_requirement_count": 8,
+      "agent_count": 20,
+      "replanner_generated_agents": 0,
+      "terminal_state": "partial"
+    },
+    "adaptive": {
+      "scenarios": 4,
+      "avg_quality_score": 0.88,
+      "avg_evidence_completeness": 0.94,
+      "avg_parallel_speedup_estimate": 3.5,
+      "missing_requirement_count": 0,
+      "agent_count": 28,
+      "replanner_generated_agents": 8,
+      "terminal_state": "completed"
+    }
+  },
+  "lift": {
+    "fixed_vs_single": {
+      "quality_score_absolute_lift": 0.18,
+      "evidence_completeness_absolute_lift": 0.3,
+      "missing_requirement_reduction_pct": 60.0,
+      "parallel_speedup_lift": 2.48
+    },
+    "adaptive_vs_single": {
+      "quality_score_absolute_lift": 0.32,
+      "evidence_completeness_absolute_lift": 0.46,
+      "missing_requirement_reduction_pct": 100.0,
+      "parallel_speedup_lift": 2.5
+    }
+  },
+  "rows": [
+    {
+      "scenario": "frontend_build",
+      "mode": "single",
+      "goal": "Add a dashboard/report page to a small React/Vite app and validate it before handoff.",
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_generated_agents": 0,
+      "coverage_lanes_hit": [
+        "ui-layout",
+        "state-data",
+        "a11y"
+      ],
+      "coverage_lane_count": 8,
+      "requirements_hit": [
+        "layout",
+        "state",
+        "data-contract"
+      ],
+      "missing_requirements": [
+        "accessibility",
+        "responsive",
+        "visual-regression",
+        "tests",
+        "docs"
+      ],
+      "missing_requirement_count": 5,
+      "expected_artifacts_hit": [
+        "implementation plan",
+        "component checklist",
+        "a11y findings"
+      ],
+      "quality_score": 0.56,
+      "evidence_completeness": 0.48,
+      "test_success_ratio": 0.55,
+      "wall_clock_duration_s": 46.0,
+      "sum_worker_duration_s": 46.0,
+      "parallel_speedup_estimate": 1.0,
+      "terminal_state": "partial",
+      "interpretation": "Single baseline covers the first-pass path for frontend_build, but leaves 5 requirement(s) without explicit evidence."
+    },
+    {
+      "scenario": "frontend_build",
+      "mode": "fixed",
+      "goal": "Add a dashboard/report page to a small React/Vite app and validate it before handoff.",
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_generated_agents": 0,
+      "coverage_lanes_hit": [
+        "ui-layout",
+        "state-data",
+        "a11y",
+        "responsive-review",
+        "visual-review",
+        "test-authoring"
+      ],
+      "coverage_lane_count": 8,
+      "requirements_hit": [
+        "layout",
+        "state",
+        "data-contract",
+        "accessibility",
+        "responsive",
+        "visual-regression"
+      ],
+      "missing_requirements": [
+        "tests",
+        "docs"
+      ],
+      "missing_requirement_count": 2,
+      "expected_artifacts_hit": [
+        "implementation plan",
+        "component checklist",
+        "a11y findings",
+        "responsive findings",
+        "test plan"
+      ],
+      "quality_score": 0.74,
+      "evidence_completeness": 0.78,
+      "test_success_ratio": 0.78,
+      "wall_clock_duration_s": 31.0,
+      "sum_worker_duration_s": 108.0,
+      "parallel_speedup_estimate": 3.48,
+      "terminal_state": "partial",
+      "interpretation": "Fixed swarm increases specialist coverage for frontend_build, but cannot create follow-up agents for tests, docs."
+    },
+    {
+      "scenario": "frontend_build",
+      "mode": "adaptive",
+      "goal": "Add a dashboard/report page to a small React/Vite app and validate it before handoff.",
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_generated_agents": 2,
+      "coverage_lanes_hit": [
+        "ui-layout",
+        "state-data",
+        "a11y",
+        "responsive-review",
+        "visual-review",
+        "test-authoring",
+        "docs-handoff",
+        "replanner-gap-fix"
+      ],
+      "coverage_lane_count": 8,
+      "requirements_hit": [
+        "layout",
+        "state",
+        "data-contract",
+        "accessibility",
+        "responsive",
+        "visual-regression",
+        "tests",
+        "docs"
+      ],
+      "missing_requirements": [],
+      "missing_requirement_count": 0,
+      "expected_artifacts_hit": [
+        "implementation plan",
+        "component checklist",
+        "a11y findings",
+        "responsive findings",
+        "test plan",
+        "handoff notes"
+      ],
+      "quality_score": 0.88,
+      "evidence_completeness": 0.94,
+      "test_success_ratio": 0.92,
+      "wall_clock_duration_s": 34.0,
+      "sum_worker_duration_s": 119.0,
+      "parallel_speedup_estimate": 3.5,
+      "terminal_state": "completed",
+      "interpretation": "Adaptive workflow closes the planned coverage lanes for frontend_build by adding replanner-generated follow-up agents."
+    },
+    {
+      "scenario": "harness_engineering",
+      "mode": "single",
+      "goal": "Design an evaluation harness with fixtures, scoring, redaction, CI gates, and evidence reports.",
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_generated_agents": 0,
+      "coverage_lanes_hit": [
+        "fixture-designer",
+        "rubric-reviewer",
+        "redaction-reviewer"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "fixtures",
+        "scoring-rubric",
+        "redaction"
+      ],
+      "missing_requirements": [
+        "ci-gate",
+        "dry-run",
+        "real-run-boundary",
+        "evidence-schema",
+        "failure-preservation"
+      ],
+      "missing_requirement_count": 5,
+      "expected_artifacts_hit": [
+        "fixture matrix",
+        "scoring rubric",
+        "redaction checklist"
+      ],
+      "quality_score": 0.56,
+      "evidence_completeness": 0.48,
+      "test_success_ratio": 0.55,
+      "wall_clock_duration_s": 46.0,
+      "sum_worker_duration_s": 46.0,
+      "parallel_speedup_estimate": 1.0,
+      "terminal_state": "partial",
+      "interpretation": "Single baseline covers the first-pass path for harness_engineering, but leaves 5 requirement(s) without explicit evidence."
+    },
+    {
+      "scenario": "harness_engineering",
+      "mode": "fixed",
+      "goal": "Design an evaluation harness with fixtures, scoring, redaction, CI gates, and evidence reports.",
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_generated_agents": 0,
+      "coverage_lanes_hit": [
+        "fixture-designer",
+        "rubric-reviewer",
+        "redaction-reviewer",
+        "ci-integrator",
+        "evidence-writer"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "fixtures",
+        "scoring-rubric",
+        "redaction",
+        "ci-gate",
+        "dry-run",
+        "real-run-boundary"
+      ],
+      "missing_requirements": [
+        "evidence-schema",
+        "failure-preservation"
+      ],
+      "missing_requirement_count": 2,
+      "expected_artifacts_hit": [
+        "fixture matrix",
+        "scoring rubric",
+        "redaction checklist",
+        "CI command list",
+        "compact evidence JSON"
+      ],
+      "quality_score": 0.74,
+      "evidence_completeness": 0.78,
+      "test_success_ratio": 0.78,
+      "wall_clock_duration_s": 31.0,
+      "sum_worker_duration_s": 108.0,
+      "parallel_speedup_estimate": 3.48,
+      "terminal_state": "partial",
+      "interpretation": "Fixed swarm increases specialist coverage for harness_engineering, but cannot create follow-up agents for evidence-schema, failure-preservation."
+    },
+    {
+      "scenario": "harness_engineering",
+      "mode": "adaptive",
+      "goal": "Design an evaluation harness with fixtures, scoring, redaction, CI gates, and evidence reports.",
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_generated_agents": 2,
+      "coverage_lanes_hit": [
+        "fixture-designer",
+        "rubric-reviewer",
+        "redaction-reviewer",
+        "ci-integrator",
+        "evidence-writer",
+        "failure-triage",
+        "replanner-gap-fix"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "fixtures",
+        "scoring-rubric",
+        "redaction",
+        "ci-gate",
+        "dry-run",
+        "real-run-boundary",
+        "evidence-schema",
+        "failure-preservation"
+      ],
+      "missing_requirements": [],
+      "missing_requirement_count": 0,
+      "expected_artifacts_hit": [
+        "fixture matrix",
+        "scoring rubric",
+        "redaction checklist",
+        "CI command list",
+        "compact evidence JSON",
+        "known limitations"
+      ],
+      "quality_score": 0.88,
+      "evidence_completeness": 0.94,
+      "test_success_ratio": 0.92,
+      "wall_clock_duration_s": 34.0,
+      "sum_worker_duration_s": 119.0,
+      "parallel_speedup_estimate": 3.5,
+      "terminal_state": "completed",
+      "interpretation": "Adaptive workflow closes the planned coverage lanes for harness_engineering by adding replanner-generated follow-up agents."
+    },
+    {
+      "scenario": "repo_productization",
+      "mode": "single",
+      "goal": "Turn a research prototype into an externally adoptable repository.",
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_generated_agents": 0,
+      "coverage_lanes_hit": [
+        "install-review",
+        "doctor-review",
+        "docs-review"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "install",
+        "doctor",
+        "quickstart"
+      ],
+      "missing_requirements": [
+        "known-limits",
+        "tests",
+        "coverage",
+        "release-checklist",
+        "evidence"
+      ],
+      "missing_requirement_count": 5,
+      "expected_artifacts_hit": [
+        "doctor output",
+        "quickstart commands"
+      ],
+      "quality_score": 0.56,
+      "evidence_completeness": 0.48,
+      "test_success_ratio": 0.55,
+      "wall_clock_duration_s": 46.0,
+      "sum_worker_duration_s": 46.0,
+      "parallel_speedup_estimate": 1.0,
+      "terminal_state": "partial",
+      "interpretation": "Single baseline covers the first-pass path for repo_productization, but leaves 5 requirement(s) without explicit evidence."
+    },
+    {
+      "scenario": "repo_productization",
+      "mode": "fixed",
+      "goal": "Turn a research prototype into an externally adoptable repository.",
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_generated_agents": 0,
+      "coverage_lanes_hit": [
+        "install-review",
+        "doctor-review",
+        "docs-review",
+        "test-review",
+        "release-review"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "install",
+        "doctor",
+        "quickstart",
+        "known-limits",
+        "tests",
+        "coverage"
+      ],
+      "missing_requirements": [
+        "release-checklist",
+        "evidence"
+      ],
+      "missing_requirement_count": 2,
+      "expected_artifacts_hit": [
+        "doctor output",
+        "quickstart commands",
+        "release checklist",
+        "coverage gate"
+      ],
+      "quality_score": 0.74,
+      "evidence_completeness": 0.78,
+      "test_success_ratio": 0.78,
+      "wall_clock_duration_s": 31.0,
+      "sum_worker_duration_s": 108.0,
+      "parallel_speedup_estimate": 3.48,
+      "terminal_state": "partial",
+      "interpretation": "Fixed swarm increases specialist coverage for repo_productization, but cannot create follow-up agents for release-checklist, evidence."
+    },
+    {
+      "scenario": "repo_productization",
+      "mode": "adaptive",
+      "goal": "Turn a research prototype into an externally adoptable repository.",
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_generated_agents": 2,
+      "coverage_lanes_hit": [
+        "install-review",
+        "doctor-review",
+        "docs-review",
+        "test-review",
+        "release-review",
+        "evidence-review",
+        "replanner-gap-fix"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "install",
+        "doctor",
+        "quickstart",
+        "known-limits",
+        "tests",
+        "coverage",
+        "release-checklist",
+        "evidence"
+      ],
+      "missing_requirements": [],
+      "missing_requirement_count": 0,
+      "expected_artifacts_hit": [
+        "doctor output",
+        "quickstart commands",
+        "release checklist",
+        "coverage gate",
+        "public evidence"
+      ],
+      "quality_score": 0.88,
+      "evidence_completeness": 0.94,
+      "test_success_ratio": 0.92,
+      "wall_clock_duration_s": 34.0,
+      "sum_worker_duration_s": 119.0,
+      "parallel_speedup_estimate": 3.5,
+      "terminal_state": "completed",
+      "interpretation": "Adaptive workflow closes the planned coverage lanes for repo_productization by adding replanner-generated follow-up agents."
+    },
+    {
+      "scenario": "security_trust",
+      "mode": "single",
+      "goal": "Review command surface, broker artifacts, gateway auth, evidence redaction, and raw-output boundaries.",
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_generated_agents": 0,
+      "coverage_lanes_hit": [
+        "command-review",
+        "gateway-review",
+        "artifact-review"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "command-surface",
+        "gateway-auth",
+        "artifact-poisoning"
+      ],
+      "missing_requirements": [
+        "secret-redaction",
+        "path-redaction",
+        "raw-output-boundary",
+        "threat-model",
+        "bandit"
+      ],
+      "missing_requirement_count": 5,
+      "expected_artifacts_hit": [
+        "threat model mapping",
+        "bandit result"
+      ],
+      "quality_score": 0.56,
+      "evidence_completeness": 0.48,
+      "test_success_ratio": 0.55,
+      "wall_clock_duration_s": 46.0,
+      "sum_worker_duration_s": 46.0,
+      "parallel_speedup_estimate": 1.0,
+      "terminal_state": "partial",
+      "interpretation": "Single baseline covers the first-pass path for security_trust, but leaves 5 requirement(s) without explicit evidence."
+    },
+    {
+      "scenario": "security_trust",
+      "mode": "fixed",
+      "goal": "Review command surface, broker artifacts, gateway auth, evidence redaction, and raw-output boundaries.",
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_generated_agents": 0,
+      "coverage_lanes_hit": [
+        "command-review",
+        "gateway-review",
+        "artifact-review",
+        "redaction-review",
+        "threat-model-review"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "command-surface",
+        "gateway-auth",
+        "artifact-poisoning",
+        "secret-redaction",
+        "path-redaction",
+        "raw-output-boundary"
+      ],
+      "missing_requirements": [
+        "threat-model",
+        "bandit"
+      ],
+      "missing_requirement_count": 2,
+      "expected_artifacts_hit": [
+        "threat model mapping",
+        "bandit result",
+        "doctor result",
+        "redaction scan"
+      ],
+      "quality_score": 0.74,
+      "evidence_completeness": 0.78,
+      "test_success_ratio": 0.78,
+      "wall_clock_duration_s": 31.0,
+      "sum_worker_duration_s": 108.0,
+      "parallel_speedup_estimate": 3.48,
+      "terminal_state": "partial",
+      "interpretation": "Fixed swarm increases specialist coverage for security_trust, but cannot create follow-up agents for threat-model, bandit."
+    },
+    {
+      "scenario": "security_trust",
+      "mode": "adaptive",
+      "goal": "Review command surface, broker artifacts, gateway auth, evidence redaction, and raw-output boundaries.",
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_generated_agents": 2,
+      "coverage_lanes_hit": [
+        "command-review",
+        "gateway-review",
+        "artifact-review",
+        "redaction-review",
+        "threat-model-review",
+        "bandit-review",
+        "replanner-gap-fix"
+      ],
+      "coverage_lane_count": 7,
+      "requirements_hit": [
+        "command-surface",
+        "gateway-auth",
+        "artifact-poisoning",
+        "secret-redaction",
+        "path-redaction",
+        "raw-output-boundary",
+        "threat-model",
+        "bandit"
+      ],
+      "missing_requirements": [],
+      "missing_requirement_count": 0,
+      "expected_artifacts_hit": [
+        "threat model mapping",
+        "bandit result",
+        "doctor result",
+        "redaction scan",
+        "risk summary"
+      ],
+      "quality_score": 0.88,
+      "evidence_completeness": 0.94,
+      "test_success_ratio": 0.92,
+      "wall_clock_duration_s": 34.0,
+      "sum_worker_duration_s": 119.0,
+      "parallel_speedup_estimate": 3.5,
+      "terminal_state": "completed",
+      "interpretation": "Adaptive workflow closes the planned coverage lanes for security_trust by adding replanner-generated follow-up agents."
+    }
+  ],
+  "claim_boundary": "This deterministic demo measures workflow coverage, evidence completeness, parallel review throughput, and gap-driven replanning. It does not prove live model quality.",
+  "claim_boundary_zh": "这个确定性 demo 衡量的是任务覆盖、证据完整度、并行审查吞吐和基于缺口的重规划；它不证明真实模型质量提升。",
+  "known_limitations": [
+    "Deterministic dry-run evidence; no Codex CLI workers are launched.",
+    "Numbers are scenario fixtures for external explanation, not a live benchmark.",
+    "Pair this report with real Codex CLI evidence before making runtime claims."
+  ],
+  "known_limitations_zh": [
+    "这是确定性 dry-run 证据，不启动 Codex CLI workers。",
+    "数值用于场景化解释，不是真实 benchmark。",
+    "涉及 runtime claim 时，应同时引用真实 Codex CLI evidence。"
+  ],
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
+}

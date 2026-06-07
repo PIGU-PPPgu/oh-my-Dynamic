@@ -46,8 +46,11 @@ jobs:
           python scripts/render_workflow_observability.py --help >/dev/null
           python scripts/run_quality_eval.py --help >/dev/null
           python scripts/run_benchmark.py --help >/dev/null
+          python scripts/run_demo_validation.py --help >/dev/null
           python examples/codex_cli_swarm_review.py --help >/dev/null
           python examples/real_repo_review.py --help >/dev/null
+          python examples/frontend_build_demo.py --help >/dev/null
+          python examples/harness_engineering_demo.py --help >/dev/null
           python -m doctor --json >/dev/null
       - name: Package install smoke
         run: |
@@ -63,6 +66,9 @@ jobs:
         run: python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark_v320.json
       - name: Safe example smoke
         run: |
+          python scripts/run_demo_validation.py --output /tmp/ohmy-demo-validation/demo_validation_v360.json
+          python examples/frontend_build_demo.py --output /tmp/ohmy-demo-validation/frontend_build.json
+          python examples/harness_engineering_demo.py --output /tmp/ohmy-demo-validation/harness_engineering.json
           python examples/real_repo_review.py --dry-run --run-id ci-dry --output-dir /tmp/ohmy-evidence
           python scripts/record_adaptive_workflow_evidence.py --required-coverage security,tests,docs,replanner-proof --force-missing-coverage replanner-proof --max-rounds 2 --max-agents 12 --max-parallel 4 --dry-run --output-dir /tmp/ohmy-adaptive
           python examples/research_analysis.py >/tmp/ohmy-research-demo.txt

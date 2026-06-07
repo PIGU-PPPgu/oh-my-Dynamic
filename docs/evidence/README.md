@@ -47,6 +47,7 @@ python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 python scripts/record_swarm_evidence.py --agents 50 --max-parallel 10
 python scripts/record_swarm_evidence.py --agents 100 --max-parallel 20
 python scripts/run_quality_eval.py --sample --output docs/evidence/sample_quality_eval.md
+python scripts/run_demo_validation.py --output docs/evidence/demo_validation_v360.json
 python scripts/measure_improvement.py --suite benchmarks/repo_review.json --output docs/evidence/improvement_v311.json
 python scripts/run_benchmark.py --real --allow-failures --suite benchmarks/repo_review.json --mode single,fixed,adaptive --fixtures install_five_minute --timeout-s 240 --planner-timeout-s 180 --total-timeout-s 1200 --max-parallel 2 --adaptive-max-agents 5 --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' --codex-extra-arg=-c --codex-extra-arg='model_reasoning_effort="low"' --output docs/evidence/benchmark_v320_real_smoke.json
 python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output docs/evidence/benchmark_v320_dry.json
