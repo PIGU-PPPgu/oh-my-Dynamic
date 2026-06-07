@@ -6,8 +6,8 @@
   official-facing video composition and a 1200x630 poster still.
 - Added the rendered showcase MP4 and poster under `assets/`, then promoted the
   README hero to a centered large icon plus clickable video preview.
-- Added a compact animated GIF preview so the README first screen plays
-  directly on GitHub while still linking to the full MP4.
+- Added a GitHub `user-attachments` MP4 URL so the README first screen renders
+  as an inline video player, with the committed MP4 kept as a fallback.
 - Added bilingual video showcase docs explaining the render commands, public
   message, evidence boundary, and recommended external-review usage.
 - Kept rendered video output out of git by ignoring `showcase/out/` and

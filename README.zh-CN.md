@@ -4,9 +4,9 @@
   <p><strong>面向 Codex 的 dynamic workflow 工具。</strong></p>
   <p><a href="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml"><img src="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg" alt="tests"></a> <a href="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml"><img src="https://img.shields.io/badge/coverage-82%25-brightgreen" alt="coverage"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license"></a></p>
   <p><a href="README.md">English</a></p>
-  <a href="assets/oh-my-dynamic-showcase.mp4"><img src="assets/showcase-preview.gif" alt="oh-my-Dynamic 动态展示预览" width="760"></a>
-  <p><a href="assets/oh-my-dynamic-showcase.mp4">打开完整 75 秒 MP4</a> · <a href="docs/VIDEO_SHOWCASE.zh-CN.md">渲染源码</a></p>
 </div>
+
+https://github.com/user-attachments/assets/a48d5943-620f-4eac-bd36-a4ea02b4cec6
 
 **边界：** 目前已验证的大规模执行后端是 Codex CLI process swarm。Codex App-native isolated subagents 仍取决于 Codex App 是否开放对应 runtime。默认只读。
 

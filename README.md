@@ -4,9 +4,9 @@
   <p><strong>Dynamic workflow tooling for Codex.</strong></p>
   <p><a href="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml"><img src="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg" alt="tests"></a> <a href="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml"><img src="https://img.shields.io/badge/coverage-82%25-brightgreen" alt="coverage"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license"></a></p>
   <p><a href="README.zh-CN.md">中文说明</a></p>
-  <a href="assets/oh-my-dynamic-showcase.mp4"><img src="assets/showcase-preview.gif" alt="oh-my-Dynamic animated showcase preview" width="760"></a>
-  <p><a href="assets/oh-my-dynamic-showcase.mp4">Open the full 75-second MP4</a> · <a href="docs/VIDEO_SHOWCASE.md">Render source</a></p>
 </div>
+
+https://github.com/user-attachments/assets/a48d5943-620f-4eac-bd36-a4ea02b4cec6
 
 **Boundary:** verified large-scale execution is Codex CLI process swarm. Codex App-native isolated subagents still depend on Codex App exposing that runtime. Defaults are read-only.
 
