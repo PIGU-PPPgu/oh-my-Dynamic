@@ -60,7 +60,7 @@ jobs:
       - name: Quality eval smoke
         run: python scripts/run_quality_eval.py --sample --output /tmp/quality_eval.md
       - name: Benchmark dry-run smoke
-        run: python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark_v310.json
+        run: python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode single,fixed,adaptive --output /tmp/benchmark_v320.json
       - name: Evidence redaction scan
         run: |
           ! grep -R "/Users/" docs/evidence

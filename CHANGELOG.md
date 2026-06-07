@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.3.0 - 2026-06-07
+
+- Added bilingual Quickstart docs for install, doctor, dry-run, real 5-agent review, adaptive smoke, and evidence locations.
+- Reworked `examples/README.md` around three adoption entrypoints and marked the older mock/protocol/fan-out demos as reference demos.
+- Added GitHub issue forms for bug reports and install help, plus a pull request template that asks for validation commands and compact evidence paths.
+- Added bilingual Known Limits docs covering App-native runtime dependency, Codex CLI process-swarm boundary, real benchmark slowness, controlled-vs-real evidence, raw `.orchestry/` privacy, and no-auto-merge worktree behavior.
+- Added bilingual external review prompt packs for adoption, security boundary, and benchmark claim reviews.
+- Kept README and README.zh-CN short by linking to adoption docs instead of expanding the first screen.
+
 ## 3.2.0 - 2026-06-07
 
 - Hardened Codex CLI worker execution for real benchmark stability:

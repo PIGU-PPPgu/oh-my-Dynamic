@@ -80,7 +80,9 @@ python -m bandit -r . -c pyproject.toml
 
 ## 更多
 
+- 快速开始：[docs/QUICKSTART.zh-CN.md](docs/QUICKSTART.zh-CN.md)
 - 文档索引：[docs/README.md](docs/README.md)
+- 已知边界：[docs/KNOWN_LIMITS.zh-CN.md](docs/KNOWN_LIMITS.zh-CN.md)
 - 证据规则：[docs/evidence/README.md](docs/evidence/README.md)
 - 威胁模型：[docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
 - v3 import 迁移：[docs/V3_MIGRATION_GUIDE.md](docs/V3_MIGRATION_GUIDE.md)

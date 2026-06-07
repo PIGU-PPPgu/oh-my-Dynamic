@@ -1,0 +1,77 @@
+name: Bug report
+description: Report a reproducible oh-my-Dynamic bug.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please include compact evidence only; do not paste raw prompts, stdout, stderr, secrets, or full `.orchestry/` traces.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What failed, and what did you expect?
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: "macOS 15, Ubuntu 24.04, etc."
+    validations:
+      required: true
+  - type: input
+    id: codex_version
+    attributes:
+      label: Codex CLI version
+      placeholder: "codex-cli 0.128.0"
+    validations:
+      required: false
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Doctor output
+      description: Paste `python -m doctor --json` output, with secrets removed.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: run_id
+    attributes:
+      label: Run id
+      placeholder: "benchmark_v320_..., codex_cli_run_..., etc."
+    validations:
+      required: false
+  - type: input
+    id: evidence_path
+    attributes:
+      label: Evidence path
+      placeholder: "docs/evidence/benchmark_v320_real_smoke.md"
+    validations:
+      required: false
+  - type: dropdown
+    id: real_run
+    attributes:
+      label: Was this a real Codex CLI run?
+      options:
+        - "No, dry-run or deterministic demo"
+        - "Yes, real Codex CLI workers"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction command
+      description: Paste the exact command you ran.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+      description: Any compact logs, sanitized trace paths, or links.
+    validations:
+      required: false

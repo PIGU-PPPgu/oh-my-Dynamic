@@ -45,7 +45,8 @@ replanner-generated agents, trigger reasons, and reducer recommendations.
 scored without model credentials. `src/oh_my_dynamic/evals/doctor.py`, `src/oh_my_dynamic/evals/evidence_sanitizer.py`, and
 `scripts/run_benchmark.py` add adoption checks, public evidence redaction,
 single/fixed/adaptive benchmark shape checks, v3.2 real Codex CLI stability
-evidence, and v3.1.1 bilingual improvement measurement evidence.
+evidence, v3.3 adoption docs, and v3.1.1 bilingual improvement measurement
+evidence.
 
 Use It Now:
 
@@ -78,8 +79,8 @@ Current product status:
 - Stable: Codex CLI swarm, adaptive dynamic workflow planner/replanner, broker
   reducer, the real repo review demo, static observability dashboards,
   round-aware compact evidence, deterministic quality evals, v3.2 benchmark
-  stability evidence, bilingual improvement measurement, and pytest coverage
-  fail-under 80.
+  stability evidence, v3.3 Quickstart/Known Limits docs, bilingual improvement
+  measurement, and pytest coverage fail-under 80.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.
 - Experimental: Codex App bridge, A2A gateway, and TEA protocol.

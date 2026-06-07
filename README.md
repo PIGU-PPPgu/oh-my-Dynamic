@@ -80,7 +80,9 @@ python -m bandit -r . -c pyproject.toml
 
 ## More
 
+- Quickstart: [docs/QUICKSTART.md](docs/QUICKSTART.md)
 - Docs index: [docs/README.md](docs/README.md)
+- Known limits: [docs/KNOWN_LIMITS.md](docs/KNOWN_LIMITS.md)
 - Evidence rules: [docs/evidence/README.md](docs/evidence/README.md)
 - Threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
 - v3 imports: [docs/V3_MIGRATION_GUIDE.md](docs/V3_MIGRATION_GUIDE.md)

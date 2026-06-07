@@ -6,12 +6,15 @@ This folder holds the long-form material that used to crowd the project README. 
 
 | Need | Document |
 |------|----------|
+| Five-minute setup and first run | [QUICKSTART.md](QUICKSTART.md) / [QUICKSTART.zh-CN.md](QUICKSTART.zh-CN.md) |
+| Current product limits and claim boundaries | [KNOWN_LIMITS.md](KNOWN_LIMITS.md) / [KNOWN_LIMITS.zh-CN.md](KNOWN_LIMITS.zh-CN.md) |
 | Evidence format, redaction rules, and reproduction notes | [evidence/README.md](evidence/README.md) |
 | Codex CLI fixed swarm scale notes | [CODEX_CLI_SWARM_SMOKE.md](CODEX_CLI_SWARM_SMOKE.md) |
 | Native dynamic workflow proposal and App runtime boundary | [CODEX_NATIVE_DYNAMIC_WORKFLOWS.md](CODEX_NATIVE_DYNAMIC_WORKFLOWS.md) |
 | Security assumptions and mitigations | [THREAT_MODEL.md](THREAT_MODEL.md) |
 | Release gates and publishing checklist | [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md) |
 | v3 package import migration | [V3_MIGRATION_GUIDE.md](V3_MIGRATION_GUIDE.md) |
+| External reviewer prompt pack | [REVIEW_PROMPTS.md](REVIEW_PROMPTS.md) / [REVIEW_PROMPTS.zh-CN.md](REVIEW_PROMPTS.zh-CN.md) |
 
 ## Evidence Records
 

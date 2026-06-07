@@ -1,0 +1,63 @@
+name: Install help
+description: Get help with plugin install, skills, marketplace JSON, or first run.
+title: "[Install]: "
+labels: ["install", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this when `install_plugin.sh`, Codex App skill discovery, or the first dry-run does not work.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What step failed?
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Doctor output
+      description: Paste `python -m doctor --json` output.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Commands run
+      description: Include install and validation commands.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: skill_path
+    attributes:
+      label: Skill path
+      placeholder: "~/.agents/skills/oh-my-dynamic"
+    validations:
+      required: false
+  - type: input
+    id: marketplace_path
+    attributes:
+      label: Marketplace JSON path
+      placeholder: "~/.agents/plugins/marketplace.json"
+    validations:
+      required: false
+  - type: dropdown
+    id: codex_app_reloaded
+    attributes:
+      label: Did you restart Codex App or open a new thread?
+      options:
+        - "Yes"
+        - "No"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: What did you expect to happen?
+    validations:
+      required: false
