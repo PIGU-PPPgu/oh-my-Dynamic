@@ -1,0 +1,1514 @@
+{
+  "benchmark": "repo_review_productization_v2",
+  "measurement": "controlled_improvement",
+  "run_id": "improvement_v311",
+  "created_at": 1780803779,
+  "dry_run": true,
+  "fixture_count": 10,
+  "fixtures": [
+    "security_command_surface",
+    "security_broker_poisoning",
+    "install_five_minute",
+    "docs_boundary_claims",
+    "tests_dynamic_workflow",
+    "tests_failure_modes",
+    "evidence_redaction",
+    "release_gates",
+    "benchmark_claims",
+    "llm_provider_docs"
+  ],
+  "mode_summaries": {
+    "single": {
+      "fixtures": 10,
+      "passed": 0,
+      "pass_rate": 0.0,
+      "avg_quality_score": 0.614,
+      "avg_evidence_completeness": 0.671,
+      "missing_requirement_count": 70,
+      "agents_completed": 10,
+      "replanner_count": 0
+    },
+    "fixed": {
+      "fixtures": 10,
+      "passed": 10,
+      "pass_rate": 1.0,
+      "avg_quality_score": 0.9,
+      "avg_evidence_completeness": 0.9,
+      "missing_requirement_count": 18,
+      "agents_completed": 50,
+      "replanner_count": 0
+    },
+    "adaptive": {
+      "fixtures": 10,
+      "passed": 10,
+      "pass_rate": 1.0,
+      "avg_quality_score": 1.0,
+      "avg_evidence_completeness": 1.0,
+      "missing_requirement_count": 0,
+      "agents_completed": 70,
+      "replanner_count": 20
+    }
+  },
+  "lift": {
+    "fixed_vs_single": {
+      "quality_score_absolute_lift": 0.286,
+      "quality_score_relative_lift_pct": 46.6,
+      "pass_rate_absolute_lift": 1.0,
+      "evidence_completeness_absolute_lift": 0.229,
+      "missing_requirement_reduction": 52,
+      "missing_requirement_reduction_pct": 74.3
+    },
+    "adaptive_vs_single": {
+      "quality_score_absolute_lift": 0.386,
+      "quality_score_relative_lift_pct": 62.9,
+      "pass_rate_absolute_lift": 1.0,
+      "evidence_completeness_absolute_lift": 0.329,
+      "missing_requirement_reduction": 70,
+      "missing_requirement_reduction_pct": 100.0
+    },
+    "adaptive_vs_fixed": {
+      "quality_score_absolute_lift": 0.1,
+      "pass_rate_absolute_lift": 0.0,
+      "evidence_completeness_absolute_lift": 0.1,
+      "missing_requirement_reduction": 18,
+      "missing_requirement_reduction_pct": 100.0
+    }
+  },
+  "task_results": [
+    {
+      "mode": "single",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for security_command_surface. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: subprocess Signals covered: codex exec Risk categories covered: security Evidence covered: file Single proof: one rev",
+      "quality_score": 0.613,
+      "passed": false,
+      "keyword_hits": [
+        "subprocess"
+      ],
+      "signal_hits": [
+        "codex exec"
+      ],
+      "risk_hits": [
+        "security",
+        "process"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "command",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.729,
+      "missing": {
+        "keywords": [
+          "sandbox",
+          "secret",
+          "auth"
+        ],
+        "signals": [
+          "sandbox",
+          "environment",
+          "stderr"
+        ],
+        "risk_categories": [
+          "secrets"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 7
+    },
+    {
+      "mode": "fixed",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for security_command_surface. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: subprocess, sandbox, secret Signals covered: codex exec, sandbox, environment Risk categories covered: security, secre",
+      "quality_score": 0.888,
+      "passed": true,
+      "keyword_hits": [
+        "subprocess",
+        "sandbox",
+        "secret"
+      ],
+      "signal_hits": [
+        "codex exec",
+        "sandbox",
+        "environment"
+      ],
+      "risk_hits": [
+        "security",
+        "secrets",
+        "process"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "command",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.938,
+      "missing": {
+        "keywords": [
+          "auth"
+        ],
+        "signals": [
+          "stderr"
+        ],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 2
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "security_command_surface",
+      "goal": "Review command execution and subprocess security surfaces.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for security_command_surface. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: subprocess, sandbox, secret, auth Signals covered: codex exec, sandbox, environment, stderr Risk categories covered",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "subprocess",
+        "sandbox",
+        "secret",
+        "auth"
+      ],
+      "signal_hits": [
+        "codex exec",
+        "sandbox",
+        "environment",
+        "stderr"
+      ],
+      "risk_hits": [
+        "security",
+        "secrets",
+        "process"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "command",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "security_broker_poisoning",
+      "goal": "Review broker artifact poisoning and malformed envelope risks.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for security_broker_poisoning. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: broker Signals covered: artifact Risk categories covered: security Evidence covered: file Single proof: one reviewer",
+      "quality_score": 0.613,
+      "passed": false,
+      "keyword_hits": [
+        "broker",
+        "artifact"
+      ],
+      "signal_hits": [
+        "artifact"
+      ],
+      "risk_hits": [
+        "security"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.646,
+      "missing": {
+        "keywords": [
+          "envelope",
+          "validation"
+        ],
+        "signals": [
+          "envelope",
+          "thread_id",
+          "validation"
+        ],
+        "risk_categories": [
+          "protocol",
+          "data-integrity"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 7
+    },
+    {
+      "mode": "fixed",
+      "fixture": "security_broker_poisoning",
+      "goal": "Review broker artifact poisoning and malformed envelope risks.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for security_broker_poisoning. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: broker, artifact, envelope Signals covered: artifact, envelope, thread_id Risk categories covered: security, protocol",
+      "quality_score": 0.838,
+      "passed": true,
+      "keyword_hits": [
+        "broker",
+        "artifact",
+        "envelope"
+      ],
+      "signal_hits": [
+        "artifact",
+        "envelope",
+        "thread_id"
+      ],
+      "risk_hits": [
+        "security",
+        "protocol"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.854,
+      "missing": {
+        "keywords": [
+          "validation"
+        ],
+        "signals": [
+          "validation"
+        ],
+        "risk_categories": [
+          "data-integrity"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 3
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "security_broker_poisoning",
+      "goal": "Review broker artifact poisoning and malformed envelope risks.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for security_broker_poisoning. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: broker, artifact, envelope, validation Signals covered: artifact, envelope, thread_id, validation Risk categories ",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "broker",
+        "artifact",
+        "envelope",
+        "validation"
+      ],
+      "signal_hits": [
+        "artifact",
+        "envelope",
+        "thread_id",
+        "validation"
+      ],
+      "risk_hits": [
+        "security",
+        "protocol",
+        "data-integrity"
+      ],
+      "evidence_hits": [
+        "file",
+        "line",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for install_five_minute. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: install Signals covered: Use It Now Risk categories covered: adoption Evidence covered: README Single proof: one reviewer ",
+      "quality_score": 0.663,
+      "passed": false,
+      "keyword_hits": [
+        "install",
+        "README",
+        "command"
+      ],
+      "signal_hits": [
+        "Use It Now"
+      ],
+      "risk_hits": [
+        "adoption",
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "command",
+        "gap"
+      ],
+      "evidence_completeness": 0.667,
+      "missing": {
+        "keywords": [
+          "dry-run"
+        ],
+        "signals": [
+          "doctor",
+          "dry-run",
+          "plugin"
+        ],
+        "risk_categories": [
+          "docs"
+        ],
+        "evidence_requirements": [
+          "expected"
+        ]
+      },
+      "missing_requirement_count": 6
+    },
+    {
+      "mode": "fixed",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for install_five_minute. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: install, README, dry-run Signals covered: Use It Now, doctor, dry-run Risk categories covered: adoption, docs Evidence cove",
+      "quality_score": 0.938,
+      "passed": true,
+      "keyword_hits": [
+        "install",
+        "README",
+        "dry-run",
+        "command"
+      ],
+      "signal_hits": [
+        "Use It Now",
+        "doctor",
+        "dry-run"
+      ],
+      "risk_hits": [
+        "adoption",
+        "docs",
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "command",
+        "expected",
+        "gap"
+      ],
+      "evidence_completeness": 0.938,
+      "missing": {
+        "keywords": [],
+        "signals": [
+          "plugin"
+        ],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 1
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "install_five_minute",
+      "goal": "Review the five-minute install and dry-run path.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for install_five_minute. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: install, README, dry-run, command Signals covered: Use It Now, doctor, dry-run, plugin Risk categories covered: adoption",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "install",
+        "README",
+        "dry-run",
+        "command"
+      ],
+      "signal_hits": [
+        "Use It Now",
+        "doctor",
+        "dry-run",
+        "plugin"
+      ],
+      "risk_hits": [
+        "adoption",
+        "docs",
+        "install"
+      ],
+      "evidence_hits": [
+        "README",
+        "command",
+        "expected",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for docs_boundary_claims. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: App-native Signals covered: App-native Risk categories covered: docs Evidence covered: README Single proof: one reviewer ",
+      "quality_score": 0.613,
+      "passed": false,
+      "keyword_hits": [
+        "App-native",
+        "boundary"
+      ],
+      "signal_hits": [
+        "App-native"
+      ],
+      "risk_hits": [
+        "docs"
+      ],
+      "evidence_hits": [
+        "README",
+        "boundary",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.646,
+      "missing": {
+        "keywords": [
+          "Codex CLI",
+          "process swarm"
+        ],
+        "signals": [
+          "Codex CLI",
+          "runtime",
+          "read-only"
+        ],
+        "risk_categories": [
+          "positioning",
+          "adoption"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 7
+    },
+    {
+      "mode": "fixed",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for docs_boundary_claims. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: App-native, Codex CLI, process swarm Signals covered: App-native, Codex CLI, runtime Risk categories covered: docs, positi",
+      "quality_score": 0.888,
+      "passed": true,
+      "keyword_hits": [
+        "App-native",
+        "Codex CLI",
+        "process swarm",
+        "boundary"
+      ],
+      "signal_hits": [
+        "App-native",
+        "Codex CLI",
+        "runtime"
+      ],
+      "risk_hits": [
+        "docs",
+        "positioning"
+      ],
+      "evidence_hits": [
+        "README",
+        "boundary",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.854,
+      "missing": {
+        "keywords": [],
+        "signals": [
+          "read-only"
+        ],
+        "risk_categories": [
+          "adoption"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 2
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "docs_boundary_claims",
+      "goal": "Review App-native versus Codex CLI process-swarm boundary claims.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for docs_boundary_claims. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: App-native, Codex CLI, process swarm, boundary Signals covered: App-native, Codex CLI, runtime, read-only Risk categori",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "App-native",
+        "Codex CLI",
+        "process swarm",
+        "boundary"
+      ],
+      "signal_hits": [
+        "App-native",
+        "Codex CLI",
+        "runtime",
+        "read-only"
+      ],
+      "risk_hits": [
+        "docs",
+        "positioning",
+        "adoption"
+      ],
+      "evidence_hits": [
+        "README",
+        "boundary",
+        "risk",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for tests_dynamic_workflow. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: planner Signals covered: DynamicWorkflowRuntime Risk categories covered: tests Evidence covered: test Single proof: one",
+      "quality_score": 0.663,
+      "passed": false,
+      "keyword_hits": [
+        "planner"
+      ],
+      "signal_hits": [
+        "DynamicWorkflowRuntime"
+      ],
+      "risk_hits": [
+        "tests",
+        "coverage",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "coverage",
+        "gap",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.812,
+      "missing": {
+        "keywords": [
+          "replanner",
+          "trigger",
+          "reducer"
+        ],
+        "signals": [
+          "ReplanTriggerPolicy",
+          "broker reducer",
+          "checkpoint"
+        ],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 6
+    },
+    {
+      "mode": "fixed",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for tests_dynamic_workflow. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: planner, replanner, trigger Signals covered: DynamicWorkflowRuntime, ReplanTriggerPolicy, broker reducer Risk categories",
+      "quality_score": 0.938,
+      "passed": true,
+      "keyword_hits": [
+        "planner",
+        "replanner",
+        "trigger",
+        "reducer"
+      ],
+      "signal_hits": [
+        "DynamicWorkflowRuntime",
+        "ReplanTriggerPolicy",
+        "broker reducer"
+      ],
+      "risk_hits": [
+        "tests",
+        "coverage",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "coverage",
+        "gap",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.938,
+      "missing": {
+        "keywords": [],
+        "signals": [
+          "checkpoint"
+        ],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 1
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "tests_dynamic_workflow",
+      "goal": "Review tests around planner, replanner, trigger policy, and reducer.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for tests_dynamic_workflow. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: planner, replanner, trigger, reducer Signals covered: DynamicWorkflowRuntime, ReplanTriggerPolicy, broker reducer, ch",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "planner",
+        "replanner",
+        "trigger",
+        "reducer"
+      ],
+      "signal_hits": [
+        "DynamicWorkflowRuntime",
+        "ReplanTriggerPolicy",
+        "broker reducer",
+        "checkpoint"
+      ],
+      "risk_hits": [
+        "tests",
+        "coverage",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "coverage",
+        "gap",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "tests_failure_modes",
+      "goal": "Review failure-mode coverage for worker timeout, malformed JSON, and dependency failure.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for tests_failure_modes. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: timeout Signals covered: timeout Risk categories covered: tests Evidence covered: test Single proof: one reviewer produced",
+      "quality_score": 0.563,
+      "passed": false,
+      "keyword_hits": [
+        "timeout"
+      ],
+      "signal_hits": [
+        "timeout"
+      ],
+      "risk_hits": [
+        "tests"
+      ],
+      "evidence_hits": [
+        "test",
+        "risk",
+        "failure",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.646,
+      "missing": {
+        "keywords": [
+          "malformed",
+          "dependency",
+          "failed"
+        ],
+        "signals": [
+          "dependency",
+          "malformed JSON",
+          "failed envelope"
+        ],
+        "risk_categories": [
+          "resilience",
+          "workflow"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 8
+    },
+    {
+      "mode": "fixed",
+      "fixture": "tests_failure_modes",
+      "goal": "Review failure-mode coverage for worker timeout, malformed JSON, and dependency failure.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for tests_failure_modes. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: timeout, malformed, dependency Signals covered: timeout, dependency, malformed JSON Risk categories covered: tests, resilie",
+      "quality_score": 0.838,
+      "passed": true,
+      "keyword_hits": [
+        "timeout",
+        "malformed",
+        "dependency"
+      ],
+      "signal_hits": [
+        "timeout",
+        "dependency",
+        "malformed JSON"
+      ],
+      "risk_hits": [
+        "tests",
+        "resilience"
+      ],
+      "evidence_hits": [
+        "test",
+        "risk",
+        "failure",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.854,
+      "missing": {
+        "keywords": [
+          "failed"
+        ],
+        "signals": [
+          "failed envelope"
+        ],
+        "risk_categories": [
+          "workflow"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 3
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "tests_failure_modes",
+      "goal": "Review failure-mode coverage for worker timeout, malformed JSON, and dependency failure.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for tests_failure_modes. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: timeout, malformed, dependency, failed Signals covered: timeout, dependency, malformed JSON, failed envelope Risk catego",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "timeout",
+        "malformed",
+        "dependency",
+        "failed"
+      ],
+      "signal_hits": [
+        "timeout",
+        "dependency",
+        "malformed JSON",
+        "failed envelope"
+      ],
+      "risk_hits": [
+        "tests",
+        "resilience",
+        "workflow"
+      ],
+      "evidence_hits": [
+        "test",
+        "risk",
+        "failure",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for evidence_redaction. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: evidence Signals covered: $REPO_ROOT Risk categories covered: evidence Evidence covered: file Single proof: one reviewer pr",
+      "quality_score": 0.463,
+      "passed": false,
+      "keyword_hits": [
+        "evidence"
+      ],
+      "signal_hits": [
+        "$REPO_ROOT"
+      ],
+      "risk_hits": [
+        "evidence"
+      ],
+      "evidence_hits": [
+        "file",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.521,
+      "missing": {
+        "keywords": [
+          "sanitize",
+          "secret",
+          "path"
+        ],
+        "signals": [
+          "sensitive scan",
+          "raw output",
+          "dashboard"
+        ],
+        "risk_categories": [
+          "privacy",
+          "security"
+        ],
+        "evidence_requirements": [
+          "scan",
+          "path"
+        ]
+      },
+      "missing_requirement_count": 10
+    },
+    {
+      "mode": "fixed",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for evidence_redaction. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: evidence, sanitize, secret Signals covered: $REPO_ROOT, sensitive scan, raw output Risk categories covered: evidence, privac",
+      "quality_score": 0.888,
+      "passed": true,
+      "keyword_hits": [
+        "evidence",
+        "sanitize",
+        "secret",
+        "path"
+      ],
+      "signal_hits": [
+        "$REPO_ROOT",
+        "sensitive scan",
+        "raw output"
+      ],
+      "risk_hits": [
+        "evidence",
+        "privacy"
+      ],
+      "evidence_hits": [
+        "file",
+        "scan",
+        "path",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.854,
+      "missing": {
+        "keywords": [],
+        "signals": [
+          "dashboard"
+        ],
+        "risk_categories": [
+          "security"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 2
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "evidence_redaction",
+      "goal": "Review public evidence for local path and secret leakage.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for evidence_redaction. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: evidence, sanitize, secret, path Signals covered: $REPO_ROOT, sensitive scan, raw output, dashboard Risk categories cover",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "evidence",
+        "sanitize",
+        "secret",
+        "path"
+      ],
+      "signal_hits": [
+        "$REPO_ROOT",
+        "sensitive scan",
+        "raw output",
+        "dashboard"
+      ],
+      "risk_hits": [
+        "evidence",
+        "privacy",
+        "security"
+      ],
+      "evidence_hits": [
+        "file",
+        "scan",
+        "path",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "release_gates",
+      "goal": "Review release gates, CI, coverage, security scans, and checklist completeness.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for release_gates. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: CI Signals covered: coverage Risk categories covered: release Evidence covered: command Single proof: one reviewer produced a co",
+      "quality_score": 0.725,
+      "passed": false,
+      "keyword_hits": [
+        "CI",
+        "coverage",
+        "release"
+      ],
+      "signal_hits": [
+        "coverage",
+        "benchmark"
+      ],
+      "risk_hits": [
+        "release"
+      ],
+      "evidence_hits": [
+        "command",
+        "CI",
+        "coverage",
+        "gap"
+      ],
+      "evidence_completeness": 0.708,
+      "missing": {
+        "keywords": [
+          "bandit"
+        ],
+        "signals": [
+          "bandit",
+          "doctor"
+        ],
+        "risk_categories": [
+          "quality",
+          "security"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 5
+    },
+    {
+      "mode": "fixed",
+      "fixture": "release_gates",
+      "goal": "Review release gates, CI, coverage, security scans, and checklist completeness.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for release_gates. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: CI, coverage, bandit Signals covered: coverage, bandit, doctor Risk categories covered: release, quality Evidence covered: comman",
+      "quality_score": 0.95,
+      "passed": true,
+      "keyword_hits": [
+        "CI",
+        "coverage",
+        "bandit",
+        "release"
+      ],
+      "signal_hits": [
+        "coverage",
+        "bandit",
+        "doctor",
+        "benchmark"
+      ],
+      "risk_hits": [
+        "release",
+        "quality"
+      ],
+      "evidence_hits": [
+        "command",
+        "CI",
+        "coverage",
+        "gap"
+      ],
+      "evidence_completeness": 0.917,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [
+          "security"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 1
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "release_gates",
+      "goal": "Review release gates, CI, coverage, security scans, and checklist completeness.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for release_gates. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: CI, coverage, bandit, release Signals covered: coverage, bandit, doctor, benchmark Risk categories covered: release, quality, ",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "CI",
+        "coverage",
+        "bandit",
+        "release"
+      ],
+      "signal_hits": [
+        "coverage",
+        "bandit",
+        "doctor",
+        "benchmark"
+      ],
+      "risk_hits": [
+        "release",
+        "quality",
+        "security"
+      ],
+      "evidence_hits": [
+        "command",
+        "CI",
+        "coverage",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "benchmark_claims",
+      "goal": "Review whether benchmark evidence proves quality improvement over a single agent.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for benchmark_claims. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: benchmark Signals covered: quality_score Risk categories covered: benchmark Evidence covered: score Single proof: one reviewe",
+      "quality_score": 0.613,
+      "passed": false,
+      "keyword_hits": [
+        "benchmark",
+        "single"
+      ],
+      "signal_hits": [
+        "quality_score"
+      ],
+      "risk_hits": [
+        "benchmark",
+        "evidence",
+        "quality"
+      ],
+      "evidence_hits": [
+        "score",
+        "recommendation"
+      ],
+      "evidence_completeness": 0.688,
+      "missing": {
+        "keywords": [
+          "fixed",
+          "adaptive"
+        ],
+        "signals": [
+          "evidence_completeness",
+          "duration",
+          "replanner"
+        ],
+        "risk_categories": [],
+        "evidence_requirements": [
+          "comparison",
+          "mode"
+        ]
+      },
+      "missing_requirement_count": 7
+    },
+    {
+      "mode": "fixed",
+      "fixture": "benchmark_claims",
+      "goal": "Review whether benchmark evidence proves quality improvement over a single agent.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for benchmark_claims. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: benchmark, single, fixed Signals covered: quality_score, evidence_completeness, duration Risk categories covered: benchmark, e",
+      "quality_score": 0.95,
+      "passed": true,
+      "keyword_hits": [
+        "benchmark",
+        "single",
+        "fixed"
+      ],
+      "signal_hits": [
+        "quality_score",
+        "evidence_completeness",
+        "duration",
+        "replanner"
+      ],
+      "risk_hits": [
+        "benchmark",
+        "evidence",
+        "quality"
+      ],
+      "evidence_hits": [
+        "score",
+        "comparison",
+        "mode",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [
+          "adaptive"
+        ],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 1
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "benchmark_claims",
+      "goal": "Review whether benchmark evidence proves quality improvement over a single agent.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for benchmark_claims. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: benchmark, single, fixed, adaptive Signals covered: quality_score, evidence_completeness, duration, replanner Risk categori",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "benchmark",
+        "single",
+        "fixed",
+        "adaptive"
+      ],
+      "signal_hits": [
+        "quality_score",
+        "evidence_completeness",
+        "duration",
+        "replanner"
+      ],
+      "risk_hits": [
+        "benchmark",
+        "evidence",
+        "quality"
+      ],
+      "evidence_hits": [
+        "score",
+        "comparison",
+        "mode",
+        "recommendation"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    },
+    {
+      "mode": "single",
+      "fixture": "llm_provider_docs",
+      "goal": "Review model-provider routing docs and Chinese model support clarity.",
+      "dry_run": true,
+      "agent_count": 1,
+      "agents_completed": 1,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "partial",
+      "response_preview": "single controlled benchmark for llm_provider_docs. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: GLM Signals covered: GLM Risk categories covered: docs Evidence covered: README Single proof: one reviewer produced a compac",
+      "quality_score": 0.613,
+      "passed": false,
+      "keyword_hits": [
+        "GLM",
+        "provider"
+      ],
+      "signal_hits": [
+        "GLM"
+      ],
+      "risk_hits": [
+        "docs"
+      ],
+      "evidence_hits": [
+        "README",
+        "provider",
+        "command",
+        "gap"
+      ],
+      "evidence_completeness": 0.646,
+      "missing": {
+        "keywords": [
+          "Qwen",
+          "DeepSeek"
+        ],
+        "signals": [
+          "Qwen",
+          "DeepSeek",
+          "OpenAI compatible"
+        ],
+        "risk_categories": [
+          "model-routing",
+          "adoption"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 7
+    },
+    {
+      "mode": "fixed",
+      "fixture": "llm_provider_docs",
+      "goal": "Review model-provider routing docs and Chinese model support clarity.",
+      "dry_run": true,
+      "agent_count": 5,
+      "agents_completed": 5,
+      "agents_failed": 0,
+      "replanner_count": 0,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "fixed controlled benchmark for llm_provider_docs. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: GLM, Qwen, DeepSeek Signals covered: GLM, Qwen, DeepSeek Risk categories covered: docs, model-routing Evidence covered: READM",
+      "quality_score": 0.888,
+      "passed": true,
+      "keyword_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "provider"
+      ],
+      "signal_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek"
+      ],
+      "risk_hits": [
+        "docs",
+        "model-routing"
+      ],
+      "evidence_hits": [
+        "README",
+        "provider",
+        "command",
+        "gap"
+      ],
+      "evidence_completeness": 0.854,
+      "missing": {
+        "keywords": [],
+        "signals": [
+          "OpenAI compatible"
+        ],
+        "risk_categories": [
+          "adoption"
+        ],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 2
+    },
+    {
+      "mode": "adaptive",
+      "fixture": "llm_provider_docs",
+      "goal": "Review model-provider routing docs and Chinese model support clarity.",
+      "dry_run": true,
+      "agent_count": 7,
+      "agents_completed": 7,
+      "agents_failed": 0,
+      "replanner_count": 2,
+      "duration_s": 0.0,
+      "terminal_state": "completed",
+      "response_preview": "adaptive controlled benchmark for llm_provider_docs. Finding: risk and gap found in file README.md line 1. Command evidence: python test_suite.py. Recommendation: fix the missing review coverage and rerun the benchmark. Keywords covered: GLM, Qwen, DeepSeek, provider Signals covered: GLM, Qwen, DeepSeek, OpenAI compatible Risk categories covered: docs, model",
+      "quality_score": 1.0,
+      "passed": true,
+      "keyword_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "provider"
+      ],
+      "signal_hits": [
+        "GLM",
+        "Qwen",
+        "DeepSeek",
+        "OpenAI compatible"
+      ],
+      "risk_hits": [
+        "docs",
+        "model-routing",
+        "adoption"
+      ],
+      "evidence_hits": [
+        "README",
+        "provider",
+        "command",
+        "gap"
+      ],
+      "evidence_completeness": 1.0,
+      "missing": {
+        "keywords": [],
+        "signals": [],
+        "risk_categories": [],
+        "evidence_requirements": []
+      },
+      "missing_requirement_count": 0
+    }
+  ],
+  "interpretation": {
+    "what_this_measures": "Deterministic requirement coverage and benchmark scoring lift when moving from one reviewer to fixed lanes to adaptive replanner follow-up.",
+    "what_this_does_not_measure": "It does not prove live model answer quality or Codex App-native isolated subagents. Pair with real Codex CLI evidence for runtime proof."
+  },
+  "sanitized": true,
+  "repo_root_label": "$REPO_ROOT"
+}
