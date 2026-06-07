@@ -13,7 +13,7 @@ One-line trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务；App runtime 可用时使用内部 Codex subagents，否则走 in-chat fallback；大规模走 Codex CLI swarm。
 ```
 
-Current v3.4.0 status:
+Current v3.5.0 status:
 
 - Preferred developer imports now use `oh_my_dynamic.*`; root-level files such as `dynamic_workflow.py`, `codex_cli_swarm.py`, and `agent_broker.py` are compatibility shims.
 
@@ -22,7 +22,7 @@ Current v3.4.0 status:
   dashboards, round-aware compact evidence, and deterministic quality evals.
 - Trust gates: sanitized evidence, `python -m doctor --json`, Bandit CI, MIT
   license, threat model docs, deterministic benchmark dry-runs, real v3.2
-  benchmark stability evidence, v3.4 Quickstart/Known Limits docs, GitHub
+  benchmark stability evidence, v3.5 official brief/demo/outreach docs, GitHub
   issue templates, and pytest coverage fail-under 80.
 - Beta: worktree patch mode, checkpoint/resume, streaming progress events, and
   capability routing.

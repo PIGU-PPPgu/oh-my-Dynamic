@@ -14,6 +14,19 @@ python3 -m pip install -e ".[dev]"
 bash -n install_plugin.sh
 test -f LICENSE
 python3 -m json.tool .agents/plugins/marketplace.json >/dev/null
+python3 - <<'PY'
+from pathlib import Path
+import xml.etree.ElementTree as ET
+for name in ["assets/icon.svg", "assets/icon-dark.svg"]:
+    ET.parse(name)
+data = Path("assets/icon-512.png").read_bytes()
+assert data.startswith(b"\x89PNG\r\n\x1a\n")
+assert int.from_bytes(data[16:20], "big") == 512
+assert int.from_bytes(data[20:24], "big") == 512
+assert Path("assets/social-preview.png").exists()
+assert "does not claim App-native isolated subagents are implemented" in Path("docs/OFFICIAL_BRIEF.md").read_text(encoding="utf-8")
+assert "不声称已经实现 Codex App-native isolated subagents" in Path("docs/OFFICIAL_BRIEF.zh-CN.md").read_text(encoding="utf-8")
+PY
 python3 -m py_compile *.py examples/*.py scripts/*.py $(find src -name '*.py' -print)
 python3 test_suite.py
 python3 -m pytest tests -q

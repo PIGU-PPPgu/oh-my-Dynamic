@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">oh-my-Dynamic icon</title>
+  <desc id="desc">A minimal workflow graph fanning out and reducing into one result node.</desc>
+  <rect width="512" height="512" rx="96" fill="#0b1020"/>
+  <path d="M104 256C148 164 208 112 256 112s108 52 152 144c-44 92-104 144-152 144S148 348 104 256Z" fill="#111a2e" stroke="#7dd3fc" stroke-width="14"/>
+  <g stroke="#94a3b8" stroke-width="12" stroke-linecap="round">
+    <path d="M178 206 256 256"/>
+    <path d="M178 306 256 256"/>
+    <path d="M256 256 334 206"/>
+    <path d="M256 256 334 306"/>
+  </g>
+  <g fill="#e2e8f0" stroke="#0b1020" stroke-width="10">
+    <circle cx="162" cy="196" r="34"/>
+    <circle cx="162" cy="316" r="34"/>
+    <circle cx="350" cy="196" r="34"/>
+    <circle cx="350" cy="316" r="34"/>
+  </g>
+  <circle cx="256" cy="256" r="48" fill="#22d3ee" stroke="#e0f2fe" stroke-width="12"/>
+  <path d="M240 256h32M256 240v32" stroke="#0b1020" stroke-width="14" stroke-linecap="round"/>
+</svg>

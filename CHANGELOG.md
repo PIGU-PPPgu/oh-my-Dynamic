@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.5.0 - 2026-06-08
+
+- Added engineering-minimal brand assets under `assets/`, including SVG icons,
+  a 512px PNG icon, and a 1200x630 social preview image without using official
+  OpenAI, Codex, or ChatGPT marks.
+- Added bilingual official-facing technical briefs that state the problem,
+  verified Codex CLI process-swarm proof, evidence links, runtime asks, and the
+  explicit non-claim around App-native isolated subagents.
+- Added bilingual outreach packs for GitHub discussions, email, X threads, HN
+  style posts, and a short list of materials to send to Codex/OpenAI runtime
+  owners.
+- Added bilingual five-minute demo scripts that separate safe dry-run commands
+  from real Codex CLI worker commands.
+- Linked the new brief/demo/outreach material from the short README and docs
+  index while keeping README and README.zh-CN within the 100-line limit.
+
 ## 3.4.0 - 2026-06-07
 
 - Hardened external adoption flow: README and Quickstart now start with a

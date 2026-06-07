@@ -1,4 +1,4 @@
-# oh-my-Dynamic
+# <img src="assets/icon.svg" alt="oh-my-Dynamic" width="32" height="32"> oh-my-Dynamic
 
 [![tests](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
 [![coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
@@ -90,6 +90,7 @@ Stable: Codex CLI swarm, adaptive workflow, broker reducer, evidence reports. Ex
 
 - Quickstart: [docs/QUICKSTART.md](docs/QUICKSTART.md)
 - Troubleshooting/uninstall: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+- Official brief / demo / outreach: [brief](docs/OFFICIAL_BRIEF.md), [demo](docs/DEMO_SCRIPT.md), [outreach](docs/OUTREACH.md)
 - Docs index: [docs/README.md](docs/README.md)
 - Known limits: [docs/KNOWN_LIMITS.md](docs/KNOWN_LIMITS.md)
 - Evidence rules: [docs/evidence/README.md](docs/evidence/README.md)

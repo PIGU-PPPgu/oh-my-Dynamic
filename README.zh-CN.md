@@ -1,4 +1,4 @@
-# oh-my-Dynamic
+# <img src="assets/icon.svg" alt="oh-my-Dynamic" width="32" height="32"> oh-my-Dynamic
 
 [![tests](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
 [![coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
@@ -90,6 +90,7 @@ Stable：Codex CLI swarm、adaptive workflow、broker reducer、证据报告。E
 
 - 快速开始：[docs/QUICKSTART.zh-CN.md](docs/QUICKSTART.zh-CN.md)
 - 故障排查/卸载：[docs/TROUBLESHOOTING.zh-CN.md](docs/TROUBLESHOOTING.zh-CN.md)
+- 官方 brief / demo / outreach：[brief](docs/OFFICIAL_BRIEF.zh-CN.md)、[demo](docs/DEMO_SCRIPT.zh-CN.md)、[outreach](docs/OUTREACH.zh-CN.md)
 - 文档索引：[docs/README.md](docs/README.md)
 - 已知边界：[docs/KNOWN_LIMITS.zh-CN.md](docs/KNOWN_LIMITS.zh-CN.md)
 - 证据规则：[docs/evidence/README.md](docs/evidence/README.md)
