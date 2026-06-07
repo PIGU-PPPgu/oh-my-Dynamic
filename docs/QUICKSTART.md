@@ -37,6 +37,20 @@ This launches real `codex exec` workers. Raw prompts/stdout/stderr and traces st
 
 ## 4. Adaptive replanner smoke
 
+Start with a shape check:
+
+```bash
+python scripts/record_adaptive_workflow_evidence.py \
+  --required-coverage security,tests,docs,replanner-proof \
+  --force-missing-coverage replanner-proof \
+  --max-rounds 2 \
+  --max-agents 12 \
+  --max-parallel 4 \
+  --dry-run
+```
+
+Then run the real smoke when you are ready to launch Codex CLI workers:
+
 ```bash
 python scripts/record_adaptive_workflow_evidence.py \
   --required-coverage security,tests,docs,replanner-proof \
@@ -47,7 +61,7 @@ python scripts/record_adaptive_workflow_evidence.py \
   --dashboard
 ```
 
-This proves planner/replanner flow. It is slower than the dry-run and may launch multiple real Codex CLI workers.
+The dry-run verifies evidence shape only. The real smoke proves planner/replanner flow, is slower, and may launch multiple real Codex CLI workers.
 
 ## 5. Read the evidence
 

@@ -7,6 +7,7 @@ This folder holds the long-form material that used to crowd the project README. 
 | Need | Document |
 |------|----------|
 | Five-minute setup and first run | [QUICKSTART.md](QUICKSTART.md) / [QUICKSTART.zh-CN.md](QUICKSTART.zh-CN.md) |
+| Fresh-clone adoption validation | [ADOPTION_VALIDATION.md](ADOPTION_VALIDATION.md) / [ADOPTION_VALIDATION.zh-CN.md](ADOPTION_VALIDATION.zh-CN.md) |
 | Current product limits and claim boundaries | [KNOWN_LIMITS.md](KNOWN_LIMITS.md) / [KNOWN_LIMITS.zh-CN.md](KNOWN_LIMITS.zh-CN.md) |
 | Evidence format, redaction rules, and reproduction notes | [evidence/README.md](evidence/README.md) |
 | Codex CLI fixed swarm scale notes | [CODEX_CLI_SWARM_SMOKE.md](CODEX_CLI_SWARM_SMOKE.md) |

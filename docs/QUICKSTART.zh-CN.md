@@ -37,6 +37,20 @@ python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard
 
 ## 4. Adaptive replanner smoke
 
+先跑 shape check：
+
+```bash
+python scripts/record_adaptive_workflow_evidence.py \
+  --required-coverage security,tests,docs,replanner-proof \
+  --force-missing-coverage replanner-proof \
+  --max-rounds 2 \
+  --max-agents 12 \
+  --max-parallel 4 \
+  --dry-run
+```
+
+确认要启动真实 Codex CLI workers 后，再跑真实 smoke：
+
 ```bash
 python scripts/record_adaptive_workflow_evidence.py \
   --required-coverage security,tests,docs,replanner-proof \
@@ -47,7 +61,7 @@ python scripts/record_adaptive_workflow_evidence.py \
   --dashboard
 ```
 
-这个命令用于证明 planner/replanner 流程。它比 dry-run 慢，并可能启动多个真实 Codex CLI workers。
+dry-run 只验证 evidence 形状。真实 smoke 用于证明 planner/replanner 流程，它更慢，并可能启动多个真实 Codex CLI workers。
 
 ## 5. 阅读 evidence
 
