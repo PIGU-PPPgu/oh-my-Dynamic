@@ -27,6 +27,10 @@ npm run render
 
 Rendered files go to `showcase/out/` and are not committed by default.
 
+The README uses a compact animated GIF preview because GitHub strips normal
+`<video>` tags from repository README rendering. The full MP4 is still linked
+from the hero and stored under `assets/oh-my-dynamic-showcase.mp4`.
+
 ## Recommended Use
 
 - Attach the MP4 to the GitHub Release notes.

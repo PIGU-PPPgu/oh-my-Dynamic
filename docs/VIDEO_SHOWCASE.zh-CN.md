@@ -25,6 +25,10 @@ npm run render
 
 渲染结果会写入 `showcase/out/`，默认不提交。
 
+README 使用轻量 GIF 做内联动态预览，因为 GitHub 会过滤普通仓库 README 里的
+`<video>` 标签。完整 MP4 仍然从首页 hero 链接到
+`assets/oh-my-dynamic-showcase.mp4`。
+
 ## 推荐用途
 
 - 把 MP4 附到 GitHub Release notes。
