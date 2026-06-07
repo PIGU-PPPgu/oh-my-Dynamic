@@ -42,7 +42,9 @@ def test_improvement_measurement_has_concrete_lift(tmp_path):
 
     md = output.with_suffix(".md").read_text(encoding="utf-8")
     assert "Quality Lift" in md
+    assert "提升幅度" in md
     assert "controlled deterministic scoring" in md
+    assert "受控确定性评分" in md
 
 
 def test_improvement_response_does_not_leak_missing_terms_into_hits():

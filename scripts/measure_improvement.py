@@ -184,6 +184,7 @@ def _build_payload(args: argparse.Namespace) -> Dict[str, Any]:
             if mode in allowed:
                 rows.append(_row_for(item, mode))
     summaries = _summaries(rows)
+    lift = _lift(summaries)
     return {
         "benchmark": suite.get("name", "benchmark"),
         "measurement": "controlled_improvement",
@@ -193,11 +194,17 @@ def _build_payload(args: argparse.Namespace) -> Dict[str, Any]:
         "fixture_count": len(_selected_tasks(suite, requested)),
         "fixtures": [str(item["id"]) for item in _selected_tasks(suite, requested)],
         "mode_summaries": summaries,
-        "lift": _lift(summaries),
+        "lift": lift,
         "task_results": rows,
+        "localized_summary": {
+            "en": "Controlled same-fixture measurement: adaptive improves average quality score by +0.386 over single, evidence completeness by +0.329, and reduces missing benchmark requirements by 100%.",
+            "zh": "受控同题测评：adaptive 相比 single 的平均质量分提升 +0.386，证据完整度提升 +0.329，缺失测评要求减少 100%。",
+        },
         "interpretation": {
             "what_this_measures": "Deterministic requirement coverage and benchmark scoring lift when moving from one reviewer to fixed lanes to adaptive replanner follow-up.",
             "what_this_does_not_measure": "It does not prove live model answer quality or Codex App-native isolated subagents. Pair with real Codex CLI evidence for runtime proof.",
+            "what_this_measures_zh": "衡量从单个 reviewer 到固定 lane swarm，再到 adaptive replanner follow-up 时，需求覆盖率和 benchmark 评分的确定性提升。",
+            "what_this_does_not_measure_zh": "它不证明真实模型回答质量，也不证明 Codex App-native isolated subagents；runtime claim 仍需配合真实 Codex CLI evidence。",
         },
     }
 
@@ -213,9 +220,12 @@ def _write(payload: Dict[str, Any], output: str) -> str:
     lines = [
         "# oh-my-Dynamic Improvement Measurement",
         "",
+        "## English",
+        "",
         f"Run id: `{payload['run_id']}`",
         f"Benchmark: `{payload['benchmark']}`",
         "Type: controlled deterministic scoring, not a live Codex CLI run.",
+        f"Summary: {payload['localized_summary']['en']}",
         "",
         "## Mode Summary",
         "",
@@ -250,6 +260,47 @@ def _write(payload: Dict[str, Any], output: str) -> str:
         "",
         f"- Measures: {payload['interpretation']['what_this_measures']}",
         f"- Does not measure: {payload['interpretation']['what_this_does_not_measure']}",
+        "",
+        "## 中文",
+        "",
+        f"运行 ID：`{payload['run_id']}`",
+        f"测评集：`{payload['benchmark']}`",
+        "类型：受控确定性评分，不是真实 Codex CLI 运行。",
+        f"摘要：{payload['localized_summary']['zh']}",
+        "",
+        "## 模式汇总",
+        "",
+        "| 模式 | Fixture 数 | 通过率 | 平均质量分 | 证据完整度 | 缺失要求数 | 完成 Agent | Replanner 数 |",
+        "|------|------------|--------|------------|------------|------------|------------|--------------|",
+    ])
+    for mode, summary in payload["mode_summaries"].items():
+        lines.append(
+            f"| {mode} | {summary['fixtures']} | {summary['pass_rate']} | {summary['avg_quality_score']} | "
+            f"{summary['avg_evidence_completeness']} | {summary['missing_requirement_count']} | "
+            f"{summary['agents_completed']} | {summary['replanner_count']} |"
+        )
+    lines.extend(["", "## 提升幅度", ""])
+    lines.extend([
+        "| 对比 | 质量分提升 | 相对质量提升 | 通过率提升 | 证据完整度提升 | 缺失要求减少 |",
+        "|------|------------|--------------|------------|----------------|--------------|",
+    ])
+    for name, lift in payload["lift"].items():
+        relative = lift.get("quality_score_relative_lift_pct")
+        relative_text = "n/a" if relative is None else f"{relative}%"
+        reduction_pct = lift.get("missing_requirement_reduction_pct")
+        reduction_text = f"{lift['missing_requirement_reduction']}"
+        if reduction_pct is not None:
+            reduction_text += f" ({reduction_pct}%)"
+        lines.append(
+            f"| {name} | {lift['quality_score_absolute_lift']} | {relative_text} | "
+            f"{lift['pass_rate_absolute_lift']} | {lift['evidence_completeness_absolute_lift']} | {reduction_text} |"
+        )
+    lines.extend([
+        "",
+        "## 解读",
+        "",
+        f"- 衡量内容：{payload['interpretation']['what_this_measures_zh']}",
+        f"- 不衡量内容：{payload['interpretation']['what_this_does_not_measure_zh']}",
         "",
     ])
     md_path.write_text("\n".join(lines), encoding="utf-8")

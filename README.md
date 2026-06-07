@@ -84,7 +84,7 @@ python -m dynamic_workflow --resume RUN_ID
 | Evidence | What it proves |
 |----------|----------------|
 | [`docs/evidence/benchmark_v310.md`](docs/evidence/benchmark_v310.md) | v3.1 bounded real Codex CLI benchmark across single / fixed / adaptive modes, including failures and timeouts |
-| [`docs/evidence/improvement_v311.md`](docs/evidence/improvement_v311.md) | Controlled same-fixture measurement: adaptive improves avg quality score by `+0.386` over single, evidence completeness by `+0.329`, and reduces missing requirements by `100%` |
+| [`docs/evidence/improvement_v311.md`](docs/evidence/improvement_v311.md) | Bilingual controlled same-fixture measurement: adaptive improves avg quality score by `+0.386` over single, evidence completeness by `+0.329`, and reduces missing requirements by `100%` |
 | [`docs/evidence/benchmark_v310_replanner_sample.md`](docs/evidence/benchmark_v310_replanner_sample.md) | Real adaptive run where planner generated agents and replanner generated follow-up agents |
 | [`docs/evidence/swarm_100_agents_codex_cli_run_98b78a645c.md`](docs/evidence/swarm_100_agents_codex_cli_run_98b78a645c.md) | Fixed 100-agent Codex CLI swarm evidence |
 | [`docs/evidence/README.md`](docs/evidence/README.md) | Evidence format, redaction rules, and reproduction notes |

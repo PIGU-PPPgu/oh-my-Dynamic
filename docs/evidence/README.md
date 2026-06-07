@@ -52,11 +52,11 @@ python scripts/run_benchmark.py --suite benchmarks/repo_review.json --mode singl
 python scripts/run_benchmark.py --real --allow-failures --suite benchmarks/repo_review.json --mode single,fixed,adaptive --fixtures security_command_surface,install_five_minute,tests_dynamic_workflow,evidence_redaction,docs_boundary_claims --timeout-s 60 --planner-timeout-s 60 --codex-extra-arg=-c --codex-extra-arg='service_tier="fast"' --codex-extra-arg=-c --codex-extra-arg='model_reasoning_effort="low"' --output docs/evidence/benchmark_v310.json
 ```
 
-`improvement_v311` is a controlled same-fixture measurement, not a live Codex
-CLI run. It uses the benchmark scoring rubric to compare three coverage models:
-single reviewer, fixed lane swarm, and adaptive replanner follow-up. Report it
-as a concrete scoring/coverage lift, then pair it with real Codex CLI evidence
-before making runtime claims.
+`improvement_v311` is a bilingual controlled same-fixture measurement, not a
+live Codex CLI run. It uses the benchmark scoring rubric to compare three
+coverage models: single reviewer, fixed lane swarm, and adaptive replanner
+follow-up. Report it as a concrete scoring/coverage lift, then pair it with real
+Codex CLI evidence before making runtime claims.
 
 `--dry-run` evidence is only a deterministic shape check. It can prove that the
 markdown/JSON/dashboard schema renders, but it does not prove real agents,

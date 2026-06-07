@@ -2,7 +2,7 @@
   "benchmark": "repo_review_productization_v2",
   "measurement": "controlled_improvement",
   "run_id": "improvement_v311",
-  "created_at": 1780803779,
+  "created_at": 1780806015,
   "dry_run": true,
   "fixture_count": 10,
   "fixtures": [
@@ -1505,9 +1505,15 @@
       "missing_requirement_count": 0
     }
   ],
+  "localized_summary": {
+    "en": "Controlled same-fixture measurement: adaptive improves average quality score by +0.386 over single, evidence completeness by +0.329, and reduces missing benchmark requirements by 100%.",
+    "zh": "受控同题测评：adaptive 相比 single 的平均质量分提升 +0.386，证据完整度提升 +0.329，缺失测评要求减少 100%。"
+  },
   "interpretation": {
     "what_this_measures": "Deterministic requirement coverage and benchmark scoring lift when moving from one reviewer to fixed lanes to adaptive replanner follow-up.",
-    "what_this_does_not_measure": "It does not prove live model answer quality or Codex App-native isolated subagents. Pair with real Codex CLI evidence for runtime proof."
+    "what_this_does_not_measure": "It does not prove live model answer quality or Codex App-native isolated subagents. Pair with real Codex CLI evidence for runtime proof.",
+    "what_this_measures_zh": "衡量从单个 reviewer 到固定 lane swarm，再到 adaptive replanner follow-up 时，需求覆盖率和 benchmark 评分的确定性提升。",
+    "what_this_does_not_measure_zh": "它不证明真实模型回答质量，也不证明 Codex App-native isolated subagents；runtime claim 仍需配合真实 Codex CLI evidence。"
   },
   "sanitized": true,
   "repo_root_label": "$REPO_ROOT"

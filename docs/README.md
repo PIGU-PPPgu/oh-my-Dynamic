@@ -20,7 +20,7 @@ Committed evidence is compact and sanitized. Raw `.orchestry/` traces, prompts, 
 | Evidence | Summary |
 |----------|---------|
 | [evidence/benchmark_v310.md](evidence/benchmark_v310.md) | Bounded real Codex CLI benchmark across single, fixed, and adaptive modes |
-| [evidence/improvement_v311.md](evidence/improvement_v311.md) | Controlled same-fixture lift measurement for single vs fixed vs adaptive |
+| [evidence/improvement_v311.md](evidence/improvement_v311.md) | Bilingual controlled same-fixture lift measurement for single vs fixed vs adaptive |
 | [evidence/benchmark_v310_replanner_sample.md](evidence/benchmark_v310_replanner_sample.md) | Real adaptive run with replanner-generated follow-up agents |
 | [evidence/swarm_100_agents_codex_cli_run_98b78a645c.md](evidence/swarm_100_agents_codex_cli_run_98b78a645c.md) | Fixed 100-agent Codex CLI swarm record |
 
