@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- Added a standalone Remotion showcase under `showcase/` with a 75-second
+  official-facing video composition and a 1200x630 poster still.
+- Added bilingual video showcase docs explaining the render commands, public
+  message, evidence boundary, and recommended external-review usage.
+- Kept rendered video output out of git by ignoring `showcase/out/` and
+  `showcase/node_modules/`.
+
 ## 3.5.0 - 2026-06-08
 
 - Added engineering-minimal brand assets under `assets/`, including SVG icons,

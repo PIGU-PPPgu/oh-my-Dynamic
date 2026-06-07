@@ -1,0 +1,25 @@
+{
+  "name": "oh-my-dynamic-showcase",
+  "version": "3.5.0",
+  "private": true,
+  "description": "Remotion showcase video for oh-my-Dynamic visibility and outreach.",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "still": "remotion still src/index.ts OhMyDynamicShowcase out/preview.png --frame=90",
+    "poster": "remotion still src/index.ts OhMyDynamicPoster out/poster.png",
+    "render": "remotion render src/index.ts OhMyDynamicShowcase out/oh-my-dynamic-showcase.mp4",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.383",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "remotion": "^4.0.383"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.34",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "typescript": "^5.8.3"
+  }
+}

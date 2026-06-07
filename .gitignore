@@ -9,3 +9,5 @@ dist/
 build/
 .venv/
 venv/
+showcase/node_modules/
+showcase/out/
