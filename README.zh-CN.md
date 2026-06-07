@@ -1,12 +1,12 @@
-# <img src="assets/icon.svg" alt="oh-my-Dynamic" width="32" height="32"> oh-my-Dynamic
-
-[![tests](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
-[![coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
-[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-
-[English](README.md)
-
-面向 Codex 的 dynamic workflow 工具：planner/replanner 编排、Codex CLI 进程级 swarm、broker 证据链和测评报告。
+<div align="center">
+  <img src="assets/icon.svg" alt="oh-my-Dynamic" width="112" height="112">
+  <h1>oh-my-Dynamic</h1>
+  <p><strong>面向 Codex 的 dynamic workflow 工具。</strong></p>
+  <p><a href="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml"><img src="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg" alt="tests"></a> <a href="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml"><img src="https://img.shields.io/badge/coverage-82%25-brightgreen" alt="coverage"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license"></a></p>
+  <p><a href="README.md">English</a></p>
+  <a href="assets/oh-my-dynamic-showcase.mp4"><img src="assets/showcase-poster.png" alt="观看 oh-my-Dynamic 展示视频" width="760"></a>
+  <p><a href="assets/oh-my-dynamic-showcase.mp4">观看 75 秒展示视频</a> · <a href="docs/VIDEO_SHOWCASE.zh-CN.md">渲染源码</a></p>
+</div>
 
 **边界：** 目前已验证的大规模执行后端是 Codex CLI process swarm。Codex App-native isolated subagents 仍取决于 Codex App 是否开放对应 runtime。默认只读。
 

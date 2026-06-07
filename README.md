@@ -1,12 +1,12 @@
-# <img src="assets/icon.svg" alt="oh-my-Dynamic" width="32" height="32"> oh-my-Dynamic
-
-[![tests](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
-[![coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)](https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml)
-[![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-
-[中文说明](README.zh-CN.md)
-
-Dynamic workflow tooling for Codex: planner/replanner orchestration, Codex CLI process swarms, broker evidence, and benchmark reports.
+<div align="center">
+  <img src="assets/icon.svg" alt="oh-my-Dynamic" width="112" height="112">
+  <h1>oh-my-Dynamic</h1>
+  <p><strong>Dynamic workflow tooling for Codex.</strong></p>
+  <p><a href="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml"><img src="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml/badge.svg" alt="tests"></a> <a href="https://github.com/PIGU-PPPgu/oh-my-Dynamic/actions/workflows/tests.yml"><img src="https://img.shields.io/badge/coverage-82%25-brightgreen" alt="coverage"></a> <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="license"></a></p>
+  <p><a href="README.zh-CN.md">中文说明</a></p>
+  <a href="assets/oh-my-dynamic-showcase.mp4"><img src="assets/showcase-poster.png" alt="Watch the oh-my-Dynamic showcase video" width="760"></a>
+  <p><a href="assets/oh-my-dynamic-showcase.mp4">Watch the 75-second showcase video</a> · <a href="docs/VIDEO_SHOWCASE.md">Render source</a></p>
+</div>
 
 **Boundary:** verified large-scale execution is Codex CLI process swarm. Codex App-native isolated subagents still depend on Codex App exposing that runtime. Defaults are read-only.
 
