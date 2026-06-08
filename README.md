@@ -62,16 +62,19 @@ python -m dynamic_workflow "review this repo" --max-rounds 2 --max-agents 20 --m
 python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 ```
 
-## Controlled Rubric Lift
+## Demo Validation
 
-Bilingual report: [docs/evidence/improvement_v311.md](docs/evidence/improvement_v311.md)
+Report: [docs/evidence/demo_validation_v360.md](docs/evidence/demo_validation_v360.md)
 
-This is controlled same-fixture rubric scoring, not live model quality proof. Pair it with real Codex CLI evidence before making runtime claims.
+Deterministic scenario validation across frontend build, harness engineering, repo productization, and security/trust. It measures workflow coverage and evidence completeness, not live model quality.
 
-| Comparison | Quality Score | Evidence Completeness | Missing Requirements |
-|------------|---------------|-----------------------|----------------------|
-| fixed vs single | `+0.286` / `+46.6%` | `+0.229` | `-74.3%` |
-| adaptive vs single | `+0.386` / `+62.9%` | `+0.329` | `-100%` |
+| Mode | Avg Quality | Evidence | Speedup | Missing Requirements | Replanner Agents |
+|------|-------------|----------|---------|----------------------|------------------|
+| single | `0.56` | `0.48` | `1.0x` | `20` | `0` |
+| fixed | `0.74` | `0.78` | `3.48x` | `8` | `0` |
+| adaptive | `0.88` | `0.94` | `3.5x` | `0` | `8` |
+
+Controlled rubric lift report: [docs/evidence/improvement_v311.md](docs/evidence/improvement_v311.md).
 
 ## Evidence
 
@@ -91,10 +94,6 @@ Stable: Codex CLI swarm, adaptive workflow, broker reducer, evidence reports. Ex
 - Quickstart: [docs/QUICKSTART.md](docs/QUICKSTART.md)
 - Troubleshooting/uninstall: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
 - Brief / demos / video / outreach: [brief](docs/OFFICIAL_BRIEF.md), [demos](docs/DEMOS.md), [video](docs/VIDEO_SHOWCASE.md), [outreach](docs/OUTREACH.md)
-- Docs index: [docs/README.md](docs/README.md)
-- Known limits: [docs/KNOWN_LIMITS.md](docs/KNOWN_LIMITS.md)
-- Evidence rules: [docs/evidence/README.md](docs/evidence/README.md)
-- Threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
-- v3 imports: [docs/V3_MIGRATION_GUIDE.md](docs/V3_MIGRATION_GUIDE.md)
+- Index / limits / evidence / threat model / imports: [docs](docs/README.md), [limits](docs/KNOWN_LIMITS.md), [evidence](docs/evidence/README.md), [threat model](docs/THREAT_MODEL.md), [v3 imports](docs/V3_MIGRATION_GUIDE.md)
 
 MIT. See [LICENSE](LICENSE).

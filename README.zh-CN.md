@@ -62,16 +62,19 @@ python -m dynamic_workflow "review this repo" --max-rounds 2 --max-agents 20 --m
 python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
 ```
 
-## 受控 Rubric 提升
+## Demo 验证
 
-中英双语报告：[docs/evidence/improvement_v311.md](docs/evidence/improvement_v311.md)
+报告：[docs/evidence/demo_validation_v360.md](docs/evidence/demo_validation_v360.md)
 
-这是受控同题 rubric 评分，不是真实模型质量证明。涉及 runtime 能力时，应同时引用真实 Codex CLI evidence。
+覆盖前端建设、harness 工程、项目产品化、安全与可信四类场景。它衡量 workflow 覆盖和证据完整度，不是真实模型质量证明。
 
-| 对比 | 质量分 | 证据完整度 | 缺失要求 |
-|------|--------|------------|----------|
-| fixed vs single | `+0.286` / `+46.6%` | `+0.229` | `-74.3%` |
-| adaptive vs single | `+0.386` / `+62.9%` | `+0.329` | `-100%` |
+| 模式 | 平均质量 | 证据完整度 | 加速估计 | 缺失要求 | Replanner agents |
+|------|----------|------------|----------|----------|------------------|
+| single | `0.56` | `0.48` | `1.0x` | `20` | `0` |
+| fixed | `0.74` | `0.78` | `3.48x` | `8` | `0` |
+| adaptive | `0.88` | `0.94` | `3.5x` | `0` | `8` |
+
+受控 rubric 提升报告：[docs/evidence/improvement_v311.md](docs/evidence/improvement_v311.md)。
 
 ## 证据
 
@@ -91,10 +94,6 @@ Stable：Codex CLI swarm、adaptive workflow、broker reducer、证据报告。E
 - 快速开始：[docs/QUICKSTART.zh-CN.md](docs/QUICKSTART.zh-CN.md)
 - 故障排查/卸载：[docs/TROUBLESHOOTING.zh-CN.md](docs/TROUBLESHOOTING.zh-CN.md)
 - Brief / demos / 视频 / outreach：[brief](docs/OFFICIAL_BRIEF.zh-CN.md)、[demos](docs/DEMOS.zh-CN.md)、[video](docs/VIDEO_SHOWCASE.zh-CN.md)、[outreach](docs/OUTREACH.zh-CN.md)
-- 文档索引：[docs/README.md](docs/README.md)
-- 已知边界：[docs/KNOWN_LIMITS.zh-CN.md](docs/KNOWN_LIMITS.zh-CN.md)
-- 证据规则：[docs/evidence/README.md](docs/evidence/README.md)
-- 威胁模型：[docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
-- v3 import 迁移：[docs/V3_MIGRATION_GUIDE.md](docs/V3_MIGRATION_GUIDE.md)
+- 索引 / 边界 / 证据 / 威胁模型 / import：[docs](docs/README.md)、[limits](docs/KNOWN_LIMITS.zh-CN.md)、[evidence](docs/evidence/README.md)、[threat model](docs/THREAT_MODEL.md)、[v3 imports](docs/V3_MIGRATION_GUIDE.md)
 
 MIT. 见 [LICENSE](LICENSE)。
