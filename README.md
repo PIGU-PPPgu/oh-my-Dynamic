@@ -8,7 +8,18 @@
 
 https://github.com/user-attachments/assets/a48d5943-620f-4eac-bd36-a4ea02b4cec6
 
-**Boundary:** verified large-scale execution is Codex CLI process swarm. Codex App-native isolated subagents still depend on Codex App exposing that runtime. Defaults are read-only.
+**Positioning:** Codex supports native parallel coding agents. oh-my-Dynamic does not compete with that runtime; it adds planning, replanning, broker evidence, benchmark reports, and adoption validation around Codex CLI/App workflows. The verified large-scale backend here is Codex CLI process swarm; defaults are read-only.
+
+## Why It Exists
+
+Codex native subagents execute the work. oh-my-Dynamic explains, plans, measures, records, and audits the work.
+
+| Layer | Codex native agents | oh-my-Dynamic |
+|-------|---------------------|---------------|
+| Execution | First-party parallel agents, worktrees, cloud/app runtime | Uses Codex CLI process swarm today; can later target native APIs |
+| Workflow | Great direct coding UX | Planner/replanner rounds, reducers, missing-coverage follow-up |
+| Evidence | Codex task UI and diffs | Compact JSON/MD/dashboard evidence for reviewers and releases |
+| Best fit | Build, fix, refactor, review code | Complex task decomposition, audit trails, benchmarks, external proof |
 
 ## Quick Start
 
@@ -46,22 +57,6 @@ Codex App skill trigger:
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务；App runtime 可用时使用内部 Codex subagents，否则走 in-chat fallback；大规模走 Codex CLI swarm。
 ```
 
-## Run
-
-```bash
-# Safe: no key, no real workers, writes outside repo
-python examples/real_repo_review.py --dry-run --run-id five-minute-demo --output-dir /tmp/ohmy-evidence
-
-# Real: launches Codex CLI workers
-python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard
-
-# Real adaptive workflow
-python -m dynamic_workflow "review this repo" --max-rounds 2 --max-agents 20 --max-parallel 5 --stream-events
-
-# More expensive fixed swarm
-python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
-```
-
 ## Demo Validation
 
 Report: [docs/evidence/demo_validation_v360.md](docs/evidence/demo_validation_v360.md)
@@ -94,6 +89,6 @@ Stable: Codex CLI swarm, adaptive workflow, broker reducer, evidence reports. Ex
 - Quickstart: [docs/QUICKSTART.md](docs/QUICKSTART.md)
 - Troubleshooting/uninstall: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
 - Brief / demos / video / outreach: [brief](docs/OFFICIAL_BRIEF.md), [demos](docs/DEMOS.md), [video](docs/VIDEO_SHOWCASE.md), [outreach](docs/OUTREACH.md)
-- Index / limits / evidence / threat model / imports: [docs](docs/README.md), [limits](docs/KNOWN_LIMITS.md), [evidence](docs/evidence/README.md), [threat model](docs/THREAT_MODEL.md), [v3 imports](docs/V3_MIGRATION_GUIDE.md)
+- Comparison / limits / evidence / threat model / imports: [comparison](docs/CODEX_NATIVE_VS_OH_MY_DYNAMIC.md), [limits](docs/KNOWN_LIMITS.md), [evidence](docs/evidence/README.md), [threat model](docs/THREAT_MODEL.md), [v3 imports](docs/V3_MIGRATION_GUIDE.md)
 
 MIT. See [LICENSE](LICENSE).

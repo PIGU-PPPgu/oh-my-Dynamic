@@ -4,15 +4,17 @@
 
 ## Runtime 边界
 
-- 目前已验证的大规模执行路径是 Codex CLI process swarm。
-- Codex App-native isolated subagents 仍依赖 Codex App 开放 native subagent runtime、sandbox、scheduler 和 tool-permission APIs。
+- Codex 已支持原生并行 coding-agent workflows。
+- oh-my-Dynamic 不声称由本项目实现 Codex App native runtime。
+- 本项目目前已验证的大规模执行路径是 Codex CLI process swarm。
+- 如果未来有公开 native subagent APIs，oh-my-Dynamic 应把它作为执行后端。
 - 除非 Codex App 显式开放 bridge，本地 Python runtime 不能直接调用 Codex App 内部 LLM API。
 
 ## Benchmark
 
 - 真实 benchmark 会慢。Adaptive run 更慢，因为包含 planner、workers、replanner、follow-up workers 和 reducer。
 - Controlled improvement measurement 不是真实模型质量证明。它衡量的是固定 fixture 上的确定性 rubric 覆盖率。
-- 真实 Codex CLI evidence 证明的是 process-swarm 行为和证据捕获，不证明 App-native isolated subagents。
+- 真实 Codex CLI evidence 证明的是 process-swarm 行为和证据捕获，不证明本项目拥有 Codex App-native 执行层。
 
 ## Evidence 与隐私
 

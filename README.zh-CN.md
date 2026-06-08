@@ -8,7 +8,18 @@
 
 https://github.com/user-attachments/assets/a48d5943-620f-4eac-bd36-a4ea02b4cec6
 
-**边界：** 目前已验证的大规模执行后端是 Codex CLI process swarm。Codex App-native isolated subagents 仍取决于 Codex App 是否开放对应 runtime。默认只读。
+**定位：** Codex 已支持原生并行 coding agents。oh-my-Dynamic 不和官方 runtime 抢执行层，而是在 Codex CLI/App workflows 外围补上规划、重规划、broker 证据、benchmark 报告和采用验证。目前这里已验证的大规模后端是 Codex CLI process swarm；默认只读。
+
+## 为什么需要它
+
+Codex 原生 subagents 负责真正执行；oh-my-Dynamic 负责解释、规划、测量、记录和审计。
+
+| 层面 | Codex 原生 agents | oh-my-Dynamic |
+|------|-------------------|---------------|
+| 执行 | 官方并行 agents、worktrees、cloud/app runtime | 当前用 Codex CLI process swarm；以后可接 native APIs |
+| Workflow | 直接开发体验顺滑 | planner/replanner rounds、reducer、缺口 follow-up |
+| 证据 | Codex 任务 UI 和 diff | 可提交的 JSON/MD/dashboard evidence |
+| 最适合 | 写代码、修 bug、重构、review | 复杂任务拆解、审计链、benchmark、对外可信展示 |
 
 ## 快速开始
 
@@ -46,22 +57,6 @@ Codex App skill 触发句：
 [$oh-my-dynamic:multi-agent-run] 用 dynamic workflow 处理这个任务；App runtime 可用时使用内部 Codex subagents，否则走 in-chat fallback；大规模走 Codex CLI swarm。
 ```
 
-## 运行
-
-```bash
-# Safe: 无 key、无真实 workers、写到仓库外
-python examples/real_repo_review.py --dry-run --run-id five-minute-demo --output-dir /tmp/ohmy-evidence
-
-# Real: 启动 Codex CLI workers
-python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard
-
-# 真实 adaptive workflow
-python -m dynamic_workflow "review this repo" --max-rounds 2 --max-agents 20 --max-parallel 5 --stream-events
-
-# 成本更高的固定 swarm
-python scripts/record_swarm_evidence.py --agents 20 --max-parallel 5
-```
-
 ## Demo 验证
 
 报告：[docs/evidence/demo_validation_v360.md](docs/evidence/demo_validation_v360.md)
@@ -94,6 +89,6 @@ Stable：Codex CLI swarm、adaptive workflow、broker reducer、证据报告。E
 - 快速开始：[docs/QUICKSTART.zh-CN.md](docs/QUICKSTART.zh-CN.md)
 - 故障排查/卸载：[docs/TROUBLESHOOTING.zh-CN.md](docs/TROUBLESHOOTING.zh-CN.md)
 - Brief / demos / 视频 / outreach：[brief](docs/OFFICIAL_BRIEF.zh-CN.md)、[demos](docs/DEMOS.zh-CN.md)、[video](docs/VIDEO_SHOWCASE.zh-CN.md)、[outreach](docs/OUTREACH.zh-CN.md)
-- 索引 / 边界 / 证据 / 威胁模型 / import：[docs](docs/README.md)、[limits](docs/KNOWN_LIMITS.zh-CN.md)、[evidence](docs/evidence/README.md)、[threat model](docs/THREAT_MODEL.md)、[v3 imports](docs/V3_MIGRATION_GUIDE.md)
+- 对比 / 边界 / 证据 / 威胁模型 / import：[comparison](docs/CODEX_NATIVE_VS_OH_MY_DYNAMIC.zh-CN.md)、[limits](docs/KNOWN_LIMITS.zh-CN.md)、[evidence](docs/evidence/README.md)、[threat model](docs/THREAT_MODEL.md)、[v3 imports](docs/V3_MIGRATION_GUIDE.md)
 
 MIT. 见 [LICENSE](LICENSE)。

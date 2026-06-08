@@ -10,6 +10,7 @@ This folder holds the long-form material that used to crowd the project README. 
 | Fresh-clone adoption validation | [ADOPTION_VALIDATION.md](ADOPTION_VALIDATION.md) / [ADOPTION_VALIDATION.zh-CN.md](ADOPTION_VALIDATION.zh-CN.md) |
 | Troubleshooting, strict doctor, and uninstall | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) / [TROUBLESHOOTING.zh-CN.md](TROUBLESHOOTING.zh-CN.md) |
 | Official-facing brief | [OFFICIAL_BRIEF.md](OFFICIAL_BRIEF.md) / [OFFICIAL_BRIEF.zh-CN.md](OFFICIAL_BRIEF.zh-CN.md) |
+| Codex native agents vs oh-my-Dynamic | [CODEX_NATIVE_VS_OH_MY_DYNAMIC.md](CODEX_NATIVE_VS_OH_MY_DYNAMIC.md) / [CODEX_NATIVE_VS_OH_MY_DYNAMIC.zh-CN.md](CODEX_NATIVE_VS_OH_MY_DYNAMIC.zh-CN.md) |
 | Five-minute demo script | [DEMO_SCRIPT.md](DEMO_SCRIPT.md) / [DEMO_SCRIPT.zh-CN.md](DEMO_SCRIPT.zh-CN.md) |
 | Remotion video showcase | [VIDEO_SHOWCASE.md](VIDEO_SHOWCASE.md) / [VIDEO_SHOWCASE.zh-CN.md](VIDEO_SHOWCASE.zh-CN.md) |
 | Demo validation and measured adoption scenarios | [DEMOS.md](DEMOS.md) / [DEMOS.zh-CN.md](DEMOS.zh-CN.md) |
@@ -38,6 +39,6 @@ Committed evidence is compact and sanitized. Raw `.orchestry/` traces, prompts, 
 
 ## Current Product Boundary
 
-The stable product path is Codex CLI dynamic workflow: planner/replanner orchestration around `codex exec` workers, broker evidence, compact evaluation artifacts, and optional static dashboards.
+Codex itself supports native parallel coding-agent workflows. oh-my-Dynamic's stable product path is a reproducible workflow/evidence harness around Codex CLI/App workflows: planner/replanner orchestration, broker evidence, compact evaluation artifacts, and optional static dashboards.
 
-Codex App-native isolated subagents remain experimental because they depend on Codex App exposing native subagent runtime, sandbox, scheduler, and tool-permission APIs.
+The oh-my-Dynamic App-native bridge remains experimental because this project does not currently own Codex App's native subagent runtime, sandbox, scheduler, or tool-permission contracts.

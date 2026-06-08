@@ -4,7 +4,7 @@ oh-my-Dynamic 是围绕 Codex 的 dynamic workflow 编排独立原型。它不�
 
 ## 问题
 
-Codex 在本地代码理解、工具使用和 workspace 执行上很强。当前公开 App surface 仍缺少 App-native dynamic workflow fan-out runtime：也就是一种受支持的能力，让一个任务可以生成 isolated subagents，给它们受限工具和上下文，流式记录事件，收集 artifacts，并最终 reducer 汇总。
+Codex 已支持原生并行 coding-agent workflows。独立 workflow 工具真正需要的是可集成官方 runtime 的稳定公开 contract：受支持的 subagent dispatch、受限工具和上下文、structured events、artifact ownership、dependency metadata 和 reducer handoff。
 
 ## 这个项目证明了什么
 
@@ -16,7 +16,7 @@ Codex 在本地代码理解、工具使用和 workspace 执行上很强。当前
 
 ## 这个项目不声称什么
 
-oh-my-Dynamic 不声称已经实现 Codex App-native isolated subagents。当前已验证的大规模执行路径是 Codex CLI process swarm。App-native isolated subagents 需要 Codex App/runtime 暴露 native spawn、sandbox、scheduler、context、tool-permission、event 和 artifact interfaces。
+oh-my-Dynamic 不声称由本项目实现了 Codex App-native isolated subagents。这里当前已验证的大规模执行路径是 Codex CLI process swarm。Codex native execution 应继续作为 runtime layer；oh-my-Dynamic 是围绕它的 planning、replanning、evidence、benchmark 和 audit harness。
 
 ## 证据
 
@@ -41,7 +41,7 @@ python examples/real_repo_review.py --agents 5 --max-parallel 3 --dashboard
 
 ## 对 Codex Runtime 的请求
 
-如果 Codex 暴露 native dynamic workflow primitives，oh-my-Dynamic 可以作为具体 contract test 和 integration prototype。最关键的 runtime primitives 是：
+如果 Codex 向 extensions 或 external harnesses 暴露 public native dynamic workflow primitives，oh-my-Dynamic 可以作为具体 contract test 和 integration prototype。最关键的 runtime primitives 是：
 
 - native subagent spawn，并拥有独立 context windows
 - 每个 subagent 的 sandbox 和 tool-permission policy

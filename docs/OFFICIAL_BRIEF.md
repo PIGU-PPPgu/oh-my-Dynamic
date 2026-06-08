@@ -4,7 +4,7 @@ oh-my-Dynamic is an independent prototype for dynamic workflow orchestration aro
 
 ## Problem
 
-Codex is strong at local code understanding, tool use, and workspace execution. What is still missing from the public App surface is an App-native dynamic workflow fan-out runtime: a supported way for a task to spawn isolated subagents, give them bounded tools and context, stream their events, collect artifacts, and reduce the result.
+Codex supports native parallel coding-agent workflows. What independent workflow tools still need is a stable public contract for integrating with that runtime: supported subagent dispatch, bounded tools and context, structured events, artifact ownership, dependency metadata, and reducer handoff.
 
 ## What This Project Proves
 
@@ -16,7 +16,7 @@ Codex is strong at local code understanding, tool use, and workspace execution. 
 
 ## What This Project Does Not Claim
 
-oh-my-Dynamic does not claim App-native isolated subagents are implemented. The verified large-scale execution path today is Codex CLI process swarm. App-native isolated subagents require Codex App/runtime support for native spawn, sandbox, scheduler, context, tool-permission, event, and artifact interfaces.
+oh-my-Dynamic does not claim App-native isolated subagents are implemented by this project. The verified large-scale execution path here is Codex CLI process swarm. Native Codex execution should remain the runtime layer; oh-my-Dynamic is the planning, replanning, evidence, benchmark, and audit harness around it.
 
 ## Evidence
 
@@ -41,7 +41,7 @@ The first two commands are safe and do not launch real workers. The last two com
 
 ## Request To Codex Runtime Owners
 
-If Codex exposes native dynamic workflow primitives, oh-my-Dynamic can act as a concrete contract test and integration prototype. The runtime primitives that would matter most are:
+If Codex exposes public native dynamic workflow primitives to extensions or external harnesses, oh-my-Dynamic can act as a concrete contract test and integration prototype. The runtime primitives that would matter most are:
 
 - native subagent spawn with independent context windows
 - sandbox and tool-permission policy per subagent

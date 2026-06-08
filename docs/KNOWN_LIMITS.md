@@ -4,15 +4,17 @@ These limits are intentional and should be repeated in release notes, reviews, a
 
 ## Runtime Boundary
 
-- Verified large-scale execution is Codex CLI process swarm.
-- Codex App-native isolated subagents still depend on Codex App exposing native subagent runtime, sandbox, scheduler, and tool-permission APIs.
+- Codex supports native parallel coding-agent workflows.
+- oh-my-Dynamic does not claim to implement the Codex App native runtime itself.
+- Verified large-scale execution for this project is Codex CLI process swarm.
+- If public native subagent APIs become available, oh-my-Dynamic should use them as the execution backend.
 - Local Python runtime cannot call Codex App internal LLM APIs unless Codex App exposes an explicit bridge.
 
 ## Benchmarks
 
 - Real benchmarks are slow. Adaptive runs are slower because they include planner, workers, replanner, follow-up workers, and reducer.
 - Controlled improvement measurement is not live model quality proof. It measures deterministic rubric coverage on fixed fixtures.
-- Real Codex CLI evidence proves process-swarm behavior and evidence capture, not App-native isolated subagents.
+- Real Codex CLI evidence proves process-swarm behavior and evidence capture, not that this project owns Codex App-native execution.
 
 ## Evidence And Privacy
 
